@@ -203,33 +203,35 @@ const lastChapter = chapters[chapters.length - 1];
                 })();
               </script>
 
-              <!-- CTAs -->
-              <div class="mt-2 flex flex-wrap items-center gap-3">
+              <!-- CTAs mobile-first: stack full-width en movil, inline en sm+ -->
+              <div class="mt-2 grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
                 {firstChapter && (
-                  <a href={`/read/${firstChapter.id}?manga=${manga.id}`} class="btn-primary">
+                  <a href={`/read/${firstChapter.id}?manga=${manga.id}`} class="btn-primary w-full sm:w-auto">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                     Empezar desde Cap. {firstChapter.number ?? '1'}
                   </a>
                 )}
                 {lastChapter && lastChapter.id !== firstChapter?.id && (
-                  <a href={`/read/${lastChapter.id}?manga=${manga.id}`} class="btn-secondary">
+                  <a href={`/read/${lastChapter.id}?manga=${manga.id}`} class="btn-secondary w-full sm:w-auto">
                     Último · Cap. {lastChapter.number ?? '?'}
                   </a>
                 )}
-                {chapters.length > 0 && (
-                  <DownloadMangaZip
+                <div class="grid grid-cols-2 gap-2 sm:contents">
+                  {chapters.length > 0 && (
+                    <DownloadMangaZip
+                      client:only="react"
+                      mangaTitle={manga.title}
+                      chapters={chapters.map((c) => ({ id: c.id, number: c.number, title: c.title }))}
+                    />
+                  )}
+                  <MangaActions
                     client:only="react"
-                    mangaTitle={manga.title}
-                    chapters={chapters.map((c) => ({ id: c.id, number: c.number, title: c.title }))}
+                    providerId="mangadex"
+                    mangaId={manga.id}
+                    title={manga.title}
+                    coverUrl={manga.coverUrl}
                   />
-                )}
-                <MangaActions
-                  client:only="react"
-                  providerId="mangadex"
-                  mangaId={manga.id}
-                  title={manga.title}
-                  coverUrl={manga.coverUrl}
-                />
+                </div>
               </div>
             </div>
           </div>

@@ -155,7 +155,7 @@ export default function Reader({ mangaId, chapterId, pages, chapters }: Props) {
       />
 
       {mode === 'vertical' ? (
-        <div className="mx-auto flex max-w-3xl flex-col items-center gap-1 py-16">
+        <div className="mx-auto flex max-w-3xl flex-col items-center gap-0 py-4 sm:gap-1 sm:py-8 lg:py-16">
           {pages.map((src, i) => (
             <div
               key={src}
