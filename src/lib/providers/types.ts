@@ -61,6 +61,8 @@ export interface MangaProvider {
   readonly preferredLanguages: Language[];
 
   search(params: SearchParams): Promise<MangaSummary[]>;
+  popular(params?: { limit?: number; offset?: number }): Promise<MangaSummary[]>;
+  latest(params?: { limit?: number; offset?: number }): Promise<MangaSummary[]>;
   getManga(id: string): Promise<MangaDetail>;
   listChapters(params: ChaptersParams): Promise<Chapter[]>;
   getChapterPages(chapterId: string): Promise<ChapterPages>;

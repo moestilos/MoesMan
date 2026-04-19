@@ -10,6 +10,7 @@ import {
   ProviderError,
 } from './types';
 import { cached } from '../cache';
+import { translateTag } from './tag-names';
 
 const API = 'https://api.mangadex.org';
 const COVERS = 'https://uploads.mangadex.org/covers';
@@ -98,7 +99,10 @@ function mapSummary(m: MDManga, langs: string[]): MangaSummary {
     status: (m.attributes.status as MangaSummary['status']) ?? 'unknown',
     contentRating: (m.attributes.contentRating as MangaSummary['contentRating']) ?? 'unknown',
     tags: m.attributes.tags
-      .map((t) => pickLocalized(t.attributes.name, ['es', 'en']))
+      .map((t) => {
+        const raw = pickLocalized(t.attributes.name, ['en']);
+        return raw ? translateTag(raw) : '';
+      })
       .filter(Boolean),
   };
 }
@@ -159,6 +163,40 @@ export class MangaDexProvider implements MangaProvider {
         'availableTranslatedLanguage[]': langs,
         'contentRating[]': ['safe', 'suggestive', 'erotica'],
         'order[relevance]': 'desc',
+      });
+      return data.data.map((m) => mapSummary(m, langs));
+    });
+  }
+
+  async popular({ limit = 24, offset = 0 }: { limit?: number; offset?: number } = {}): Promise<MangaSummary[]> {
+    const langs = this.preferredLanguages;
+    const key = `md:popular:${limit}:${offset}:${langs.join(',')}`;
+    return cached(key, 5 * 60_000, async () => {
+      const data = await mdFetch<{ data: MDManga[] }>('/manga', {
+        limit,
+        offset,
+        'includes[]': ['cover_art', 'author', 'artist'],
+        'availableTranslatedLanguage[]': langs,
+        'contentRating[]': ['safe', 'suggestive', 'erotica'],
+        hasAvailableChapters: 'true',
+        'order[followedCount]': 'desc',
+      });
+      return data.data.map((m) => mapSummary(m, langs));
+    });
+  }
+
+  async latest({ limit = 24, offset = 0 }: { limit?: number; offset?: number } = {}): Promise<MangaSummary[]> {
+    const langs = this.preferredLanguages;
+    const key = `md:latest:${limit}:${offset}:${langs.join(',')}`;
+    return cached(key, 2 * 60_000, async () => {
+      const data = await mdFetch<{ data: MDManga[] }>('/manga', {
+        limit,
+        offset,
+        'includes[]': ['cover_art', 'author', 'artist'],
+        'availableTranslatedLanguage[]': langs,
+        'contentRating[]': ['safe', 'suggestive', 'erotica'],
+        hasAvailableChapters: 'true',
+        'order[latestUploadedChapter]': 'desc',
       });
       return data.data.map((m) => mapSummary(m, langs));
     });

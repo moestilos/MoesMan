@@ -2,27 +2,25 @@
 import Base from '@/layouts/Base.astro';
 import MangaGrid from '@/components/MangaGrid.astro';
 import GridSkeleton from '@/components/GridSkeleton.astro';
+import ContinueReading from '@/components/ContinueReading';
 import { getProvider } from '@/lib/providers';
 
 const provider = getProvider('mangadex');
 
-const featuredQueries = ['one piece', 'chainsaw man', 'jujutsu kaisen', 'solo leveling'];
-const pick = featuredQueries[Math.floor(Math.random() * featuredQueries.length)];
-
-let popular: Awaited<ReturnType<typeof provider.search>> = [];
-let trending: Awaited<ReturnType<typeof provider.search>> = [];
+let popular: Awaited<ReturnType<typeof provider.popular>> = [];
+let latest: Awaited<ReturnType<typeof provider.latest>> = [];
 let error: string | null = null;
 
 try {
-  [popular, trending] = await Promise.all([
-    provider.search({ query: pick, limit: 18 }),
-    provider.search({ query: 'manga', limit: 12 }),
+  [popular, latest] = await Promise.all([
+    provider.popular({ limit: 24 }),
+    provider.latest({ limit: 18 }),
   ]);
 } catch (e) {
   error = e instanceof Error ? e.message : 'Error cargando';
 }
 
-const hero = popular[0];
+const hero = popular[Math.floor(Math.random() * Math.min(popular.length, 5))];
 ---
 
 <Base title="MoesMan — Inicio">
@@ -41,7 +39,7 @@ const hero = popular[0];
         <div class="absolute inset-0 bg-gradient-to-t from-bg via-transparent to-transparent"></div>
         <div class="relative z-10 flex h-full items-end sm:items-center">
           <div class="flex max-w-2xl flex-col gap-4 p-6 sm:p-10">
-            <span class="badge-brand w-fit">Destacado</span>
+            <span class="badge-brand w-fit">Más leídos ahora</span>
             <h1 class="text-3xl sm:text-5xl font-bold leading-tight drop-shadow">
               {hero.title}
             </h1>
@@ -75,6 +73,8 @@ const hero = popular[0];
     </div>
   )}
 
+  <ContinueReading client:idle />
+
   <section class="mb-12">
     <header class="mb-4 flex items-end justify-between">
       <h2 class="text-xl sm:text-2xl font-bold">Populares ahora</h2>
@@ -83,15 +83,14 @@ const hero = popular[0];
     {popular.length === 0 && !error ? (
       <GridSkeleton count={12} />
     ) : (
-      <MangaGrid items={popular.slice(0, 12)} />
+      <MangaGrid items={popular.slice(0, 18)} />
     )}
   </section>
 
   <section class="mb-6">
     <header class="mb-4 flex items-end justify-between">
-      <h2 class="text-xl sm:text-2xl font-bold">En tendencia</h2>
-      <a href="/search" class="text-sm link-hover text-fg-muted">Ver más →</a>
+      <h2 class="text-xl sm:text-2xl font-bold">Actualizados recientemente</h2>
     </header>
-    {trending.length === 0 && !error ? <GridSkeleton count={12} /> : <MangaGrid items={trending} />}
+    {latest.length === 0 && !error ? <GridSkeleton count={12} /> : <MangaGrid items={latest} />}
   </section>
 </Base>

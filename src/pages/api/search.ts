@@ -6,6 +6,7 @@ export const prerender = false;
 export const GET: APIRoute = async ({ url }) => {
   const q = (url.searchParams.get('q') ?? '').trim();
   const limit = Math.min(Number(url.searchParams.get('limit') ?? 20), 50);
+  const offset = Math.max(0, Number(url.searchParams.get('offset') ?? 0));
   const providerId = url.searchParams.get('provider') ?? 'mangadex';
 
   if (!q) {
@@ -16,7 +17,7 @@ export const GET: APIRoute = async ({ url }) => {
 
   try {
     const provider = getProvider(providerId);
-    const data = await provider.search({ query: q, limit });
+    const data = await provider.search({ query: q, limit, offset });
     return new Response(JSON.stringify({ data }), {
       headers: {
         'Content-Type': 'application/json',

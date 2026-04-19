@@ -1,22 +1,9 @@
 ---
 import Base from '@/layouts/Base.astro';
-import MangaGrid from '@/components/MangaGrid.astro';
+import SearchResults from '@/components/SearchResults';
 import GridSkeleton from '@/components/GridSkeleton.astro';
-import { getProvider } from '@/lib/providers';
 
 const q = (Astro.url.searchParams.get('q') ?? '').trim();
-const provider = getProvider('mangadex');
-
-let results: Awaited<ReturnType<typeof provider.search>> = [];
-let error: string | null = null;
-
-if (q) {
-  try {
-    results = await provider.search({ query: q, limit: 36 });
-  } catch (e) {
-    error = e instanceof Error ? e.message : 'Error';
-  }
-}
 ---
 
 <Base title={q ? `Buscar: ${q} — MoesMan` : 'Explorar — MoesMan'}>
@@ -25,23 +12,13 @@ if (q) {
       {q ? <>Resultados para <span class="text-brand-400">“{q}”</span></> : 'Explorar manga'}
     </h1>
     <p class="mt-1 text-sm text-fg-muted">
-      {q ? `${results.length} título(s) encontrado(s)` : 'Escribe en la barra superior para buscar.'}
+      {q ? 'Scroll para cargar más.' : 'Escribe en la barra superior para buscar.'}
     </p>
   </section>
 
-  {error && (
-    <div class="mb-6 rounded-xl border border-brand-500/40 bg-brand-500/10 p-4 text-sm text-brand-200">
-      {error}
-    </div>
-  )}
-
-  {q && !error ? (
-    results.length > 0 ? (
-      <MangaGrid items={results} />
-    ) : (
-      <p class="py-16 text-center text-fg-muted">Sin resultados. Prueba otros términos.</p>
-    )
+  {q ? (
+    <SearchResults client:load query={q} />
   ) : (
-    !q && !error && <GridSkeleton count={18} />
+    <GridSkeleton count={18} />
   )}
 </Base>
