@@ -18,6 +18,7 @@ if (nsfw) {
     items = await provider.browse({
       limit: 60,
       contentRating: ['pornographic'],
+      language: ['es', 'es-la', 'en'],
       order: 'popular',
     });
   } catch (e) {

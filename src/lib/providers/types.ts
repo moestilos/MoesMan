@@ -58,7 +58,9 @@ export interface BrowseParams {
   tagIds?: string[];
   demographic?: 'shounen' | 'shoujo' | 'seinen' | 'josei';
   order?: 'popular' | 'latest' | 'relevance';
-  originalLanguage?: string[]; // ej. ['ko'] para manhwa, ['zh','zh-hk'] para manhua
+  originalLanguage?: string[];
+  /** Override de availableTranslatedLanguage. Si no se pasa usa preferredLanguages. */
+  language?: string[];
 }
 
 export interface ChaptersParams {

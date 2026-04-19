@@ -12,6 +12,7 @@ export interface Category {
   originalLanguage?: string[];
   nsfwOnly?: boolean;
   ratingOverride?: Array<'safe' | 'suggestive' | 'erotica' | 'pornographic'>;
+  languageOverride?: string[];
 }
 
 export const CATEGORIES: Category[] = [
@@ -47,7 +48,14 @@ export const CATEGORIES: Category[] = [
   { slug: 'slice-of-life', label: 'Slice of Life', tagIds: ['e5301a23-ebd9-49dd-a0cb-2add944c7fe9'] },
 
   // --- Adulto (requiere NSFW toggle) ---
-  { slug: 'hentai', label: 'Hentai', nsfwOnly: true, ratingOverride: ['pornographic'] },
+  {
+    slug: 'hentai',
+    label: 'Hentai',
+    nsfwOnly: true,
+    ratingOverride: ['pornographic'],
+    // Pornographic rara vez tiene ES, expandir a EN para que aparezca catalogo
+    languageOverride: ['es', 'es-la', 'en'],
+  },
   { slug: 'ecchi', label: 'Ecchi', tagIds: ['9ab53f6b-1c80-4479-807c-0e6d73e8a1a5'] },
 ];
 

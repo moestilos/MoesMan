@@ -321,8 +321,9 @@ export class MangaDexProvider implements MangaProvider {
     demographic,
     order = 'popular',
     originalLanguage,
+    language,
   }: import('./types').BrowseParams): Promise<MangaSummary[]> {
-    const langs = this.preferredLanguages;
+    const langs = language ?? this.preferredLanguages;
     const ratings = contentRating ?? DEFAULT_RATINGS;
     const origLang = originalLanguage ?? [];
     const key = `md:browse:${limit}:${offset}:${langs.join(',')}:${ratings.join(',')}:${(tagIds ?? []).join(',')}:${demographic ?? ''}:${order}:${origLang.join(',')}`;
