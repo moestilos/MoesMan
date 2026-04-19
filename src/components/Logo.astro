@@ -11,30 +11,45 @@ const uid = Math.random().toString(36).slice(2, 8);
 <a href="/" class:list={['group inline-flex items-center gap-2.5 select-none', className]} aria-label="MoesMan">
   <span class="relative flex-none" style={`width:${size}px;height:${size}px`}>
     <svg
-      viewBox="0 0 40 40"
+      viewBox="0 0 64 64"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
-      class="h-full w-full transition-transform duration-500 ease-out group-hover:rotate-[8deg]"
+      class="h-full w-full transition-transform duration-500 ease-[var(--ease-out)] group-hover:scale-[1.08]"
     >
       <defs>
-        <linearGradient id={`lg-${uid}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="rgb(var(--brand-400))"/>
+        <linearGradient id={`lg-bg-${uid}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#1a1a22"/>
+          <stop offset="100%" stop-color="#08080b"/>
+        </linearGradient>
+        <linearGradient id={`lg-brand-${uid}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="rgb(var(--brand-300))"/>
+          <stop offset="55%" stop-color="rgb(var(--brand-500))"/>
           <stop offset="100%" stop-color="rgb(var(--brand-700))"/>
         </linearGradient>
       </defs>
-      <!-- Torii-inspired: two columns + top beam (Japanese zen) -->
-      <rect width="40" height="40" rx="10" fill="rgb(var(--brand-950) / 0.85)"/>
-      <rect x="0.5" y="0.5" width="39" height="39" rx="9.5" fill="none" stroke="rgba(255,255,255,0.08)"/>
-      <!-- Top beam -->
-      <rect x="7" y="10" width="26" height="3" rx="1" fill={`url(#lg-${uid})`}/>
-      <!-- Second beam slightly thinner -->
-      <rect x="9" y="15" width="22" height="2" rx="0.8" fill={`url(#lg-${uid})`} opacity="0.8"/>
-      <!-- Left column -->
-      <rect x="12" y="13" width="3" height="17" rx="1" fill={`url(#lg-${uid})`}/>
-      <!-- Right column -->
-      <rect x="25" y="13" width="3" height="17" rx="1" fill={`url(#lg-${uid})`}/>
-      <!-- Bottom dot -->
-      <circle cx="20" cy="30" r="1.5" fill={`url(#lg-${uid})`}/>
+
+      <rect width="64" height="64" rx="14" fill={`url(#lg-bg-${uid})`}/>
+      <rect x="0.5" y="0.5" width="63" height="63" rx="13.5" fill="none" stroke="rgba(255,255,255,0.08)"/>
+
+      <g fill={`url(#lg-brand-${uid})`}>
+        <!-- Head -->
+        <path d="M32 13 L29.2 18 L34.8 18 Z"/>
+
+        <!-- Right wing 3 tiers -->
+        <path d="M34.4 19 L57 17 L52 23 L38.2 24 Z"/>
+        <path d="M34.2 24.4 L55 25.2 L47.8 30 L36.4 29 Z"/>
+        <path d="M34.8 29.4 L49.5 32 L41.5 36 L36.4 34 Z"/>
+
+        <!-- Left wing mirror -->
+        <path d="M29.6 19 L7 17 L12 23 L25.8 24 Z"/>
+        <path d="M29.8 24.4 L9 25.2 L16.2 30 L27.6 29 Z"/>
+        <path d="M29.2 29.4 L14.5 32 L22.5 36 L27.6 34 Z"/>
+
+        <!-- Body + tail -->
+        <path d="M29.8 24 L29.8 39.5 L27 46.5 L32 51.5 L37 46.5 L34.2 39.5 L34.2 24 Z"/>
+      </g>
+      <!-- Tail split line -->
+      <path d="M32 40 L31 47.5 L32 50.5 L33 47.5 Z" fill="rgba(0,0,0,0.2)"/>
     </svg>
   </span>
   {withText && (

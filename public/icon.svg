@@ -1,94 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="MoesMan">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MoesMan">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1a1a1f"/>
-      <stop offset="100%" stop-color="#0a0a0b"/>
+      <stop offset="0%" stop-color="#1a1a22"/>
+      <stop offset="100%" stop-color="#0a0a0e"/>
     </linearGradient>
     <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#fb7185"/>
-      <stop offset="50%" stop-color="#f43f5e"/>
-      <stop offset="100%" stop-color="#be123c"/>
+      <stop offset="0%" stop-color="#ff9eb4"/>
+      <stop offset="55%" stop-color="#f5356a"/>
+      <stop offset="100%" stop-color="#ba0e44"/>
     </linearGradient>
-    <linearGradient id="accent" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#a78bfa"/>
-      <stop offset="100%" stop-color="#6d28d9"/>
-    </linearGradient>
-    <radialGradient id="glow" cx="0.5" cy="0.4" r="0.6">
-      <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.45"/>
-      <stop offset="70%" stop-color="#f43f5e" stop-opacity="0"/>
-    </radialGradient>
-    <filter id="innerShadow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
-      <feOffset in="blur" dx="0" dy="4" result="offsetBlur"/>
-      <feFlood flood-color="#000" flood-opacity="0.5"/>
-      <feComposite in2="offsetBlur" operator="in"/>
-      <feComposite in2="SourceGraphic" operator="over"/>
-    </filter>
   </defs>
 
-  <!-- Background -->
-  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <!-- Soft glow -->
-  <rect width="512" height="512" rx="112" fill="url(#glow)"/>
+  <!-- Rounded bg -->
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <rect x="0.5" y="0.5" width="63" height="63" rx="13.5" fill="none" stroke="rgba(255,255,255,0.08)"/>
 
-  <!-- Manga speed-lines (subtle) -->
-  <g opacity="0.08" stroke="#ffffff" stroke-linecap="round">
-    <line x1="60" y1="120" x2="140" y2="120" stroke-width="2"/>
-    <line x1="60" y1="150" x2="110" y2="150" stroke-width="2"/>
-    <line x1="380" y1="400" x2="460" y2="400" stroke-width="2"/>
-    <line x1="400" y1="430" x2="460" y2="430" stroke-width="2"/>
+  <!-- Eagle / spread wings mark -->
+  <g fill="url(#brand)">
+    <!-- Head peak -->
+    <path d="M32 13 L29.2 18 L34.8 18 Z"/>
+
+    <!-- Right wing: three feather tiers -->
+    <path d="M34.4 19 L57 17 L52 23 L38.2 24 Z"/>
+    <path d="M34.2 24.4 L55 25.2 L47.8 30 L36.4 29 Z"/>
+    <path d="M34.8 29.4 L49.5 32 L41.5 36 L36.4 34 Z"/>
+
+    <!-- Left wing: mirror -->
+    <path d="M29.6 19 L7 17 L12 23 L25.8 24 Z"/>
+    <path d="M29.8 24.4 L9 25.2 L16.2 30 L27.6 29 Z"/>
+    <path d="M29.2 29.4 L14.5 32 L22.5 36 L27.6 34 Z"/>
+
+    <!-- Body + tail feathers -->
+    <path d="M29.8 24 L29.8 39.5 L27 46.5 L32 51.5 L37 46.5 L34.2 39.5 L34.2 24 Z"/>
+    <path d="M32 40 L31 47.5 L32 50.5 L33 47.5 Z" fill="rgba(0,0,0,0.18)"/>
   </g>
-
-  <!-- The "M" — built from two ascending peaks over a bold baseline -->
-  <g filter="url(#innerShadow)">
-    <!-- Left peak -->
-    <path
-      d="M 108 380
-         L 108 160
-         Q 108 132 136 132
-         L 162 132
-         Q 180 132 190 150
-         L 256 280
-         L 218 356
-         Z"
-      fill="url(#brand)"/>
-    <!-- Right peak -->
-    <path
-      d="M 404 380
-         L 404 160
-         Q 404 132 376 132
-         L 350 132
-         Q 332 132 322 150
-         L 256 280
-         L 294 356
-         Z"
-      fill="url(#brand)"/>
-    <!-- Center valley accent -->
-    <path
-      d="M 218 356
-         L 256 280
-         L 294 356
-         Z"
-      fill="url(#accent)"
-      opacity="0.95"/>
-  </g>
-
-  <!-- Panel cut highlight (top-right, manga panel vibe) -->
-  <path
-    d="M 420 92 L 464 92 L 464 136"
-    fill="none"
-    stroke="url(#brand)"
-    stroke-width="6"
-    stroke-linecap="round"/>
-  <!-- Panel cut (bottom-left) -->
-  <path
-    d="M 48 420 L 48 376 M 48 420 L 92 420"
-    fill="none"
-    stroke="url(#accent)"
-    stroke-width="6"
-    stroke-linecap="round"
-    opacity="0.75"/>
-
-  <!-- Dot accent -->
-  <circle cx="256" cy="410" r="10" fill="url(#brand)"/>
 </svg>
