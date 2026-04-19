@@ -8,237 +8,166 @@ const isActive = (p: string) =>
 const q = Astro.url.searchParams.get('q') ?? '';
 
 const navItems = [
-  { href: '/', label: 'Inicio' },
-  { href: '/search', label: 'Explorar' },
-  { href: '/library', label: 'Biblioteca' },
+  { href: '/', label: 'Inicio', seccion: 'inicio' },
+  { href: '/search', label: 'Explorar', seccion: 'explorar' },
+  { href: '/library', label: 'Biblioteca', seccion: 'biblioteca' },
 ];
 ---
 
 <header
-  class="fixed inset-x-0 top-0 z-40 pointer-events-none
-         px-2 pt-2 sm:px-4 sm:pt-4"
+  id="header-nav"
+  class="fixed top-4 inset-x-0 z-50 flex justify-center px-3 sm:px-4 pointer-events-none transition-all duration-300"
 >
-  <!-- Desktop/tablet: 3-column grid con isla principal centrada + profile pill derecha -->
-  <div class="mx-auto hidden max-w-[1440px] items-center gap-3 lg:grid lg:grid-cols-[1fr_auto_1fr]">
-    <div aria-hidden="true"></div>
+  <div
+    id="pill-nav"
+    class="pointer-events-auto flex items-center gap-1 p-1.5 rounded-full border border-border-strong bg-bg-raised/80 backdrop-blur-xl shadow-2xl shadow-black/40 max-w-full transition-all duration-300 hover:border-brand-500/40"
+  >
+    <!-- Logo + wordmark -->
+    <a
+      href="/"
+      aria-label="Ako — Inicio"
+      class="group flex flex-none items-center gap-2 rounded-full pl-1.5 pr-3 py-0.5 hover:bg-white/[0.04] transition-colors"
+    >
+      <Logo size={28} withText={false} />
+      <span class="hidden sm:inline font-semibold tracking-[-0.025em] text-white text-[15px] leading-none">
+        Ako
+      </span>
+    </a>
 
-    <!-- ISLA PRINCIPAL -->
-    <div class="island-wrap pointer-events-auto relative">
-      <div class="island-glow" aria-hidden="true"></div>
-      <div class="island relative flex h-12 items-center gap-1 rounded-full pl-1.5 pr-1.5">
+    <span class="hidden lg:block w-px h-5 bg-border-strong mx-1"></span>
+
+    <!-- Nav links + indicador deslizante -->
+    <nav id="nav-links" class="hidden lg:flex items-center relative">
+      <span
+        id="nav-indicador"
+        class="absolute top-1/2 -translate-y-1/2 h-8 rounded-full bg-brand-500/15 border border-brand-500/30 transition-all duration-300 ease-out opacity-0 pointer-events-none"
+      ></span>
+      {navItems.map((n) => (
         <a
-          href="/"
-          aria-label="Ako — Inicio"
-          class="group flex h-9 flex-none items-center gap-2 rounded-full pl-1.5 pr-3 hover:bg-bg-hover/40 transition-colors"
-        >
-          <Logo size={28} withText={false} />
-          <span class="font-brand text-[16px] font-extrabold leading-none tracking-[-0.02em]">
-            Ako
-          </span>
-        </a>
-
-        <span class="inline-block h-5 w-px bg-border-strong mx-0.5"></span>
-
-        <nav class="flex items-center gap-0.5">
-          {navItems.map((n) => {
-            const active = isActive(n.href);
-            return (
-              <a
-                href={n.href}
-                class:list={[
-                  'nav-pill',
-                  active ? 'nav-pill--active' : '',
-                ]}
-              >
-                <span class="relative z-10">{n.label}</span>
-              </a>
-            );
-          })}
-        </nav>
-
-        <span class="inline-block h-5 w-px bg-border-strong mx-0.5"></span>
-
-        <form action="/search" method="get" class="w-[220px] lg:w-[280px]">
-          <label class="relative block">
-            <span class="sr-only">Buscar manga</span>
-            <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-fg-subtle">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.3-4.3"></path>
-              </svg>
-            </span>
-            <input
-              type="search"
-              name="q"
-              value={q}
-              placeholder="Buscar manga, autor…"
-              autocomplete="off"
-              class="h-9 w-full rounded-full bg-white/[0.04] pl-8 pr-3 text-[13px] text-fg placeholder:text-fg-subtle
-                     ring-1 ring-inset ring-white/[0.06] outline-none transition-all
-                     hover:bg-white/[0.06] hover:ring-white/[0.1]
-                     focus:bg-white/[0.08] focus:ring-brand-500/40"
-            />
-          </label>
-        </form>
-      </div>
-    </div>
-
-    <!-- DERECHA: Profile pill -->
-    <div class="island-wrap pointer-events-auto relative justify-self-end">
-      <div class="island-glow" aria-hidden="true"></div>
-      <div class="island relative flex h-12 items-center gap-0.5 rounded-full pl-1 pr-1">
-        <a
-          href="/history"
-          aria-label="Historial"
-          title="Historial"
+          href={n.href}
+          data-seccion={n.seccion}
           class:list={[
-            'inline-flex h-9 w-9 flex-none items-center justify-center rounded-full transition-colors',
-            isActive('/history') ? 'text-brand-400 bg-brand-500/10' : 'text-fg-muted hover:text-fg hover:bg-bg-hover/50',
+            'link-nav relative z-10 px-3 py-1.5 text-sm rounded-full transition-colors',
+            isActive(n.href) ? 'text-white' : 'text-fg-muted hover:text-white',
           ]}
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 3v5h5"/>
-            <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/>
-            <path d="M12 7v5l4 2"/>
-          </svg>
+          {n.label}
         </a>
-        <span class="inline-block h-5 w-px bg-border-strong"></span>
-        <UserMenu client:only="react" />
-      </div>
-    </div>
-  </div>
+      ))}
+    </nav>
 
-  <!-- Mobile: Una sola isla full-width, logo + search + user -->
-  <div class="mx-auto flex items-center gap-2 lg:hidden">
-    <div class="island-wrap pointer-events-auto relative flex-1">
-      <div class="island-glow" aria-hidden="true"></div>
-      <div class="island relative flex h-12 items-center gap-1 rounded-full pl-1.5 pr-1.5">
-        <a
-          href="/"
-          aria-label="Ako"
-          class="flex h-9 flex-none items-center gap-2 rounded-full pl-1.5 pr-2 hover:bg-bg-hover/40 transition-colors"
-        >
-          <Logo size={26} withText={false} />
-        </a>
-        <form action="/search" method="get" class="min-w-0 flex-1">
-          <label class="relative block group/search">
-            <span class="sr-only">Buscar</span>
-            <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-fg-subtle" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.3-4.3"></path>
-              </svg>
-            </span>
-            <input
-              type="search"
-              name="q"
-              value={q}
-              placeholder="Buscar…"
-              autocomplete="off"
-              class="h-9 w-full rounded-full bg-bg-elevated/60 pl-8 pr-3 text-[13px] text-fg placeholder:text-fg-subtle
-                     ring-1 ring-inset ring-border/80 transition-all duration-200
-                     focus:ring-brand-500/50 focus:bg-bg-elevated focus:outline-none"
-            />
-          </label>
-        </form>
-      </div>
-    </div>
-    <div class="island-wrap pointer-events-auto relative flex-none">
-      <div class="island-glow" aria-hidden="true"></div>
-      <div class="island relative flex h-12 items-center rounded-full pl-1 pr-1">
-        <UserMenu client:only="react" />
-      </div>
+    <span class="hidden lg:block w-px h-5 bg-border-strong mx-1"></span>
+
+    <!-- Search inline compacto -->
+    <form action="/search" method="get" class="hidden md:block w-[200px] lg:w-[240px]">
+      <label class="relative block">
+        <span class="sr-only">Buscar manga</span>
+        <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-fg-subtle">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+        </span>
+        <input
+          type="search"
+          name="q"
+          value={q}
+          placeholder="Buscar…"
+          autocomplete="off"
+          class="h-8 w-full rounded-full bg-white/[0.04] pl-8 pr-3 text-[12.5px] text-white placeholder:text-fg-subtle ring-1 ring-inset ring-white/[0.06] outline-none transition hover:bg-white/[0.06] focus:bg-white/[0.08] focus:ring-brand-500/40"
+        />
+      </label>
+    </form>
+
+    <span class="hidden md:block w-px h-5 bg-border-strong mx-1"></span>
+
+    <!-- Historial icon (md+) -->
+    <a
+      href="/history"
+      aria-label="Historial"
+      title="Historial"
+      class:list={[
+        'hidden md:inline-flex h-8 w-8 flex-none items-center justify-center rounded-full transition-colors',
+        isActive('/history') ? 'text-brand-400 bg-brand-500/10' : 'text-fg-muted hover:text-white hover:bg-white/[0.06]',
+      ]}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 3v5h5"/>
+        <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/>
+        <path d="M12 7v5l4 2"/>
+      </svg>
+    </a>
+
+    <!-- Mobile: search icon shortcut (<md hide bar) -->
+    <a
+      href="/search"
+      aria-label="Buscar"
+      class="md:hidden inline-flex h-8 w-8 items-center justify-center rounded-full text-fg-muted hover:text-white hover:bg-white/[0.06] transition-colors"
+    >
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="m21 21-4.3-4.3"/>
+      </svg>
+    </a>
+
+    <!-- UserMenu (CTA derecha) -->
+    <div class="flex-none">
+      <UserMenu client:only="react" />
     </div>
   </div>
 </header>
 
-<!-- Spacer -->
-<div aria-hidden="true" class="h-[64px] sm:h-[80px]"></div>
-
-<style>
-  .island-wrap {
-    /* No usar `filter` aqui: rompe backdrop-filter del hijo */
-  }
-  /* Glow externo eliminado — aspecto más limpio */
-  .island-glow { display: none; }
-
-  .island {
-    background: rgba(12, 12, 16, 0.7);
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
-      0 2px 10px -4px rgba(0, 0, 0, 0.35);
-    isolation: isolate;
-    transition:
-      background-color 300ms var(--ease-out),
-      box-shadow 300ms var(--ease-out),
-      border-color 300ms var(--ease-out);
-  }
-  /* Sin conic border, sin dots — limpio */
-  :global(html.scrolled) .island {
-    background: rgba(12, 12, 16, 0.82);
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
-      0 8px 24px -8px rgba(0, 0, 0, 0.55);
-  }
-  .island > * {
-    position: relative;
-    z-index: 1;
-  }
-
-  @keyframes rotate-border {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .island::before { animation: none; }
-  }
-
-  /* ---------- Nav pills (coherentes con la isla) ---------- */
-  .nav-pill {
-    display: inline-flex;
-    height: 36px;
-    padding: 0 14px;
-    align-items: center;
-    border-radius: 9999px;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: -0.005em;
-    color: rgba(181, 181, 189, 1);
-    transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    isolation: isolate;
-  }
-  .nav-pill:hover {
-    color: #f5f5f7;
-    background: rgba(255, 255, 255, 0.04);
-  }
-  .nav-pill--active {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.07);
-    box-shadow:
-      inset 0 0 0 1px rgba(255, 255, 255, 0.1),
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
-  }
-  .nav-pill--active:hover {
-    background: rgba(255, 255, 255, 0.09);
-  }
-
-</style>
+<!-- Espaciador obligatorio -->
+<div class="h-20" aria-hidden="true"></div>
 
 <script is:inline>
-  // Ctrl/Cmd+K enfoca la barra de busqueda
-  document.addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-      const input = document.querySelector('header input[name="q"]');
-      if (input) {
-        e.preventDefault();
-        input.focus();
-        input.select();
-      }
+  (() => {
+    const navLinks = document.querySelectorAll('#nav-links .link-nav');
+    const indicador = document.getElementById('nav-indicador');
+    const navContainer = document.getElementById('nav-links');
+    if (!navLinks.length || !indicador || !navContainer) return;
+
+    let activo = document.querySelector('#nav-links .link-nav.text-white');
+
+    function mover(target) {
+      if (!target) { indicador.style.opacity = '0'; return; }
+      const cont = navContainer.getBoundingClientRect();
+      const r = target.getBoundingClientRect();
+      indicador.style.width = r.width + 'px';
+      indicador.style.left = r.left - cont.left + 'px';
+      indicador.style.opacity = '1';
     }
-  });
+
+    navLinks.forEach((a) => a.addEventListener('mouseenter', () => mover(a)));
+    navContainer.addEventListener('mouseleave', () => mover(activo));
+
+    const init = () => requestAnimationFrame(() => mover(activo));
+    init();
+    window.addEventListener('load', init);
+    window.addEventListener('resize', () => mover(activo));
+
+    const header = document.getElementById('header-nav');
+    let lastY = -1;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if ((y > 30) !== (lastY > 30) && header) {
+        header.classList.toggle('top-2', y > 30);
+        header.classList.toggle('top-4', y <= 30);
+      }
+      lastY = y;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        const input = document.querySelector('header input[name="q"]');
+        if (input) {
+          e.preventDefault();
+          input.focus();
+          input.select();
+        }
+      }
+    });
+  })();
 </script>
