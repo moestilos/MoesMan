@@ -4,6 +4,9 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      screens: {
+        xs: '420px',
+      },
       colors: {
         // Capas del fondo — OKLCH-inspired, calidez sutil
         bg: {

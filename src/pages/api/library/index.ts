@@ -1,16 +1,13 @@
 import type { APIRoute } from 'astro';
 import { requireUser, json, jsonError } from '@/server/auth';
-import { commit, getDb, nowIso, uuid } from '@/server/db';
+import { addLibrary, findLibraryEntry, listLibraryByUser } from '@/server/db';
 
 export const prerender = false;
 
 export const GET: APIRoute = async (ctx) => {
   const user = await requireUser(ctx);
   if (user instanceof Response) return user;
-  const db = await getDb();
-  const entries = db.library
-    .filter((e) => e.userId === user.id)
-    .sort((a, b) => b.addedAt.localeCompare(a.addedAt));
+  const entries = await listLibraryByUser(user.id);
   return json(entries);
 };
 
@@ -29,26 +26,9 @@ export const POST: APIRoute = async (ctx) => {
   const coverUrl = body.coverUrl == null ? null : String(body.coverUrl);
   if (!providerId || !mangaId || !title) return jsonError(400, 'Missing fields');
 
-  const db = await getDb();
-  const existing = db.library.find(
-    (e) => e.userId === user.id && e.providerId === providerId && e.mangaId === mangaId,
-  );
-  if (existing) {
-    existing.title = title;
-    existing.coverUrl = coverUrl;
-    await commit();
-    return json(existing);
-  }
-  const row = {
-    id: uuid(),
-    userId: user.id,
-    providerId,
-    mangaId,
-    title,
-    coverUrl,
-    addedAt: nowIso(),
-  };
-  db.library.push(row);
-  await commit();
+  const existing = await findLibraryEntry(user.id, providerId, mangaId);
+  if (existing) return json(existing);
+
+  const row = await addLibrary({ userId: user.id, providerId, mangaId, title, coverUrl });
   return json(row, { status: 201 });
 };

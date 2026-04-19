@@ -74,7 +74,7 @@ export default function UserMenu() {
           {open && (
             <>
               <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
-              <div className="absolute right-0 z-40 mt-2 w-72 animate-fade-in rounded-xl bg-bg-card p-2 ring-1 ring-border shadow-card">
+              <div className="absolute right-0 z-40 mt-2 w-[min(18rem,calc(100vw-1.5rem))] animate-fade-in rounded-xl bg-bg-card p-2 ring-1 ring-border shadow-card-lg">
                 <div className="px-3 pt-1 pb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-fg-subtle">
                   Tema
                 </div>
@@ -100,12 +100,12 @@ export default function UserMenu() {
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-full bg-bg-card pl-1 pr-3 py-1 ring-1 ring-border hover:ring-brand-500/40 transition"
+        className="flex items-center gap-2 rounded-full bg-bg-card p-0.5 sm:pl-1 sm:pr-3 sm:py-1 ring-1 ring-border hover:ring-brand-500/40 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60"
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        <Avatar user={user} size={28} className="text-xs" />
-        <span className="hidden sm:block text-sm font-medium">{user.username}</span>
+        <Avatar user={user} size={30} className="text-xs" />
+        <span className="hidden sm:block text-sm font-medium max-w-[120px] truncate">{user.username}</span>
       </button>
 
       {open && (
@@ -113,7 +113,7 @@ export default function UserMenu() {
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
           <div
             role="menu"
-            className="absolute right-0 z-40 mt-2 w-72 animate-fade-in rounded-2xl bg-bg-card p-2 ring-1 ring-border shadow-card"
+            className="absolute right-0 z-40 mt-2 w-[min(18rem,calc(100vw-1.5rem))] animate-fade-in rounded-2xl bg-bg-card p-2 ring-1 ring-border shadow-card-lg"
           >
             <div className="flex items-center gap-3 border-b border-border px-3 py-3">
               <div className="relative">

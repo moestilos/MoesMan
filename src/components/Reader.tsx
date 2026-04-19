@@ -159,7 +159,7 @@ export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, 
       />
 
       {mode === 'vertical' ? (
-        <div className="mx-auto flex max-w-3xl flex-col items-center gap-0 py-4 sm:gap-1 sm:py-8 lg:py-16">
+        <div className="mx-auto flex max-w-3xl lg:max-w-4xl flex-col items-center gap-0 py-4 sm:gap-1 sm:py-8 lg:py-12">
           {pages.map((src, i) => (
             <div
               key={src}
@@ -284,10 +284,18 @@ function ReaderChrome({
         </select>
         <button
           onClick={() => setMode(mode === 'vertical' ? 'paged' : 'vertical')}
-          className="btn-ghost text-white ring-white/10 hover:ring-white/20"
+          className="btn-ghost text-white ring-white/10 hover:ring-white/20 px-2 sm:px-3"
           title="Cambiar modo (v)"
+          aria-label={mode === 'vertical' ? 'Modo vertical' : 'Modo paginado'}
         >
-          {mode === 'vertical' ? 'Vertical' : 'Paginado'}
+          <span className="sm:hidden" aria-hidden="true">
+            {mode === 'vertical' ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3v18M16 3v18M3 8h18M3 16h18"/></svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="1"/></svg>
+            )}
+          </span>
+          <span className="hidden sm:inline">{mode === 'vertical' ? 'Vertical' : 'Paginado'}</span>
         </button>
         <div className="hidden md:flex gap-1">
           <a

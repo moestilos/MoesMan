@@ -40,20 +40,20 @@ export default function AuthForm({ mode }: { mode: Mode }) {
       )}
 
       <label className="flex flex-col gap-1.5">
-        <span className="text-xs font-medium text-fg-muted">Email</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-fg-subtle">Email</span>
         <input
           type="email"
           required
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="rounded-xl bg-bg-elevated px-3 py-2.5 text-sm ring-1 ring-inset ring-border focus:ring-brand-500/60 focus:outline-none"
+          className="input"
         />
       </label>
 
       {isRegister && (
         <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-fg-muted">Usuario</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-fg-subtle">Usuario</span>
           <input
             required
             minLength={3}
@@ -62,13 +62,13 @@ export default function AuthForm({ mode }: { mode: Mode }) {
             autoComplete="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="rounded-xl bg-bg-elevated px-3 py-2.5 text-sm ring-1 ring-inset ring-border focus:ring-brand-500/60 focus:outline-none"
+            className="input"
           />
         </label>
       )}
 
       <label className="flex flex-col gap-1.5">
-        <span className="text-xs font-medium text-fg-muted">Contraseña</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-fg-subtle">Contraseña</span>
         <input
           type="password"
           required
@@ -76,7 +76,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
           autoComplete={isRegister ? 'new-password' : 'current-password'}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="rounded-xl bg-bg-elevated px-3 py-2.5 text-sm ring-1 ring-inset ring-border focus:ring-brand-500/60 focus:outline-none"
+          className="input"
         />
       </label>
 

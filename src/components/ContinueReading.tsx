@@ -48,13 +48,16 @@ export default function ContinueReading() {
   if (!visible || !entries || entries.length === 0) return null;
 
   return (
-    <section className="mb-12 animate-fade-in">
-      <header className="mb-4 flex items-end justify-between">
-        <h2 className="text-xl sm:text-2xl font-bold">Continuar leyendo</h2>
+    <section className="mb-10 sm:mb-12 animate-fade-in">
+      <div className="section-header">
+        <div>
+          <span className="section-kicker">Tu progreso</span>
+          <h2 className="section-title mt-2">Continuar leyendo</h2>
+        </div>
         <a href="/history" className="text-sm link-hover text-fg-muted">Historial →</a>
-      </header>
+      </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="rail">
         {entries.map((e) => {
           const pct =
             e.progress.totalPages && e.progress.totalPages > 0
@@ -64,7 +67,7 @@ export default function ContinueReading() {
             <a
               key={e.progress.id}
               href={`/read/${e.progress.chapterId}?manga=${e.progress.mangaId}`}
-              className="group relative flex-none w-[72vw] max-w-[260px] sm:w-[240px] snap-start overflow-hidden rounded-xl bg-bg-card ring-1 ring-border transition hover:-translate-y-1 hover:ring-brand-500/50 hover:shadow-card"
+              className="group relative w-[68vw] max-w-[260px] xs:w-[55vw] sm:w-[240px] overflow-hidden rounded-xl bg-bg-card ring-1 ring-border transition hover:-translate-y-1 hover:ring-brand-500/50 hover:shadow-card"
             >
               <div className="relative aspect-video w-full bg-bg-hover overflow-hidden">
                 {e.coverUrl && (

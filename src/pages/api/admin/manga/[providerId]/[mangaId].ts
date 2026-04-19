@@ -1,65 +1,72 @@
 import type { APIRoute } from 'astro';
 import { requireUser, json, jsonError } from '@/server/auth';
 import { isAdmin } from '@/server/admin';
-import { getDb } from '@/server/db';
+import { db } from '@/server/db';
+import * as schema from '@/server/schema';
+import { and, desc, eq } from 'drizzle-orm';
 
 export const prerender = false;
+
+const iso = (v: unknown): string =>
+  v instanceof Date ? v.toISOString() : String(v ?? '');
 
 export const GET: APIRoute = async (ctx) => {
   const user = await requireUser(ctx);
   if (user instanceof Response) return user;
   if (!isAdmin(user)) return jsonError(403, 'No autorizado');
 
-  const { providerId, mangaId } = ctx.params;
+  const providerId = String(ctx.params.providerId ?? '');
+  const mangaId = String(ctx.params.mangaId ?? '');
   if (!providerId || !mangaId) return jsonError(400, 'params requeridos');
 
-  const db = await getDb();
+  const [libEntries, favEntries, progEntries, allUsers] = await Promise.all([
+    db
+      .select()
+      .from(schema.library)
+      .where(and(eq(schema.library.providerId, providerId), eq(schema.library.mangaId, mangaId)))
+      .orderBy(desc(schema.library.addedAt)),
+    db
+      .select()
+      .from(schema.favorites)
+      .where(and(eq(schema.favorites.providerId, providerId), eq(schema.favorites.mangaId, mangaId)))
+      .orderBy(desc(schema.favorites.addedAt)),
+    db
+      .select()
+      .from(schema.progress)
+      .where(and(eq(schema.progress.providerId, providerId), eq(schema.progress.mangaId, mangaId)))
+      .orderBy(desc(schema.progress.updatedAt)),
+    db.select().from(schema.users),
+  ]);
 
-  const libEntries = db.library.filter(
-    (e) => e.providerId === providerId && e.mangaId === mangaId,
-  );
-  const favEntries = db.favorites.filter(
-    (f) => f.providerId === providerId && f.mangaId === mangaId,
-  );
-  const progEntries = db.progress.filter(
-    (p) => p.providerId === providerId && p.mangaId === mangaId,
-  );
-
+  const userById = new Map(allUsers.map((u) => [u.id, u]));
   const anyLib = libEntries[0];
   const title = anyLib?.title ?? `Manga ${mangaId.slice(0, 6)}`;
   const coverUrl = anyLib?.coverUrl ?? null;
 
-  const userById = new Map(db.users.map((u) => [u.id, u]));
+  const librarySnapshot = libEntries.map((e) => {
+    const u = userById.get(e.userId);
+    return {
+      userId: e.userId,
+      username: u?.username ?? '??',
+      email: u?.email ?? '',
+      avatarUrl: u?.avatarUrl ?? null,
+      addedAt: iso(e.addedAt),
+    };
+  });
 
-  const librarySnapshot = libEntries
-    .map((e) => {
-      const u = userById.get(e.userId);
-      return {
-        userId: e.userId,
-        username: u?.username ?? '??',
-        email: u?.email ?? '',
-        avatarUrl: u?.avatarUrl ?? null,
-        addedAt: e.addedAt,
-      };
-    })
-    .sort((a, b) => b.addedAt.localeCompare(a.addedAt));
+  const favoritedBy = favEntries.map((f) => {
+    const u = userById.get(f.userId);
+    return {
+      userId: f.userId,
+      username: u?.username ?? '??',
+      addedAt: iso(f.addedAt),
+    };
+  });
 
-  const favoritedBy = favEntries
-    .map((f) => {
-      const u = userById.get(f.userId);
-      return {
-        userId: f.userId,
-        username: u?.username ?? '??',
-        addedAt: f.addedAt,
-      };
-    })
-    .sort((a, b) => b.addedAt.localeCompare(a.addedAt));
-
-  // Progreso por usuario: último capítulo
-  const byUser = new Map<string, typeof progEntries[0]>();
+  const byUser = new Map<string, typeof progEntries[number]>();
   for (const p of progEntries) {
     const cur = byUser.get(p.userId);
-    if (!cur || p.updatedAt > cur.updatedAt) byUser.set(p.userId, p);
+    if (!cur || (p.updatedAt as Date) > (cur.updatedAt as Date)) byUser.set(p.userId, p);
   }
   const readers = [...byUser.values()]
     .map((p) => {
@@ -75,18 +82,15 @@ export const GET: APIRoute = async (ctx) => {
           p.totalPages && p.totalPages > 0
             ? Math.round(((p.page + 1) / p.totalPages) * 100)
             : null,
-        updatedAt: p.updatedAt,
+        updatedAt: iso(p.updatedAt),
       };
     })
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 
-  // Chapter stats
   const chapterCount: Record<string, { count: number; chapterNumber: string | null }> = {};
   for (const p of progEntries) {
     const k = p.chapterId;
-    if (!chapterCount[k]) {
-      chapterCount[k] = { count: 0, chapterNumber: p.chapterNumber };
-    }
+    if (!chapterCount[k]) chapterCount[k] = { count: 0, chapterNumber: p.chapterNumber };
     chapterCount[k].count++;
   }
   const chaptersRead = Object.entries(chapterCount)
@@ -94,13 +98,10 @@ export const GET: APIRoute = async (ctx) => {
     .sort((a, b) => b.count - a.count)
     .slice(0, 20);
 
-  const avgPct =
-    readers.length > 0 && readers.some((r) => r.pct !== null)
-      ? Math.round(
-          readers.filter((r) => r.pct !== null).reduce((s, r) => s + (r.pct ?? 0), 0) /
-            readers.filter((r) => r.pct !== null).length,
-        )
-      : null;
+  const pctValues = readers.map((r) => r.pct).filter((p): p is number => p !== null);
+  const avgPct = pctValues.length > 0
+    ? Math.round(pctValues.reduce((s, p) => s + p, 0) / pctValues.length)
+    : null;
 
   return json({
     providerId,

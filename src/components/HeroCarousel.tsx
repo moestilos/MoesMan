@@ -41,7 +41,7 @@ export default function HeroCarousel({ items, intervalMs = 7000 }: Props) {
       onMouseLeave={() => setPaused(false)}
       className="hero-island relative mb-10 overflow-hidden rounded-2xl sm:mb-12 sm:rounded-3xl"
     >
-      <div className="relative aspect-[4/3] w-full sm:aspect-[16/9] lg:aspect-[21/8]">
+      <div className="relative aspect-[5/4] xs:aspect-[4/3] sm:aspect-[16/9] lg:aspect-[21/8]">
         {items.map((item, i) => {
           const typeLabel =
             item.originalLanguage === 'ko'
@@ -75,7 +75,7 @@ export default function HeroCarousel({ items, intervalMs = 7000 }: Props) {
             <div className="absolute inset-0 bg-gradient-to-t from-[#08080b] via-[#08080b]/40 to-transparent"></div>
 
             <div className="relative z-10 flex h-full items-end sm:items-center">
-              <div className="flex max-w-xl flex-col gap-3 p-5 sm:gap-4 sm:p-8 lg:p-12">
+              <div className="flex max-w-xl flex-col gap-2.5 p-4 xs:p-5 xs:gap-3 sm:gap-4 sm:p-8 lg:p-12">
                 {/* Kicker tipo + categoria */}
                 <div className="flex flex-wrap items-center gap-2">
                   <span
@@ -101,7 +101,7 @@ export default function HeroCarousel({ items, intervalMs = 7000 }: Props) {
                 </div>
 
                 {/* Title */}
-                <h1 className="font-display text-2xl font-black leading-[1.08] tracking-tight line-clamp-2 sm:text-4xl lg:text-[2.75rem]">
+                <h1 className="font-display text-xl xs:text-2xl font-black leading-[1.08] tracking-tight line-clamp-2 sm:text-3xl md:text-4xl lg:text-[2.75rem] break-words">
                   {item.title}
                 </h1>
 

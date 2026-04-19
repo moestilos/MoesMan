@@ -1,7 +1,9 @@
 import type { APIRoute } from 'astro';
 import { requireUser, json, jsonError } from '@/server/auth';
 import { isAdmin } from '@/server/admin';
-import { getDb } from '@/server/db';
+import { db } from '@/server/db';
+import * as schema from '@/server/schema';
+import { sql, desc } from 'drizzle-orm';
 
 export const prerender = false;
 
@@ -10,42 +12,70 @@ export const GET: APIRoute = async (ctx) => {
   if (user instanceof Response) return user;
   if (!isAdmin(user)) return jsonError(403, 'No autorizado');
 
-  const db = await getDb();
+  const [
+    totalsRow,
+    visitsAll,
+    recentUsersRows,
+  ] = await Promise.all([
+    db.execute<{
+      visits: number;
+      unique_ips: number;
+      users: number;
+      library: number;
+      favorites: number;
+      progress: number;
+    }>(sql`
+      select
+        (select count(*)::int from visits) as visits,
+        (select count(distinct ip)::int from visits) as unique_ips,
+        (select count(*)::int from users) as users,
+        (select count(*)::int from library) as library,
+        (select count(*)::int from favorites) as favorites,
+        (select count(*)::int from progress) as progress
+    `),
+    db.select().from(schema.visits),
+    db
+      .select({
+        id: schema.users.id,
+        username: schema.users.username,
+        email: schema.users.email,
+        createdAt: schema.users.createdAt,
+      })
+      .from(schema.users)
+      .orderBy(desc(schema.users.createdAt))
+      .limit(10),
+  ]);
 
-  // Totales
-  const totalVisits = db.visits.length;
-  const uniqueIps = new Set(db.visits.map((v) => v.ip)).size;
-  const totalUsers = db.users.length;
-  const totalLibraryEntries = db.library.length;
-  const totalFavorites = db.favorites.length;
-  const totalProgress = db.progress.length;
+  const totals = (totalsRow.rows ?? totalsRow)[0] as {
+    visits: number;
+    unique_ips: number;
+    users: number;
+    library: number;
+    favorites: number;
+    progress: number;
+  };
 
-  // Por día (últimos 30)
   const byDay: Record<string, number> = {};
-  db.visits.forEach((v) => {
-    byDay[v.day] = (byDay[v.day] ?? 0) + 1;
-  });
+  for (const v of visitsAll) byDay[v.day] = (byDay[v.day] ?? 0) + 1;
   const last30Days = Object.entries(byDay)
     .sort(([a], [b]) => a.localeCompare(b))
     .slice(-30);
 
-  // Por dispositivo (parse UA)
   const deviceCount = { mobile: 0, tablet: 0, desktop: 0 };
-  db.visits.forEach((v) => {
+  for (const v of visitsAll) {
     const ua = (v.userAgent ?? '').toLowerCase();
     if (/ipad|tablet|playbook|silk/.test(ua)) deviceCount.tablet++;
     else if (/mobi|android|iphone|ipod|opera mini|iemobile|blackberry/.test(ua)) deviceCount.mobile++;
     else deviceCount.desktop++;
-  });
+  }
   const byDevice = [
     { key: 'mobile', label: 'Móvil', count: deviceCount.mobile },
     { key: 'desktop', label: 'Desktop', count: deviceCount.desktop },
     { key: 'tablet', label: 'Tablet', count: deviceCount.tablet },
   ];
 
-  // Por navegador
   const browserCount: Record<string, number> = {};
-  db.visits.forEach((v) => {
+  for (const v of visitsAll) {
     const ua = v.userAgent ?? '';
     let name = 'Otros';
     if (/Edg\//.test(ua)) name = 'Edge';
@@ -54,48 +84,38 @@ export const GET: APIRoute = async (ctx) => {
     else if (/Chrome\//.test(ua)) name = 'Chrome';
     else if (/Safari\//.test(ua)) name = 'Safari';
     browserCount[name] = (browserCount[name] ?? 0) + 1;
-  });
+  }
   const byBrowser = Object.entries(browserCount)
     .map(([label, count]) => ({ label, count }))
     .sort((a, b) => b.count - a.count);
 
-  // Top paths (últimos 7 días)
-  const now = Date.now();
-  const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const weekAgo = new Date(Date.now() - 7 * 86400_000).toISOString().slice(0, 10);
   const pathCount: Record<string, number> = {};
-  db.visits.forEach((v) => {
-    if (v.day >= weekAgo) {
-      pathCount[v.path] = (pathCount[v.path] ?? 0) + 1;
-    }
-  });
+  for (const v of visitsAll) {
+    if (v.day >= weekAgo) pathCount[v.path] = (pathCount[v.path] ?? 0) + 1;
+  }
   const topPaths = Object.entries(pathCount)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 10)
     .map(([path, count]) => ({ path, count }));
 
-  // Usuarios recientes (últimos 10)
-  const recentUsers = [...db.users]
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .slice(0, 10)
-    .map((u) => ({
-      id: u.id,
-      username: u.username,
-      email: u.email,
-      createdAt: u.createdAt,
-    }));
-
   return json({
     totals: {
-      visits: totalVisits,
-      uniqueIps,
-      users: totalUsers,
-      library: totalLibraryEntries,
-      favorites: totalFavorites,
-      progress: totalProgress,
+      visits: totals?.visits ?? 0,
+      uniqueIps: totals?.unique_ips ?? 0,
+      users: totals?.users ?? 0,
+      library: totals?.library ?? 0,
+      favorites: totals?.favorites ?? 0,
+      progress: totals?.progress ?? 0,
     },
     last30Days,
     topPaths,
-    recentUsers,
+    recentUsers: recentUsersRows.map((u) => ({
+      id: u.id,
+      username: u.username,
+      email: u.email,
+      createdAt: u.createdAt instanceof Date ? u.createdAt.toISOString() : String(u.createdAt),
+    })),
     byDevice,
     byBrowser,
   });
