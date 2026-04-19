@@ -92,7 +92,7 @@ const topRanked = popular.slice(0, 10);
           <span class="section-kicker">Rankings</span>
           <h2 class="section-title mt-2">Top 10 de la semana</h2>
         </div>
-        <a href="/search?c=popular" class="text-sm link-hover text-fg-muted">Ver más →</a>
+        <a href="/search?c=popular" class="text-xs xs:text-sm font-semibold link-hover text-fg-muted whitespace-nowrap">Ver más →</a>
       </div>
       <div class="rail">
         {topRanked.map((m, i) => (
@@ -123,7 +123,7 @@ const topRanked = popular.slice(0, 10);
           <span class="section-kicker">Género</span>
           <h2 class="section-title mt-2">{row.label}</h2>
         </div>
-        <a href={`/search?genre=${row.slug}`} class="text-sm link-hover text-fg-muted">Ver más →</a>
+        <a href={`/search?genre=${row.slug}`} class="text-xs xs:text-sm font-semibold link-hover text-fg-muted whitespace-nowrap">Ver más →</a>
       </div>
       {row.items.length === 0 ? (
         <GridSkeleton count={12} />
