@@ -292,7 +292,10 @@ export class MangaDexProvider implements MangaProvider {
         'contentRating[]': ratings,
         hasAvailableChapters: 'true',
       };
-      if (tagIds && tagIds.length > 0) params['includedTags[]'] = tagIds;
+      if (tagIds && tagIds.length > 0) {
+        params['includedTags[]'] = tagIds;
+        params['includedTagsMode'] = 'AND'; // strict: todos los tags deben estar presentes
+      }
       if (demographic) params['publicationDemographic[]'] = [demographic];
       if (order === 'popular') params['order[followedCount]'] = 'desc';
       else if (order === 'latest') params['order[latestUploadedChapter]'] = 'desc';
