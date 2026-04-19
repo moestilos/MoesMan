@@ -1,5 +1,6 @@
 ---
 import Base from '@/layouts/Base.astro';
+import MangaActions from '@/components/MangaActions';
 import { getProvider } from '@/lib/providers';
 
 const { id } = Astro.params;
@@ -113,9 +114,13 @@ const firstChapter = chapters[0];
                   ▶ Empezar a leer
                 </a>
               )}
-              <button class="btn-ghost" type="button" disabled title="Próximamente (Fase 2)">
-                ★ Añadir a biblioteca
-              </button>
+              <MangaActions
+                client:only="react"
+                providerId="mangadex"
+                mangaId={manga.id}
+                title={manga.title}
+                coverUrl={manga.coverUrl}
+              />
             </div>
           </div>
         </div>

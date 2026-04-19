@@ -1,0 +1,12 @@
+---
+import Base from '@/layouts/Base.astro';
+import LibraryView from '@/components/LibraryView';
+---
+
+<Base title="Mi biblioteca — MoesMan">
+  <header class="mb-8">
+    <h1 class="text-2xl sm:text-3xl font-bold">Mi biblioteca</h1>
+    <p class="mt-1 text-sm text-fg-muted">Tus mangas guardados.</p>
+  </header>
+  <LibraryView client:only="react" />
+</Base>

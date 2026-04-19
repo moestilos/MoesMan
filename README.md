@@ -2,19 +2,21 @@
 
 Biblioteca personal de manga en español. Lector web rápido, dark mode, diseño tipo Netflix/Crunchyroll.
 
-Estado: **Fase 1 — UI + lector con MangaDex funcional**.
+Estado: **Fase 2 — backend NestJS + Postgres + Drizzle + JWT, biblioteca y progreso persistidos**.
 
 ---
 
 ## Stack
 
-- **Frontend:** Astro 5 + React islands + Tailwind CSS (SSR con adapter Node)
-- **Backend integrado:** rutas API de Astro como proxy cacheado a MangaDex
-- **Datos:** sistema de `providers` desacoplado (solo `mangadex` en F1)
-- **Cache:** en memoria por proceso (TTL por endpoint)
-- **Contenedor:** Docker + docker-compose
+- **Frontend (web):** Astro 5 + React islands + Tailwind CSS (SSR con adapter Node)
+- **Proxy MangaDex:** rutas API de Astro cacheadas
+- **Providers:** sistema desacoplado (`mangadex` activo, scraping pendiente)
+- **Backend (api):** NestJS 10 + Passport JWT + class-validator
+- **DB:** PostgreSQL 16 + Drizzle ORM (migraciones versionadas en `api/drizzle/`)
+- **Auth:** JWT firmado en `/auth/login` y `/auth/register`, `Bearer` en `Authorization`
+- **Contenedor:** Docker Compose orquesta `db` + `api` + `web`
 
-Fase 2 añadirá NestJS + PostgreSQL + Drizzle + JWT.
+Fase 3 añadirá PWA + descarga offline + caché de imágenes.
 
 ---
 
@@ -77,39 +79,47 @@ Prioridad: `es` → `es-la` → fallback.
 
 ## Ejecutar
 
-### Local (recomendado mientras desarrollas)
+### Stack completo (Docker — recomendado)
+
+```bash
+docker compose up --build
+# web  → http://localhost:4321
+# api  → http://localhost:3000/api
+# db   → localhost:5432  (postgres://moesman:moesman@localhost/moesman)
+```
+
+Las migraciones se aplican solas en el contenedor `api` en el primer arranque.
+
+### Desarrollo con hot reload (Docker)
+
+```bash
+docker compose --profile dev up --build web-dev api-dev db
+```
+
+### Local sin Docker (solo web, Fase 1)
 
 ```bash
 npm install
-npm run dev
-# abre http://localhost:4321
+npm run dev            # http://localhost:4321
 ```
 
-### Docker (producción)
+### Local API (requiere Postgres corriendo)
 
 ```bash
-docker compose up --build web
-# http://localhost:4321
-```
-
-### Docker (desarrollo con hot reload)
-
-```bash
-docker compose --profile dev up --build web-dev
-```
-
-### Build producción local
-
-```bash
-npm run build
-npm start
+cd api
+cp .env.example .env   # edita JWT_SECRET
+npm install
+npm run db:push        # crea el schema
+npm run start:dev      # http://localhost:3000/api
 ```
 
 ---
 
 ## API REST
 
-Todas las respuestas devuelven `{ data }` o `{ error }`.
+### Web — proxy MangaDex (`http://localhost:4321/api/*`)
+
+Responden `{ data }` o `{ error }`.
 
 | Método | Ruta                               | Descripción                     |
 | ------ | ---------------------------------- | ------------------------------- |
@@ -117,6 +127,25 @@ Todas las respuestas devuelven `{ data }` o `{ error }`.
 | GET    | `/api/manga/:id`                   | Detalle del manga               |
 | GET    | `/api/manga/:id/chapters`          | Capítulos ES del manga          |
 | GET    | `/api/chapter/:id`                 | URLs de páginas del capítulo    |
+
+### Backend NestJS (`http://localhost:3000/api/*`)
+
+Auth con `Authorization: Bearer <token>` salvo `/auth/register` y `/auth/login`.
+
+| Método | Ruta                                         | Descripción                          |
+| ------ | -------------------------------------------- | ------------------------------------ |
+| POST   | `/auth/register`                             | `{ email, username, password }`      |
+| POST   | `/auth/login`                                | `{ email, password }`                |
+| GET    | `/auth/me`                                   | Usuario actual                       |
+| GET    | `/library`                                   | Biblioteca del usuario               |
+| POST   | `/library`                                   | Añadir/actualizar entrada            |
+| GET    | `/library/:providerId/:mangaId`              | `{ has: boolean }`                   |
+| DELETE | `/library/:providerId/:mangaId`              | Quitar de biblioteca                 |
+| GET    | `/favorites`                                 | Lista de favoritos                   |
+| POST   | `/favorites/:providerId/:mangaId/toggle`     | Alternar favorito                    |
+| POST   | `/progress`                                  | Upsert de progreso (por capítulo)    |
+| GET    | `/progress/:providerId/:mangaId`             | Progreso de todos los capítulos      |
+| GET    | `/progress/history?limit=30`                 | Historial reciente                   |
 
 ---
 
@@ -134,7 +163,8 @@ Todas las respuestas devuelven `{ data }` o `{ error }`.
 
 ## Roadmap
 
-- **Fase 2** — NestJS + PostgreSQL + Drizzle + JWT. Biblioteca personal persistida, progreso sincronizado, favoritos, historial.
+- **Fase 1 ✓** — Astro + Tailwind + MangaDex + lector.
+- **Fase 2 ✓** — NestJS + PostgreSQL + Drizzle + JWT. Biblioteca, favoritos, progreso e historial sincronizados.
 - **Fase 3** — PWA + Service Worker + descarga offline + caché de imágenes.
 - **Futuro** — Nuevos providers (scraping con fallback), recomendaciones, notificaciones de nuevos capítulos.
 

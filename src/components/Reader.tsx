@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { api } from '@/lib/api';
+import { getToken, isAuthed } from '@/lib/auth-client';
 
 type Mode = 'vertical' | 'paged';
 
@@ -49,6 +51,45 @@ export default function Reader({ mangaId, chapterId, pages, chapters }: Props) {
   useEffect(() => {
     localStorage.setItem(progressKey(mangaId, chapterId), String(pageIndex));
   }, [mangaId, chapterId, pageIndex]);
+
+  // Sync server-side (debounced) si hay sesión
+  useEffect(() => {
+    if (!isAuthed() || !mangaId) return;
+    const token = getToken();
+    if (!token) return;
+    const chapterNumber = chapters.find((c) => c.id === chapterId)?.number ?? null;
+    const t = setTimeout(() => {
+      api.progress
+        .upsert(token, {
+          providerId: 'mangadex',
+          mangaId,
+          chapterId,
+          chapterNumber,
+          page: pageIndex,
+          totalPages: pages.length,
+        })
+        .catch(() => {});
+    }, 800);
+    return () => clearTimeout(t);
+  }, [mangaId, chapterId, pageIndex, chapters, pages.length]);
+
+  // Al montar, si hay progreso servidor más reciente, usarlo
+  useEffect(() => {
+    if (!isAuthed() || !mangaId) return;
+    const token = getToken();
+    if (!token) return;
+    api.progress
+      .forManga(token, 'mangadex', mangaId)
+      .then((rows) => {
+        const row = rows.find((r) => r.chapterId === chapterId);
+        if (row && row.page >= 0 && row.page < pages.length) {
+          const localRaw = localStorage.getItem(progressKey(mangaId, chapterId));
+          const local = localRaw ? Number(localRaw) : 0;
+          if (row.page > local) setPageIndex(row.page);
+        }
+      })
+      .catch(() => {});
+  }, [mangaId, chapterId, pages.length]);
 
   useEffect(() => {
     if (mode !== 'vertical') return;

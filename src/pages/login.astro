@@ -1,0 +1,14 @@
+---
+import Base from '@/layouts/Base.astro';
+import AuthForm from '@/components/AuthForm';
+---
+
+<Base title="Entrar — MoesMan">
+  <div class="mx-auto mt-8 max-w-md">
+    <div class="card p-6 sm:p-8 animate-slide-up">
+      <h1 class="text-2xl font-bold">Entrar</h1>
+      <p class="mt-1 mb-6 text-sm text-fg-muted">Accede a tu biblioteca y tu progreso.</p>
+      <AuthForm client:load mode="login" />
+    </div>
+  </div>
+</Base>

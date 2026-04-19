@@ -1,24 +1,85 @@
-# MoesMan — entorno Docker
-# Fase 1: solo 'web'. Postgres preparado pero comentado (Fase 2).
+# MoesMan — stack completo
 #
-# Uso:
-#   docker compose up web           -> desarrollo producción (build)
-#   docker compose up web-dev       -> desarrollo con hot reload
+# Producción:   docker compose up --build
+# Desarrollo:   docker compose --profile dev up --build
 
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: moesman-db
+    environment:
+      POSTGRES_USER: moesman
+      POSTGRES_PASSWORD: moesman
+      POSTGRES_DB: moesman
+    ports:
+      - "5432:5432"
+    volumes:
+      - moesman-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U moesman -d moesman"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    image: moesman-api:latest
+    container_name: moesman-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://moesman:moesman@db:5432/moesman
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+      JWT_EXPIRES_IN: 7d
+      PORT: 3000
+      CORS_ORIGINS: http://localhost:4321
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
   web:
     build:
       context: .
       dockerfile: Dockerfile
     image: moesman-web:latest
     container_name: moesman-web
-    ports:
-      - "4321:4321"
+    depends_on:
+      - api
     environment:
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: 4321
+      PUBLIC_API_BASE: http://localhost:3000/api
+    ports:
+      - "4321:4321"
     restart: unless-stopped
+
+  # --- Dev profile (hot reload) ---
+  api-dev:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    image: moesman-api-dev:latest
+    container_name: moesman-api-dev
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://moesman:moesman@db:5432/moesman
+      JWT_SECRET: dev-secret-change-me
+      PORT: 3000
+      CORS_ORIGINS: http://localhost:4321
+    volumes:
+      - ./api/src:/app/src
+      - ./api/drizzle:/app/drizzle
+      - ./api/drizzle.config.ts:/app/drizzle.config.ts
+    ports:
+      - "3000:3000"
+    profiles: ["dev"]
 
   web-dev:
     build:
@@ -26,8 +87,6 @@ services:
       dockerfile: Dockerfile.dev
     image: moesman-web-dev:latest
     container_name: moesman-web-dev
-    ports:
-      - "4321:4321"
     volumes:
       - ./src:/app/src
       - ./public:/app/public
@@ -36,21 +95,10 @@ services:
       - ./tsconfig.json:/app/tsconfig.json
     environment:
       HOST: 0.0.0.0
+      PUBLIC_API_BASE: http://localhost:3000/api
+    ports:
+      - "4321:4321"
     profiles: ["dev"]
 
-  # --- Fase 2 (descomenta cuando añadas el backend NestJS + Drizzle) ---
-  # db:
-  #   image: postgres:16-alpine
-  #   container_name: moesman-db
-  #   environment:
-  #     POSTGRES_USER: moesman
-  #     POSTGRES_PASSWORD: moesman
-  #     POSTGRES_DB: moesman
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - moesman-db:/var/lib/postgresql/data
-  #   restart: unless-stopped
-
-# volumes:
-#   moesman-db:
+volumes:
+  moesman-db:

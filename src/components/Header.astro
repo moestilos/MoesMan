@@ -1,11 +1,13 @@
 ---
+import UserMenu from './UserMenu';
+
 const pathname = Astro.url.pathname;
 const isActive = (p: string) => (pathname === p ? 'text-fg' : 'text-fg-muted hover:text-fg');
 const q = Astro.url.searchParams.get('q') ?? '';
 ---
 
 <header class="sticky top-0 z-40 border-b border-border/70 bg-bg/70 backdrop-blur-xl">
-  <div class="container-app flex h-16 items-center gap-4 sm:gap-6">
+  <div class="container-app flex h-16 items-center gap-3 sm:gap-6">
     <a href="/" class="flex items-center gap-2 group">
       <span
         class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 font-black text-white shadow-glow ring-1 ring-brand-400/30"
@@ -20,9 +22,10 @@ const q = Astro.url.searchParams.get('q') ?? '';
     <nav class="hidden md:flex items-center gap-5 text-sm font-medium">
       <a href="/" class={`link-hover ${isActive('/')}`}>Inicio</a>
       <a href="/search" class={`link-hover ${isActive('/search')}`}>Explorar</a>
+      <a href="/library" class={`link-hover ${isActive('/library')}`}>Biblioteca</a>
     </nav>
 
-    <form action="/search" method="get" class="ml-auto flex-1 max-w-md">
+    <form action="/search" method="get" class="flex-1 max-w-md ml-auto md:mx-auto md:max-w-sm lg:max-w-md">
       <label class="relative block">
         <span class="sr-only">Buscar manga</span>
         <span
@@ -44,5 +47,9 @@ const q = Astro.url.searchParams.get('q') ?? '';
         />
       </label>
     </form>
+
+    <div class="ml-auto md:ml-0">
+      <UserMenu client:only="react" />
+    </div>
   </div>
 </header>
