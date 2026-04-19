@@ -46,14 +46,26 @@ try {
   error = e instanceof Error ? e.message : 'Error cargando';
 }
 
-const heroItems = popular.slice(0, 5).map((m) => ({
-  id: m.id,
-  title: m.title,
-  coverUrl: m.coverUrl,
-  tags: m.tags ?? [],
-  year: m.year ?? null,
-  status: m.status,
-}));
+// Fetch detalle de los 5 primeros populares para enriquecer hero (descripcion + lang)
+const heroSource = popular.slice(0, 5);
+const heroDetails = await Promise.all(
+  heroSource.map((m) => provider.getManga(m.id).catch(() => null)),
+);
+const heroItems = heroSource.map((m, i) => {
+  const d = heroDetails[i];
+  return {
+    id: m.id,
+    title: m.title,
+    coverUrl: m.coverUrl,
+    tags: m.tags ?? [],
+    year: m.year ?? null,
+    status: m.status,
+    originalLanguage: d?.originalLanguage ?? m.originalLanguage,
+    description: d?.description
+      ? d.description.length > 360 ? d.description.slice(0, 360).replace(/\s\S*$/, '') + '…' : d.description
+      : undefined,
+  };
+});
 const topRanked = popular.slice(0, 10);
 ---
 

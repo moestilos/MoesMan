@@ -7,6 +7,8 @@ export interface HeroItem {
   tags: string[];
   year: number | null;
   status?: string;
+  description?: string;
+  originalLanguage?: string;
 }
 
 interface Props {
@@ -37,57 +39,117 @@ export default function HeroCarousel({ items, intervalMs = 7000 }: Props) {
     <section
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      className="relative mb-10 overflow-hidden rounded-2xl ring-1 ring-border bg-bg-card/40 sm:mb-12 sm:rounded-3xl"
+      className="hero-island relative mb-10 overflow-hidden rounded-2xl sm:mb-12 sm:rounded-3xl"
     >
-      <div className="relative aspect-[4/3] w-full sm:aspect-[16/9] lg:aspect-[21/9]">
-        {items.map((item, i) => (
+      <div className="relative aspect-[4/3] w-full sm:aspect-[16/9] lg:aspect-[21/8]">
+        {items.map((item, i) => {
+          const typeLabel =
+            item.originalLanguage === 'ko'
+              ? 'Manhwa'
+              : item.originalLanguage === 'zh' || item.originalLanguage === 'zh-hk'
+                ? 'Manhua'
+                : 'Manga';
+          const typeTone =
+            typeLabel === 'Manhwa'
+              ? 'bg-violet-500/80 ring-violet-400/30'
+              : typeLabel === 'Manhua'
+                ? 'bg-amber-500/80 ring-amber-400/30'
+                : 'bg-sky-500/80 ring-sky-400/30';
+          return (
           <div
             key={item.id}
             className={`absolute inset-0 transition-opacity duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${i === idx ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
             aria-hidden={i !== idx}
           >
+            {/* Blurred cover bg */}
             {item.coverUrl && (
               <img
                 src={item.coverUrl}
                 alt=""
                 aria-hidden="true"
-                className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl opacity-70"
+                className="absolute inset-0 h-full w-full scale-110 object-cover blur-3xl opacity-60"
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-r from-bg via-bg/70 to-transparent"></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/40 to-transparent"></div>
+            {/* Dark gradients para legibilidad */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#08080b] via-[#08080b]/75 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#08080b] via-[#08080b]/40 to-transparent"></div>
 
             <div className="relative z-10 flex h-full items-end sm:items-center">
               <div className="flex max-w-xl flex-col gap-3 p-5 sm:gap-4 sm:p-8 lg:p-12">
-                <span className="section-kicker">Destacado</span>
-                <h1 className="font-display text-2xl font-black leading-[1.1] tracking-tight sm:text-4xl lg:text-5xl">
+                {/* Kicker tipo + categoria */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white ring-1 backdrop-blur-sm ${typeTone}`}
+                  >
+                    {typeLabel}
+                  </span>
+                  {item.status === 'ongoing' && (
+                    <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-300 ring-1 ring-inset ring-emerald-500/30">
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.7)]"></span>
+                      En curso
+                    </span>
+                  )}
+                  {item.status === 'completed' && (
+                    <span className="inline-flex items-center gap-1.5 rounded-md bg-sky-500/15 px-2 py-0.5 text-[10px] font-semibold text-sky-300 ring-1 ring-inset ring-sky-500/30">
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-sky-400"></span>
+                      Completo
+                    </span>
+                  )}
+                  {item.year && (
+                    <span className="text-[11px] font-semibold text-fg-muted tabular-nums">{item.year}</span>
+                  )}
+                </div>
+
+                {/* Title */}
+                <h1 className="font-display text-2xl font-black leading-[1.08] tracking-tight line-clamp-2 sm:text-4xl lg:text-[2.75rem]">
                   {item.title}
                 </h1>
+
+                {/* Genres pills */}
                 {item.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {item.tags.slice(0, 4).map((t) => (
-                      <span key={t} className="badge-muted">{t}</span>
+                      <span
+                        key={t}
+                        className="inline-flex items-center rounded-full bg-white/[0.05] px-2.5 py-0.5 text-[11px] font-semibold text-fg-muted ring-1 ring-inset ring-white/[0.08]"
+                      >
+                        {t}
+                      </span>
                     ))}
                   </div>
                 )}
-                <div className="mt-1 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-                  <a href={`/manga/${item.id}`} className="btn btn-primary w-full sm:w-auto">
+
+                {/* Description (solo desktop para no saturar mobile) */}
+                {item.description && (
+                  <p className="hidden text-[13.5px] leading-relaxed text-fg-muted/90 line-clamp-3 sm:block lg:text-[14px] lg:line-clamp-4">
+                    {item.description}
+                  </p>
+                )}
+
+                {/* CTAs */}
+                <div className="mt-1 flex flex-wrap gap-2">
+                  <a href={`/manga/${item.id}`} className="btn btn-primary">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                       <path d="M8 5v14l11-7z"/>
                     </svg>
                     Ver detalles
                   </a>
-                  <a href="/search" className="btn btn-secondary w-full sm:w-auto">Explorar</a>
+                  <a href="/search" className="btn btn-secondary">Explorar</a>
                 </div>
               </div>
 
+              {/* Cover derecha desktop */}
               {item.coverUrl && (
-                <div className="pointer-events-none absolute right-6 top-1/2 hidden -translate-y-1/2 md:block lg:right-12">
+                <div className="pointer-events-none absolute right-5 top-1/2 hidden -translate-y-1/2 md:block lg:right-12">
                   <div className="relative">
+                    <div
+                      className="absolute -inset-6 -z-10 rounded-[28px] blur-2xl opacity-60"
+                      style={{ background: 'radial-gradient(ellipse at center, rgb(var(--brand-500) / 0.4), transparent 70%)' }}
+                    ></div>
                     <img
                       src={item.coverUrl}
                       alt={item.title}
-                      className="h-auto w-44 rounded-xl ring-1 ring-white/10 shadow-card-lg lg:w-56 xl:w-64"
+                      className="h-auto w-40 rounded-xl ring-1 ring-white/10 shadow-card-lg lg:w-52 xl:w-60"
                     />
                     <div className="pointer-events-none absolute inset-0 rounded-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]"></div>
                   </div>
@@ -95,7 +157,8 @@ export default function HeroCarousel({ items, intervalMs = 7000 }: Props) {
               )}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Indicators */}
