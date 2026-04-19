@@ -64,7 +64,7 @@ export default function ContinueReading() {
             <a
               key={e.progress.id}
               href={`/read/${e.progress.chapterId}?manga=${e.progress.mangaId}`}
-              className="group relative flex-none w-[200px] sm:w-[240px] snap-start overflow-hidden rounded-xl bg-bg-card ring-1 ring-border transition hover:-translate-y-1 hover:ring-brand-500/50 hover:shadow-card"
+              className="group relative flex-none w-[72vw] max-w-[260px] sm:w-[240px] snap-start overflow-hidden rounded-xl bg-bg-card ring-1 ring-border transition hover:-translate-y-1 hover:ring-brand-500/50 hover:shadow-card"
             >
               <div className="relative aspect-video w-full bg-bg-hover overflow-hidden">
                 {e.coverUrl && (

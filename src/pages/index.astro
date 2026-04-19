@@ -80,7 +80,7 @@ const topRanked = popular.slice(0, 10);
       </div>
       <div class="rail">
         {topRanked.map((m, i) => (
-          <div class="w-[180px] sm:w-[200px]">
+          <div class="w-[46vw] max-w-[220px] sm:w-[200px]">
             <MangaCard manga={m} rank={i + 1} priority={i < 5} />
           </div>
         ))}
@@ -114,7 +114,7 @@ const topRanked = popular.slice(0, 10);
       ) : (
         <div class="rail">
           {row.items.map((m, i) => (
-            <div class="w-[150px] sm:w-[180px]">
+            <div class="w-[42vw] max-w-[200px] sm:w-[180px]">
               <MangaCard manga={m} priority={i < 3} />
             </div>
           ))}

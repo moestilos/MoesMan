@@ -403,25 +403,20 @@
     }
   }
 
-  /* ---------- Horizontal rails ---------- */
+  /* ---------- Horizontal rails (mobile-first) ---------- */
   .rail {
-    @apply -mx-4 flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory
-           pl-4 pr-16 sm:mx-0 sm:pl-0
+    @apply -mx-3 flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory
+           pl-3 pr-6 sm:-mx-6 sm:gap-4 sm:pl-6 sm:pr-16 lg:mx-0 lg:pl-0
            [scrollbar-width:none] [-ms-overflow-style:none];
-    -webkit-mask-image: linear-gradient(
-      to right,
-      black 0,
-      black calc(100% - 80px),
-      transparent
-    );
-    mask-image: linear-gradient(
-      to right,
-      black 0,
-      black calc(100% - 80px),
-      transparent
-    );
-    /* Padding extra dentro del mask para que el último card se lea */
+    -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 32px), transparent);
+    mask-image: linear-gradient(to right, black 0, black calc(100% - 32px), transparent);
     padding-top: 4px;
+  }
+  @media (min-width: 640px) {
+    .rail {
+      -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 80px), transparent);
+      mask-image: linear-gradient(to right, black 0, black calc(100% - 80px), transparent);
+    }
   }
   .rail::-webkit-scrollbar {
     display: none;
