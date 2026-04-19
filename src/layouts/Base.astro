@@ -1,6 +1,7 @@
 ---
 import '@/styles/global.css';
 import Header from '@/components/Header.astro';
+import InstallPrompt from '@/components/InstallPrompt';
 
 interface Props {
   title?: string;
@@ -22,6 +23,11 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#0a0a0b" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="preconnect" href="https://uploads.mangadex.org" crossorigin />
     <link rel="preconnect" href="https://api.mangadex.org" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -50,5 +56,15 @@ const {
         </span>
       </div>
     </footer>
+    <InstallPrompt client:idle />
+    <script is:inline>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch((err) => {
+            console.warn('SW registro fallido:', err);
+          });
+        });
+      }
+    </script>
   </body>
 </html>

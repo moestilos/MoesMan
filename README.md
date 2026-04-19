@@ -2,7 +2,7 @@
 
 Biblioteca personal de manga en español. Lector web rápido, dark mode, diseño tipo Netflix/Crunchyroll.
 
-Estado: **Fase 2 — backend NestJS + Postgres + Drizzle + JWT, biblioteca y progreso persistidos**.
+Estado: **Fase 3 — PWA instalable + service worker + caché offline de portadas y páginas**.
 
 ---
 
@@ -165,8 +165,22 @@ Auth con `Authorization: Bearer <token>` salvo `/auth/register` y `/auth/login`.
 
 - **Fase 1 ✓** — Astro + Tailwind + MangaDex + lector.
 - **Fase 2 ✓** — NestJS + PostgreSQL + Drizzle + JWT. Biblioteca, favoritos, progreso e historial sincronizados.
-- **Fase 3** — PWA + Service Worker + descarga offline + caché de imágenes.
-- **Futuro** — Nuevos providers (scraping con fallback), recomendaciones, notificaciones de nuevos capítulos.
+- **Fase 3 ✓** — PWA instalable + Service Worker + caché de portadas y páginas + fallback offline.
+- **Futuro** — Nuevos providers (scraping con fallback), descarga explícita de capítulos, recomendaciones, notificaciones de nuevos capítulos, icons PNG generados desde SVG.
+
+## PWA
+
+- `public/manifest.webmanifest` — nombre, colores, shortcuts (Biblioteca, Explorar)
+- `public/icon.svg` — icono escalable (maskable + any)
+- `public/sw.js` — Service Worker vanilla con múltiples estrategias:
+  - App shell (HTML/JS/CSS same-origin): **stale-while-revalidate**
+  - Portadas MangaDex (`uploads.mangadex.org`): **cache-first**, LRU 300
+  - Páginas de capítulo (`*.mangadex.network`): **cache-first**, LRU 500
+  - Proxy `/api/*`: **network-first** con fallback cache
+  - Navegaciones fallidas → `/offline.html`
+- `InstallPrompt.tsx` — banner nativo (`beforeinstallprompt`), dismisible
+
+> Nota: algunas tiendas (Android TWA) requieren iconos PNG. Añadir `icon-192.png` y `icon-512.png` generados desde `icon.svg` cuando se empaquete para instalar fuera del navegador.
 
 ---
 
