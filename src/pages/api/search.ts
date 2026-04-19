@@ -1,9 +1,10 @@
 import type { APIRoute } from 'astro';
 import { getProvider } from '@/lib/providers';
+import { readNsfwCookie, contentRatingsFor } from '@/lib/ssr-prefs';
 
 export const prerender = false;
 
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async ({ url, request }) => {
   const q = (url.searchParams.get('q') ?? '').trim();
   const limit = Math.min(Number(url.searchParams.get('limit') ?? 20), 50);
   const offset = Math.max(0, Number(url.searchParams.get('offset') ?? 0));
@@ -17,7 +18,8 @@ export const GET: APIRoute = async ({ url }) => {
 
   try {
     const provider = getProvider(providerId);
-    const data = await provider.search({ query: q, limit, offset });
+    const ratings = contentRatingsFor(readNsfwCookie(request.headers.get('cookie')));
+    const data = await provider.search({ query: q, limit, offset, contentRating: ratings });
     return new Response(JSON.stringify({ data }), {
       headers: {
         'Content-Type': 'application/json',

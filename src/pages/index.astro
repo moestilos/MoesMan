@@ -4,8 +4,11 @@ import MangaGrid from '@/components/MangaGrid.astro';
 import GridSkeleton from '@/components/GridSkeleton.astro';
 import ContinueReading from '@/components/ContinueReading';
 import { getProvider } from '@/lib/providers';
+import { readNsfwCookie, contentRatingsFor } from '@/lib/ssr-prefs';
 
 const provider = getProvider('mangadex');
+const nsfw = readNsfwCookie(Astro.request.headers.get('cookie'));
+const ratings = contentRatingsFor(nsfw);
 
 let popular: Awaited<ReturnType<typeof provider.popular>> = [];
 let latest: Awaited<ReturnType<typeof provider.latest>> = [];
@@ -13,8 +16,8 @@ let error: string | null = null;
 
 try {
   [popular, latest] = await Promise.all([
-    provider.popular({ limit: 24 }),
-    provider.latest({ limit: 18 }),
+    provider.popular({ limit: 24, contentRating: ratings }),
+    provider.latest({ limit: 18, contentRating: ratings }),
   ]);
 } catch (e) {
   error = e instanceof Error ? e.message : 'Error cargando';

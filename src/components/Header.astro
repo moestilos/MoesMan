@@ -1,35 +1,30 @@
 ---
 import UserMenu from './UserMenu';
+import Logo from './Logo.astro';
 
 const pathname = Astro.url.pathname;
-const isActive = (p: string) => (pathname === p ? 'text-fg' : 'text-fg-muted hover:text-fg');
+const isActive = (p: string) =>
+  pathname === p
+    ? 'text-fg after:scale-x-100'
+    : 'text-fg-muted hover:text-fg after:scale-x-0 hover:after:scale-x-100';
 const q = Astro.url.searchParams.get('q') ?? '';
 ---
 
-<header class="sticky top-0 z-40 border-b border-border/70 bg-bg/70 backdrop-blur-xl">
+<header class="sticky top-0 z-40 border-b border-border/60 bg-bg/70 backdrop-blur-xl supports-[backdrop-filter]:bg-bg/60">
   <div class="container-app flex h-16 items-center gap-3 sm:gap-6">
-    <a href="/" class="flex items-center gap-2 group">
-      <span
-        class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 font-black text-white shadow-glow ring-1 ring-brand-400/30"
-      >
-        M
-      </span>
-      <span class="text-lg font-bold tracking-tight group-hover:text-brand-400 transition-colors">
-        MoesMan
-      </span>
-    </a>
+    <Logo size={36} />
 
-    <nav class="hidden md:flex items-center gap-5 text-sm font-medium">
-      <a href="/" class={`link-hover ${isActive('/')}`}>Inicio</a>
-      <a href="/search" class={`link-hover ${isActive('/search')}`}>Explorar</a>
-      <a href="/library" class={`link-hover ${isActive('/library')}`}>Biblioteca</a>
+    <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+      <a href="/" class:list={['relative py-1 transition-colors after:absolute after:-bottom-0.5 after:left-0 after:h-0.5 after:w-full after:origin-left after:bg-brand-500 after:transition-transform after:duration-300', isActive('/')]}>Inicio</a>
+      <a href="/search" class:list={['relative py-1 transition-colors after:absolute after:-bottom-0.5 after:left-0 after:h-0.5 after:w-full after:origin-left after:bg-brand-500 after:transition-transform after:duration-300', isActive('/search')]}>Explorar</a>
+      <a href="/library" class:list={['relative py-1 transition-colors after:absolute after:-bottom-0.5 after:left-0 after:h-0.5 after:w-full after:origin-left after:bg-brand-500 after:transition-transform after:duration-300', isActive('/library')]}>Biblioteca</a>
     </nav>
 
     <form action="/search" method="get" class="flex-1 max-w-md ml-auto md:mx-auto md:max-w-sm lg:max-w-md">
-      <label class="relative block">
+      <label class="relative block group/search">
         <span class="sr-only">Buscar manga</span>
         <span
-          class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-fg-subtle"
+          class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-fg-subtle transition-colors group-focus-within/search:text-brand-400"
           aria-hidden="true"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -43,8 +38,11 @@ const q = Astro.url.searchParams.get('q') ?? '';
           value={q}
           placeholder="Buscar manga…"
           autocomplete="off"
-          class="w-full rounded-xl bg-bg-card pl-9 pr-3 py-2.5 text-sm text-fg placeholder:text-fg-subtle ring-1 ring-inset ring-border focus:ring-brand-500/60 focus:outline-none transition"
+          class="w-full rounded-full bg-bg-card/80 pl-10 pr-4 py-2.5 text-sm text-fg placeholder:text-fg-subtle ring-1 ring-inset ring-border focus:ring-brand-500/60 focus:bg-bg-card focus:outline-none transition-all duration-200"
         />
+        <span class="pointer-events-none absolute inset-y-0 right-3 hidden items-center md:flex">
+          <kbd class="rounded border border-border bg-bg-elevated px-1.5 py-0.5 text-[10px] font-mono text-fg-subtle opacity-0 transition-opacity group-focus-within/search:opacity-0">⏎</kbd>
+        </span>
       </label>
     </form>
 

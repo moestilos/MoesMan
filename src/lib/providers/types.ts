@@ -40,11 +40,20 @@ export interface ChapterPages {
   pages: string[];
 }
 
+export type ContentRating = 'safe' | 'suggestive' | 'erotica' | 'pornographic';
+
 export interface SearchParams {
   query: string;
   limit?: number;
   offset?: number;
   language?: Language[];
+  contentRating?: ContentRating[];
+}
+
+export interface BrowseParams {
+  limit?: number;
+  offset?: number;
+  contentRating?: ContentRating[];
 }
 
 export interface ChaptersParams {
@@ -61,8 +70,8 @@ export interface MangaProvider {
   readonly preferredLanguages: Language[];
 
   search(params: SearchParams): Promise<MangaSummary[]>;
-  popular(params?: { limit?: number; offset?: number }): Promise<MangaSummary[]>;
-  latest(params?: { limit?: number; offset?: number }): Promise<MangaSummary[]>;
+  popular(params?: BrowseParams): Promise<MangaSummary[]>;
+  latest(params?: BrowseParams): Promise<MangaSummary[]>;
   getManga(id: string): Promise<MangaDetail>;
   listChapters(params: ChaptersParams): Promise<Chapter[]>;
   getChapterPages(chapterId: string): Promise<ChapterPages>;

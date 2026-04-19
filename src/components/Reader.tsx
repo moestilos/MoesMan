@@ -163,17 +163,26 @@ export default function Reader({ mangaId, chapterId, pages, chapters }: Props) {
               ref={(el) => {
                 pageRefs.current[i] = el;
               }}
-              className="relative w-full"
+              className={`relative w-full ${loaded.has(i) ? '' : 'aspect-[2/3] min-h-[420px]'}`}
             >
               {!loaded.has(i) && (
-                <div className="skeleton absolute inset-0 aspect-[2/3] rounded-sm" />
+                <div className="absolute inset-0 flex items-center justify-center rounded-sm bg-[#17171a]">
+                  <div className="skeleton absolute inset-0" />
+                  <div className="relative z-10 flex flex-col items-center gap-2 text-white/40">
+                    <svg className="h-8 w-8 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" d="M21 12a9 9 0 1 1-6.22-8.56" />
+                    </svg>
+                    <span className="text-xs font-medium">Página {i + 1}</span>
+                  </div>
+                </div>
               )}
               <img
                 src={src}
                 alt={`Página ${i + 1}`}
-                loading={i < 2 ? 'eager' : 'lazy'}
+                loading={i < 3 ? 'eager' : 'lazy'}
                 decoding="async"
                 onLoad={() => markLoaded(i)}
+                onError={() => markLoaded(i)}
                 className="mx-auto block h-auto w-full max-w-full"
               />
             </div>

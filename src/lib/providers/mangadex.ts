@@ -15,6 +15,7 @@ import { translateTag } from './tag-names';
 const API = 'https://api.mangadex.org';
 const COVERS = 'https://uploads.mangadex.org/covers';
 const USER_AGENT = 'MoesMan/0.1 (personal manga library)';
+const DEFAULT_RATINGS: import('./types').ContentRating[] = ['safe', 'suggestive', 'erotica'];
 
 type MDRelationship = {
   id: string;
@@ -151,9 +152,10 @@ export class MangaDexProvider implements MangaProvider {
   readonly name = 'MangaDex';
   readonly preferredLanguages: Language[] = ['es', 'es-la'];
 
-  async search({ query, limit = 24, offset = 0, language }: SearchParams): Promise<MangaSummary[]> {
+  async search({ query, limit = 24, offset = 0, language, contentRating }: SearchParams): Promise<MangaSummary[]> {
     const langs = language ?? this.preferredLanguages;
-    const key = `md:search:${query}:${limit}:${offset}:${langs.join(',')}`;
+    const ratings = contentRating ?? DEFAULT_RATINGS;
+    const key = `md:search:${query}:${limit}:${offset}:${langs.join(',')}:${ratings.join(',')}`;
     return cached(key, 60_000, async () => {
       const data = await mdFetch<{ data: MDManga[] }>('/manga', {
         title: query,
@@ -161,23 +163,24 @@ export class MangaDexProvider implements MangaProvider {
         offset,
         'includes[]': ['cover_art', 'author', 'artist'],
         'availableTranslatedLanguage[]': langs,
-        'contentRating[]': ['safe', 'suggestive', 'erotica'],
+        'contentRating[]': ratings,
         'order[relevance]': 'desc',
       });
       return data.data.map((m) => mapSummary(m, langs));
     });
   }
 
-  async popular({ limit = 24, offset = 0 }: { limit?: number; offset?: number } = {}): Promise<MangaSummary[]> {
+  async popular({ limit = 24, offset = 0, contentRating }: import('./types').BrowseParams = {}): Promise<MangaSummary[]> {
     const langs = this.preferredLanguages;
-    const key = `md:popular:${limit}:${offset}:${langs.join(',')}`;
+    const ratings = contentRating ?? DEFAULT_RATINGS;
+    const key = `md:popular:${limit}:${offset}:${langs.join(',')}:${ratings.join(',')}`;
     return cached(key, 5 * 60_000, async () => {
       const data = await mdFetch<{ data: MDManga[] }>('/manga', {
         limit,
         offset,
         'includes[]': ['cover_art', 'author', 'artist'],
         'availableTranslatedLanguage[]': langs,
-        'contentRating[]': ['safe', 'suggestive', 'erotica'],
+        'contentRating[]': ratings,
         hasAvailableChapters: 'true',
         'order[followedCount]': 'desc',
       });
@@ -185,16 +188,17 @@ export class MangaDexProvider implements MangaProvider {
     });
   }
 
-  async latest({ limit = 24, offset = 0 }: { limit?: number; offset?: number } = {}): Promise<MangaSummary[]> {
+  async latest({ limit = 24, offset = 0, contentRating }: import('./types').BrowseParams = {}): Promise<MangaSummary[]> {
     const langs = this.preferredLanguages;
-    const key = `md:latest:${limit}:${offset}:${langs.join(',')}`;
+    const ratings = contentRating ?? DEFAULT_RATINGS;
+    const key = `md:latest:${limit}:${offset}:${langs.join(',')}:${ratings.join(',')}`;
     return cached(key, 2 * 60_000, async () => {
       const data = await mdFetch<{ data: MDManga[] }>('/manga', {
         limit,
         offset,
         'includes[]': ['cover_art', 'author', 'artist'],
         'availableTranslatedLanguage[]': langs,
-        'contentRating[]': ['safe', 'suggestive', 'erotica'],
+        'contentRating[]': ratings,
         hasAvailableChapters: 'true',
         'order[latestUploadedChapter]': 'desc',
       });
