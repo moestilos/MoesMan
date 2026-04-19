@@ -1,5 +1,7 @@
 # MoesMan
 
+[![CI](https://github.com/moestilos/MoesMan/actions/workflows/ci.yml/badge.svg)](https://github.com/moestilos/MoesMan/actions/workflows/ci.yml)
+
 Biblioteca personal de manga en español. Lector web rápido, dark mode, diseño tipo Netflix/Crunchyroll.
 
 Estado: **Fase 3 — PWA instalable + service worker + caché offline de portadas y páginas**.
