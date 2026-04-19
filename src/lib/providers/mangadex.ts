@@ -279,10 +279,12 @@ export class MangaDexProvider implements MangaProvider {
     tagIds,
     demographic,
     order = 'popular',
+    originalLanguage,
   }: import('./types').BrowseParams): Promise<MangaSummary[]> {
     const langs = this.preferredLanguages;
     const ratings = contentRating ?? DEFAULT_RATINGS;
-    const key = `md:browse:${limit}:${offset}:${langs.join(',')}:${ratings.join(',')}:${(tagIds ?? []).join(',')}:${demographic ?? ''}:${order}`;
+    const origLang = originalLanguage ?? [];
+    const key = `md:browse:${limit}:${offset}:${langs.join(',')}:${ratings.join(',')}:${(tagIds ?? []).join(',')}:${demographic ?? ''}:${order}:${origLang.join(',')}`;
     return cached(key, 3 * 60_000, async () => {
       const params: Record<string, string | string[] | number> = {
         limit,
@@ -294,9 +296,10 @@ export class MangaDexProvider implements MangaProvider {
       };
       if (tagIds && tagIds.length > 0) {
         params['includedTags[]'] = tagIds;
-        params['includedTagsMode'] = 'AND'; // strict: todos los tags deben estar presentes
+        params['includedTagsMode'] = 'AND';
       }
       if (demographic) params['publicationDemographic[]'] = [demographic];
+      if (origLang.length > 0) params['originalLanguage[]'] = origLang;
       if (order === 'popular') params['order[followedCount]'] = 'desc';
       else if (order === 'latest') params['order[latestUploadedChapter]'] = 'desc';
       else params['order[relevance]'] = 'desc';

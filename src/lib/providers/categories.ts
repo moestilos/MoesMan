@@ -9,11 +9,17 @@ export interface Category {
   label: string;
   tagIds?: string[];
   demographic?: Demographic;
+  originalLanguage?: string[];
   nsfwOnly?: boolean;
   ratingOverride?: Array<'safe' | 'suggestive' | 'erotica' | 'pornographic'>;
 }
 
 export const CATEGORIES: Category[] = [
+  // --- Origen ---
+  { slug: 'manhwa', label: 'Manhwa', originalLanguage: ['ko'] },
+  { slug: 'manhua', label: 'Manhua', originalLanguage: ['zh', 'zh-hk'] },
+  { slug: 'webtoon', label: 'Webtoon', tagIds: ['3e2b8dae-350e-4ab8-a8ce-016e844b9f0d'] },
+
   // --- Demografía ---
   { slug: 'shonen', label: 'Shōnen', demographic: 'shounen' },
   { slug: 'seinen', label: 'Seinen', demographic: 'seinen' },

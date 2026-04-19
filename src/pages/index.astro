@@ -14,7 +14,7 @@ const provider = getProvider('mangadex');
 const nsfw = readNsfwCookie(Astro.request.headers.get('cookie'));
 const ratings = contentRatingsFor(nsfw);
 
-const featured = ['shonen', 'isekai', 'romance', 'accion'];
+const featured = ['manhwa', 'shonen', 'isekai', 'romance'];
 
 let popular: Awaited<ReturnType<typeof provider.popular>> = [];
 let latest: Awaited<ReturnType<typeof provider.latest>> = [];
@@ -32,6 +32,7 @@ try {
         limit: 12,
         tagIds: cat.tagIds,
         demographic: cat.demographic,
+        originalLanguage: cat.originalLanguage,
         contentRating: ratings,
         order: 'popular',
       });
