@@ -48,7 +48,7 @@ const lastChapter = chapters[chapters.length - 1];
   {manga && (
     <article class="animate-fade-in-up">
       <!-- ============ HERO ============ -->
-      <section class="relative -mx-4 mb-12 overflow-hidden sm:-mx-6 lg:-mx-10 xl:-mx-14">
+      <section class="relative -mx-3 mb-10 sm:mb-12 overflow-hidden sm:-mx-6 lg:-mx-10 xl:-mx-14">
         <!-- Blurred background -->
         <div class="absolute inset-0 -z-10">
           {manga.coverUrl && (
@@ -226,13 +226,13 @@ const lastChapter = chapters[chapters.length - 1];
         ) : (
           <ul class="divide-y divide-border/50 overflow-hidden rounded-2xl bg-bg-card/40 ring-1 ring-border">
             {chapters.map((c, i) => (
-              <li class="group flex items-center gap-1 pr-2 sm:pr-3 transition-colors hover:bg-bg-hover/50">
+              <li class="group flex items-center gap-1 pr-1.5 sm:pr-3 transition-colors hover:bg-bg-hover/50">
                 <a
                   href={`/read/${c.id}?manga=${manga.id}`}
-                  class="flex min-w-0 flex-1 items-center gap-3 px-3 py-3 sm:gap-4 sm:px-4 sm:py-3.5"
+                  class="flex min-w-0 flex-1 items-center gap-2.5 px-2.5 py-3 sm:gap-4 sm:px-4 sm:py-3.5"
                 >
-                  <span class="flex-none flex items-baseline gap-1 w-12 sm:w-14">
-                    <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-fg-subtle">Cap</span>
+                  <span class="flex-none flex items-baseline gap-1 w-10 sm:w-14">
+                    <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.12em] text-fg-subtle">Cap</span>
                     <span class="font-display text-base font-bold tabular-nums text-fg transition group-hover:text-brand-300 sm:text-lg">
                       {c.number ?? '?'}
                     </span>

@@ -47,11 +47,11 @@ export default function BarChart3D({
   const tickVals = Array.from({ length: ticks + 1 }, (_, i) => Math.round((max * i) / ticks));
 
   return (
-    <section className={`surface p-5 sm:p-6 ${className}`}>
+    <section className={`surface p-4 sm:p-6 ${className}`}>
       {(title || subtitle) && (
         <div className="mb-4">
           {subtitle && <span className="section-kicker">{subtitle}</span>}
-          {title && <h3 className="mt-2 font-display text-xl font-bold tracking-tight">{title}</h3>}
+          {title && <h3 className="mt-2 font-display text-lg sm:text-xl font-bold tracking-tight">{title}</h3>}
         </div>
       )}
 
@@ -60,8 +60,7 @@ export default function BarChart3D({
       ) : (
         <div
           ref={containerRef}
-          className="relative w-full"
-          style={{ aspectRatio: `${W}/${H}` }}
+          className="relative w-full h-[200px] xs:h-[240px] sm:h-auto sm:aspect-[900/260] overflow-hidden rounded-lg"
         >
           <svg
             viewBox={`0 0 ${W} ${H}`}
@@ -119,9 +118,9 @@ export default function BarChart3D({
                   />
                   <text
                     x={padLeft - 6}
-                    y={y + depth + 3}
-                    fill="rgba(200,200,210,0.55)"
-                    fontSize="10"
+                    y={y + depth + 4}
+                    fill="rgba(200,200,210,0.65)"
+                    fontSize="13"
                     fontWeight="600"
                     textAnchor="end"
                     className="tabular-nums"
@@ -206,20 +205,20 @@ export default function BarChart3D({
                   {isHover && (
                     <g>
                       <rect
-                        x={x0 - 18}
-                        y={y0 - depth - 28}
-                        width={barW + 36}
-                        height="20"
-                        rx="4"
+                        x={x0 - 20}
+                        y={y0 - depth - 30}
+                        width={barW + 40}
+                        height="22"
+                        rx="5"
                         fill="rgba(14,14,18,0.96)"
                         stroke="rgba(255,255,255,0.18)"
                         strokeWidth="1"
                       />
                       <text
                         x={x0 + barW / 2 - depth / 2}
-                        y={y0 - depth - 14}
+                        y={y0 - depth - 13}
                         fill="#fff"
-                        fontSize="11"
+                        fontSize="14"
                         fontWeight="700"
                         textAnchor="middle"
                         className="tabular-nums"
@@ -228,13 +227,13 @@ export default function BarChart3D({
                       </text>
                     </g>
                   )}
-                  {/* X label (sparse: every ~5) */}
-                  {(count > 0 && (i % Math.max(1, Math.ceil(data.length / 8)) === 0 || i === data.length - 1)) && (
+                  {/* X label (sparse: 5 a lo largo) */}
+                  {(count > 0 && (i % Math.max(1, Math.ceil(data.length / 5)) === 0 || i === data.length - 1)) && (
                     <text
                       x={x0 + barW / 2}
-                      y={padTop + plotH + depth + 16}
-                      fill="rgba(200,200,210,0.6)"
-                      fontSize="9"
+                      y={padTop + plotH + depth + 18}
+                      fill="rgba(200,200,210,0.65)"
+                      fontSize="12"
                       fontWeight="600"
                       textAnchor="middle"
                       className="tabular-nums"
