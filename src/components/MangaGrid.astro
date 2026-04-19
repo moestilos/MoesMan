@@ -11,14 +11,14 @@ const { items, emptyLabel = 'Sin resultados.', ranked = false } = Astro.props;
 ---
 
 {items.length === 0 ? (
-  <div class="flex flex-col items-center gap-3 py-20 text-center">
-    <span class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-bg-card ring-1 ring-border text-fg-subtle">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <div class="flex flex-col items-center gap-3 py-16 sm:py-20 text-center">
+    <span class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-bg-card ring-1 ring-border text-fg-subtle">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"/>
         <path d="m21 21-4.3-4.3"/>
       </svg>
     </span>
-    <p class="text-sm text-fg-muted">{emptyLabel}</p>
+    <p class="text-sm font-medium text-fg-muted">{emptyLabel}</p>
   </div>
 ) : (
   <div class="grid gap-3 sm:gap-4 lg:gap-5 grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 animate-fade-in">

@@ -74,12 +74,12 @@ export default function SearchResults({ query }: { query: string }) {
       )}
 
       {items.length > 0 && (
-        <div className="grid gap-4 sm:gap-5 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 animate-fade-in">
+        <div className="grid gap-3 sm:gap-4 lg:gap-5 grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 animate-fade-in">
           {items.map((m, i) => (
             <a
               key={m.id}
               href={`/manga/${m.id}`}
-              className="group relative block overflow-hidden rounded-xl bg-bg-card ring-1 ring-border transition-all duration-300 hover:-translate-y-1 hover:ring-brand-500/50 hover:shadow-card"
+              className="group relative block overflow-hidden rounded-xl bg-bg-card ring-1 ring-border outline-none transition-all duration-300 hover:-translate-y-1 hover:ring-brand-500/50 hover:shadow-card focus-visible:ring-2 focus-visible:ring-brand-500/60"
             >
               <div className="relative aspect-[2/3] w-full overflow-hidden bg-bg-hover">
                 <img
@@ -101,7 +101,7 @@ export default function SearchResults({ query }: { query: string }) {
       )}
 
       {loading && (
-        <div className="mt-6 grid gap-4 sm:gap-5 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <div className="mt-6 grid gap-3 sm:gap-4 lg:gap-5 grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="skeleton aspect-[2/3] rounded-xl" />
           ))}
