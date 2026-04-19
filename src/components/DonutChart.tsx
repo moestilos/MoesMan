@@ -112,43 +112,22 @@ export default function DonutChart({
         </div>
       ) : (
         <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
-          {/* Chart (tilt 3D) */}
+          {/* Chart — donut plano moderno */}
           <div
             className="relative flex-none"
-            style={{
-              width: size,
-              height: size,
-              perspective: '1200px',
-            }}
+            style={{ width: size, height: size }}
             onMouseMove={onMove}
             onMouseLeave={() => {
               setHoverIdx(null);
               setTooltip(null);
             }}
           >
-            {/* Floor glow ellipse (sombra proyectada debajo) */}
-            <div
-              className="pointer-events-none absolute left-1/2 -translate-x-1/2"
-              style={{
-                bottom: size * 0.05,
-                width: size * 0.85,
-                height: size * 0.18,
-                background: `radial-gradient(ellipse at center, rgba(0,0,0,0.6) 0%, transparent 70%)`,
-                filter: 'blur(8px)',
-                transform: 'translateX(-50%) translateZ(-40px)',
-              }}
-            />
             <svg
               ref={svgRef}
               viewBox={`0 0 ${size} ${size}`}
               width={size}
               height={size}
               className="-rotate-90 overflow-visible"
-              style={{
-                transform: 'rotateX(55deg) rotate(-90deg)',
-                transformStyle: 'preserve-3d',
-                filter: 'drop-shadow(0 18px 18px rgba(0,0,0,0.55))',
-              }}
             >
               <defs>
                 {rendered.map((s) => (
@@ -161,20 +140,7 @@ export default function DonutChart({
                     y2="1"
                   >
                     <stop offset="0%" stopColor={s.color} stopOpacity="1" />
-                    <stop offset="100%" stopColor={s.color} stopOpacity="0.6" />
-                  </linearGradient>
-                ))}
-                {rendered.map((s) => (
-                  <linearGradient
-                    key={`rim-${s.key}`}
-                    id={`rim-${s.key}`}
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop offset="0%" stopColor={s.color} stopOpacity="0.5" />
-                    <stop offset="100%" stopColor={s.color} stopOpacity="0.15" />
+                    <stop offset="100%" stopColor={s.color} stopOpacity="0.75" />
                   </linearGradient>
                 ))}
                 <filter id="donut-glow" x="-30%" y="-30%" width="160%" height="160%">
@@ -185,39 +151,33 @@ export default function DonutChart({
                   </feMerge>
                 </filter>
               </defs>
-              {/* Rim inferior (da grosor 3D, dibujado antes → debajo en Z) */}
-              {rendered.map((s) => {
-                const isActive = activeItem?.key === s.key;
-                const isDimmed = activeItem !== null && !isActive;
-                return (
-                  <circle
-                    key={`rim-${s.key}`}
-                    cx={cx}
-                    cy={cy + 8}
-                    r={r}
-                    fill="none"
-                    stroke={`url(#rim-${s.key})`}
-                    strokeWidth={stroke}
-                    strokeDasharray={mounted ? s.dash : `0 ${C}`}
-                    strokeDashoffset={s.offset}
-                    style={{
-                      transition:
-                        'stroke-dasharray 900ms cubic-bezier(0.16,1,0.3,1), opacity 240ms ease',
-                      opacity: isDimmed ? 0.2 : 0.85,
-                    }}
-                  />
-                );
-              })}
               {/* Track */}
               <circle
                 cx={cx}
                 cy={cy}
                 r={r}
                 fill="none"
-                stroke="rgba(255,255,255,0.05)"
+                stroke="rgba(255,255,255,0.04)"
                 strokeWidth={stroke}
               />
-              {/* Segments cara superior */}
+              {/* Inner subtle ring */}
+              <circle
+                cx={cx}
+                cy={cy}
+                r={r - stroke / 2 - 2}
+                fill="none"
+                stroke="rgba(255,255,255,0.03)"
+                strokeWidth="1"
+              />
+              <circle
+                cx={cx}
+                cy={cy}
+                r={r + stroke / 2 + 2}
+                fill="none"
+                stroke="rgba(255,255,255,0.03)"
+                strokeWidth="1"
+              />
+              {/* Segments */}
               {rendered.map((s) => {
                 const isActive = activeItem?.key === s.key;
                 const isDimmed = activeItem !== null && !isActive;
@@ -229,7 +189,7 @@ export default function DonutChart({
                     r={r}
                     fill="none"
                     stroke={`url(#grad-${s.key})`}
-                    strokeWidth={isActive ? stroke + 4 : stroke}
+                    strokeWidth={isActive ? stroke + 6 : stroke}
                     strokeLinecap="butt"
                     strokeDasharray={mounted ? s.dash : `0 ${C}`}
                     strokeDashoffset={s.offset}
@@ -237,7 +197,7 @@ export default function DonutChart({
                     style={{
                       transition:
                         'stroke-dasharray 900ms cubic-bezier(0.16,1,0.3,1), stroke-width 240ms ease, opacity 240ms ease',
-                      opacity: isDimmed ? 0.35 : 1,
+                      opacity: isDimmed ? 0.3 : 1,
                       cursor: 'pointer',
                     }}
                     onMouseEnter={() => setHoverIdx(s.index)}
