@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getToken, isAuthed, getUser } from '@/lib/auth-client';
 import DonutChart, { type DonutSegment } from './DonutChart';
+import AdminMangaList from './AdminMangaList';
 
 interface Stats {
   totals: {
@@ -134,6 +135,9 @@ export default function AdminDashboard() {
           )}
         />
       </div>
+
+      {/* Catálogo de mangas */}
+      <AdminMangaList />
 
       {/* Top paths */}
       <div className="grid gap-6 lg:grid-cols-2">
