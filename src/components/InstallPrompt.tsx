@@ -51,14 +51,14 @@ export default function InstallPrompt() {
   return (
     <div
       role="dialog"
-      aria-label="Instalar MoesMan"
+      aria-label="Instalar Ako"
       className="fixed left-4 top-4 z-50 hidden animate-fade-in md:block"
     >
       <button
         type="button"
         onClick={install}
         className="group inline-flex items-center gap-2 rounded-full bg-bg-card/90 pl-2 pr-3.5 py-1.5 text-xs font-medium text-fg-muted ring-1 ring-border backdrop-blur transition hover:text-fg hover:ring-brand-500/50 hover:shadow-glow"
-        title="Instalar MoesMan como app"
+        title="Instalar Ako como app"
       >
         <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-brand-600 text-white">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
