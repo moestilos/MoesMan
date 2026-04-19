@@ -3,9 +3,105 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  :root, [data-theme="sakura"] {
     --header-h: 64px;
     --bottomnav-h: 56px;
+    /* Sakura (rose) — default */
+    --brand-50: 255 240 243;
+    --brand-100: 255 225 231;
+    --brand-200: 255 198 210;
+    --brand-300: 255 158 180;
+    --brand-400: 255 106 142;
+    --brand-500: 245 53 106;
+    --brand-600: 224 26 83;
+    --brand-700: 186 14 68;
+    --brand-800: 143 10 53;
+    --brand-900: 106 8 39;
+    --brand-950: 62 4 24;
+  }
+  [data-theme="tsuki"] {
+    /* Violet — mystical */
+    --brand-50: 245 243 255;
+    --brand-100: 237 233 254;
+    --brand-200: 221 214 254;
+    --brand-300: 196 181 253;
+    --brand-400: 167 139 250;
+    --brand-500: 139 92 246;
+    --brand-600: 124 58 237;
+    --brand-700: 109 40 217;
+    --brand-800: 91 33 182;
+    --brand-900: 76 29 149;
+    --brand-950: 46 16 101;
+  }
+  [data-theme="sora"] {
+    /* Sky — cool */
+    --brand-50: 240 249 255;
+    --brand-100: 224 242 254;
+    --brand-200: 186 230 253;
+    --brand-300: 125 211 252;
+    --brand-400: 56 189 248;
+    --brand-500: 14 165 233;
+    --brand-600: 2 132 199;
+    --brand-700: 3 105 161;
+    --brand-800: 7 89 133;
+    --brand-900: 12 74 110;
+    --brand-950: 8 47 73;
+  }
+  [data-theme="mori"] {
+    /* Emerald — natural */
+    --brand-50: 236 253 245;
+    --brand-100: 209 250 229;
+    --brand-200: 167 243 208;
+    --brand-300: 110 231 183;
+    --brand-400: 52 211 153;
+    --brand-500: 16 185 129;
+    --brand-600: 5 150 105;
+    --brand-700: 4 120 87;
+    --brand-800: 6 95 70;
+    --brand-900: 6 78 59;
+    --brand-950: 2 44 34;
+  }
+  [data-theme="hi"] {
+    /* Amber — warm */
+    --brand-50: 255 251 235;
+    --brand-100: 254 243 199;
+    --brand-200: 253 230 138;
+    --brand-300: 252 211 77;
+    --brand-400: 251 191 36;
+    --brand-500: 245 158 11;
+    --brand-600: 217 119 6;
+    --brand-700: 180 83 9;
+    --brand-800: 146 64 14;
+    --brand-900: 120 53 15;
+    --brand-950: 69 26 3;
+  }
+  [data-theme="yami"] {
+    /* Crimson — deep red */
+    --brand-50: 254 242 242;
+    --brand-100: 254 226 226;
+    --brand-200: 254 202 202;
+    --brand-300: 252 165 165;
+    --brand-400: 248 113 113;
+    --brand-500: 239 68 68;
+    --brand-600: 220 38 38;
+    --brand-700: 185 28 28;
+    --brand-800: 153 27 27;
+    --brand-900: 127 29 29;
+    --brand-950: 69 10 10;
+  }
+  [data-theme="neo"] {
+    /* Neo-Tokyo — cyan electric */
+    --brand-50: 236 254 255;
+    --brand-100: 207 250 254;
+    --brand-200: 165 243 252;
+    --brand-300: 103 232 249;
+    --brand-400: 34 211 238;
+    --brand-500: 6 182 212;
+    --brand-600: 8 145 178;
+    --brand-700: 14 116 144;
+    --brand-800: 21 94 117;
+    --brand-900: 22 78 99;
+    --brand-950: 8 51 68;
   }
   * {
     -webkit-tap-highlight-color: transparent;

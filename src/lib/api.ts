@@ -85,6 +85,21 @@ export const api = {
       body: JSON.stringify({ avatarUrl }),
     });
   },
+  updateProfile(
+    token: string,
+    input: {
+      email?: string;
+      username?: string;
+      newPassword?: string;
+      currentPassword: string;
+    },
+  ) {
+    return request<{ user: AuthUser; token: string }>('/auth/profile', {
+      method: 'PATCH',
+      token,
+      body: JSON.stringify(input),
+    });
+  },
 
   library: {
     list: (token: string) => request<LibraryEntry[]>('/library', { token }),

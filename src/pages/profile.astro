@@ -1,0 +1,13 @@
+---
+import Base from '@/layouts/Base.astro';
+import ProfileForm from '@/components/ProfileForm';
+---
+
+<Base title="Mi perfil — MoesMan">
+  <header class="mx-auto max-w-2xl mb-8">
+    <span class="section-kicker">Cuenta</span>
+    <h1 class="mt-2 font-display text-3xl sm:text-4xl font-black tracking-tight">Mi perfil</h1>
+    <p class="mt-1 text-sm text-fg-muted">Gestiona tu usuario, email, contraseña y foto.</p>
+  </header>
+  <ProfileForm client:only="react" />
+</Base>

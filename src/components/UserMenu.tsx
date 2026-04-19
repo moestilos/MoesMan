@@ -152,6 +152,13 @@ export default function UserMenu() {
               </div>
             </div>
 
+            <a href="/profile" className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-bg-hover">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-fg-muted">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              Mi perfil
+            </a>
             <a href="/library" className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-bg-hover">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-fg-muted">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>

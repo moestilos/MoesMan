@@ -1,0 +1,271 @@
+---
+// Starfield + constelaciones + aurora sutil — futurista japonés.
+// Canvas 2D, GPU via transform, respeta prefers-reduced-motion.
+---
+
+<div aria-hidden="true" class="bg-layer">
+  <!-- Aurora blobs detrás (color del tema) -->
+  <div class="aurora-blob aurora-blob--1"></div>
+  <div class="aurora-blob aurora-blob--2"></div>
+  <div class="aurora-blob aurora-blob--3"></div>
+
+  <!-- Canvas de estrellas -->
+  <canvas id="starfield" class="starfield"></canvas>
+
+  <!-- Grid sutil tipo Neo-Tokyo -->
+  <div class="grid-lines"></div>
+
+  <!-- Vignette sobre todo -->
+  <div class="vignette"></div>
+</div>
+
+<style>
+  .bg-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: #05050a;
+  }
+  .starfield {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .aurora-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(110px);
+    mix-blend-mode: screen;
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+  }
+  .aurora-blob--1 {
+    width: 50vw;
+    height: 50vw;
+    top: -10vh;
+    left: -8vw;
+    background: radial-gradient(circle, rgb(var(--brand-500) / 0.45) 0%, transparent 65%);
+    animation: drift1 48s ease-in-out infinite;
+    opacity: 0.55;
+  }
+  .aurora-blob--2 {
+    width: 55vw;
+    height: 55vw;
+    top: 20vh;
+    right: -15vw;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.35) 0%, transparent 65%);
+    animation: drift2 62s ease-in-out infinite;
+    opacity: 0.4;
+  }
+  .aurora-blob--3 {
+    width: 45vw;
+    height: 45vw;
+    bottom: -15vh;
+    left: 30vw;
+    background: radial-gradient(circle, rgb(var(--brand-400) / 0.35) 0%, transparent 65%);
+    animation: drift3 70s ease-in-out infinite;
+    opacity: 0.3;
+  }
+  .grid-lines {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+  }
+  .vignette {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 0%, transparent 0%, rgba(5, 5, 10, 0.5) 55%, rgba(5, 5, 10, 0.85) 100%),
+      linear-gradient(to bottom, rgba(5, 5, 10, 0.25) 0%, rgba(5, 5, 10, 0.55) 100%);
+  }
+
+  @keyframes drift1 {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    33% { transform: translate3d(6vw, 4vh, 0) scale(1.15); }
+    66% { transform: translate3d(-3vw, 6vh, 0) scale(0.95); }
+  }
+  @keyframes drift2 {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(-10vw, 8vh, 0) scale(1.2); }
+  }
+  @keyframes drift3 {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(8vw, -6vh, 0) scale(1.1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .aurora-blob { animation: none !important; }
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    const canvas = document.getElementById('starfield');
+    if (!canvas) return;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const ctx = canvas.getContext('2d', { alpha: true });
+    if (!ctx) return;
+
+    const DPR = Math.min(window.devicePixelRatio || 1, 2);
+    let W = 0, H = 0;
+    const mouse = { x: 0.5, y: 0.5 };
+
+    function resize() {
+      W = canvas.clientWidth;
+      H = canvas.clientHeight;
+      canvas.width = W * DPR;
+      canvas.height = H * DPR;
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      buildStars();
+    }
+
+    // Leer CSS var de brand-500 para colorear algunas estrellas
+    function brandRgb() {
+      const v = getComputedStyle(document.documentElement).getPropertyValue('--brand-500').trim();
+      return v || '245 53 106';
+    }
+
+    const STAR_COUNT_BASE = reducedMotion ? 80 : 180;
+    let stars = [];
+
+    function buildStars() {
+      const count = Math.round(STAR_COUNT_BASE * (W * H) / (1440 * 900));
+      const target = Math.max(60, Math.min(260, count));
+      stars = new Array(target).fill(0).map(() => {
+        const depth = Math.random();
+        const accent = Math.random() < 0.14;
+        return {
+          x: Math.random() * W,
+          y: Math.random() * H,
+          z: 0.3 + depth * 0.7, // profundidad 0.3-1.0
+          r: 0.4 + Math.random() * 1.8,
+          twinkle: Math.random() * Math.PI * 2,
+          tSpeed: 0.4 + Math.random() * 1.2,
+          accent,
+        };
+      });
+    }
+
+    const MAX_LINK_DIST = 140;
+    let raf = 0, t = 0;
+
+    function frame(ts) {
+      t = ts * 0.001;
+      ctx.clearRect(0, 0, W, H);
+
+      const brand = brandRgb();
+
+      // Parallax offset desde ratón
+      const px = (mouse.x - 0.5) * 20;
+      const py = (mouse.y - 0.5) * 20;
+
+      // Lineas de constelación
+      ctx.lineWidth = 1;
+      for (let i = 0; i < stars.length; i++) {
+        const a = stars[i];
+        const ax = a.x + px * a.z;
+        const ay = a.y + py * a.z;
+        for (let j = i + 1; j < stars.length; j++) {
+          const b = stars[j];
+          const bx = b.x + px * b.z;
+          const by = b.y + py * b.z;
+          const dx = ax - bx;
+          const dy = ay - by;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < MAX_LINK_DIST * MAX_LINK_DIST) {
+            const d = Math.sqrt(d2);
+            const alpha = (1 - d / MAX_LINK_DIST) * 0.25 * Math.min(a.z, b.z);
+            if (a.accent || b.accent) {
+              ctx.strokeStyle = `rgba(${brand} / ${alpha * 0.9})`;
+            } else {
+              ctx.strokeStyle = `rgba(200, 215, 255, ${alpha * 0.5})`;
+            }
+            ctx.beginPath();
+            ctx.moveTo(ax, ay);
+            ctx.lineTo(bx, by);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Estrellas (glow + core)
+      for (const s of stars) {
+        const x = s.x + px * s.z;
+        const y = s.y + py * s.z;
+        const tw = reducedMotion ? 1 : 0.55 + 0.45 * Math.sin(t * s.tSpeed + s.twinkle);
+        const alpha = 0.35 + 0.65 * tw * s.z;
+        const r = s.r * s.z;
+
+        if (s.accent) {
+          // glow
+          const grad = ctx.createRadialGradient(x, y, 0, x, y, r * 6);
+          grad.addColorStop(0, `rgba(${brand} / ${alpha})`);
+          grad.addColorStop(0.4, `rgba(${brand} / ${alpha * 0.25})`);
+          grad.addColorStop(1, `rgba(${brand} / 0)`);
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(x, y, r * 6, 0, Math.PI * 2);
+          ctx.fill();
+          // core
+          ctx.fillStyle = `rgba(${brand} / ${alpha})`;
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.fillStyle = `rgba(235, 240, 255, ${alpha})`;
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // Drift lento del campo global
+      for (const s of stars) {
+        s.y += 0.015 * s.z;
+        if (s.y > H + 5) {
+          s.y = -5;
+          s.x = Math.random() * W;
+        }
+      }
+
+      if (!reducedMotion) raf = requestAnimationFrame(frame);
+    }
+
+    function onMove(e) {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = (e.clientX - rect.left) / rect.width;
+      mouse.y = (e.clientY - rect.top) / rect.height;
+    }
+
+    resize();
+    window.addEventListener('resize', resize, { passive: true });
+    window.addEventListener('pointermove', onMove, { passive: true });
+
+    if (reducedMotion) {
+      // Un solo frame estático
+      requestAnimationFrame(frame);
+    } else {
+      raf = requestAnimationFrame(frame);
+    }
+
+    // Limpiar al navegar (Astro SPA)
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        cancelAnimationFrame(raf);
+        window.removeEventListener('resize', resize);
+        window.removeEventListener('pointermove', onMove);
+      },
+      { once: true },
+    );
+  })();
+</script>

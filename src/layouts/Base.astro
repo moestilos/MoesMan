@@ -2,7 +2,7 @@
 import '@/styles/global.css';
 import Header from '@/components/Header.astro';
 import BottomNav from '@/components/BottomNav.astro';
-import BgAurora from '@/components/BgAurora.astro';
+import BgStarfield from '@/components/BgStarfield.astro';
 import InstallPrompt from '@/components/InstallPrompt';
 
 interface Props {
@@ -43,76 +43,44 @@ const {
     <title>{title}</title>
   </head>
   <body class:list={[hideChrome && 'reader-mode']}>
-    {!hideChrome && <BgAurora />}
+    {!hideChrome && <BgStarfield />}
     {!hideChrome && <Header />}
     <main class:list={[!fullBleed && 'container-app pt-6 pb-24 sm:pt-8', 'relative z-10']}>
       <slot />
     </main>
     {!hideChrome && (
-      <footer class="relative z-10 mt-20 border-t border-border bg-bg-sunken/80 backdrop-blur">
-        <div class="container-app py-12">
-          <div class="grid gap-10 md:grid-cols-[1.6fr_1fr_1fr] md:gap-16">
-            <div>
-              <div class="flex items-center gap-2.5">
-                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-brand text-sm font-black text-white shadow-glow ring-1 ring-brand-400/30">M</span>
-                <div class="flex flex-col leading-none">
-                  <span class="text-base font-extrabold tracking-tight">Moes<span class="text-brand-400">Man</span></span>
-                  <span class="mt-0.5 text-2xs font-bold uppercase tracking-[0.22em] text-fg-subtle">Manga Library</span>
-                </div>
-              </div>
-              <p class="mt-5 max-w-sm text-sm leading-relaxed text-fg-muted">
-                Lector y biblioteca personal de manga y manhwa en español. Modo oscuro, lectura offline, progreso sincronizado. Cero trackers, sin publicidad.
-              </p>
-              <div class="mt-6 flex flex-wrap items-center gap-2">
-                <a
-                  href="https://github.com/moestilos"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="GitHub de moestilos"
-                  class="group inline-flex items-center gap-2 rounded-full bg-bg-card px-3.5 py-1.5 text-xs font-semibold ring-1 ring-border transition hover:ring-border-strong hover:-translate-y-0.5"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="text-fg-muted group-hover:text-fg transition-colors">
-                    <path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2.9-.3 2-.4 3-.4s2 .1 3 .4c2.3-1.6 3.3-1.2 3.3-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.5-2.7 5.5-5.3 5.8.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/>
-                  </svg>
-                  <span>@moestilos</span>
-                </a>
-                <a
-                  href="https://github.com/moestilos/MoesMan"
-                  target="_blank"
-                  rel="noreferrer"
-                  class="inline-flex items-center gap-2 rounded-full bg-bg-card px-3.5 py-1.5 text-xs font-semibold ring-1 ring-border transition hover:ring-border-strong hover:-translate-y-0.5"
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M7 17L17 7M17 7H9M17 7V15"/>
-                  </svg>
-                  <span>Código fuente</span>
-                </a>
-              </div>
+      <footer class="relative z-10 mt-16 pb-8 pt-10">
+        <div class="container-app">
+          <div class="divider mb-8"></div>
+          <div class="flex flex-col items-center gap-5 text-center sm:flex-row sm:justify-between sm:text-left">
+            <div class="flex items-center gap-2.5 text-xs text-fg-subtle">
+              <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-gradient-brand text-[10px] font-black text-white">M</span>
+              <span>© {new Date().getFullYear()} <span class="font-semibold text-fg-muted">MoesMan</span></span>
+              <span class="hidden sm:inline opacity-40">·</span>
+              <span class="hidden sm:inline">Datos vía <a href="https://mangadex.org" target="_blank" rel="noreferrer" class="font-medium text-fg-muted link-hover">MangaDex</a></span>
             </div>
-
-            <div>
-              <h4 class="mb-4 text-2xs font-bold uppercase tracking-[0.18em] text-fg-subtle">Navegar</h4>
-              <ul class="space-y-2.5 text-sm font-medium">
-                <li><a href="/" class="link-hover">Inicio</a></li>
-                <li><a href="/search" class="link-hover">Explorar</a></li>
-                <li><a href="/library" class="link-hover">Biblioteca</a></li>
-                <li><a href="/history" class="link-hover">Historial</a></li>
-              </ul>
+            <div class="flex items-center gap-1.5">
+              <a
+                href="https://github.com/moestilos/MoesMan"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Código en GitHub"
+                class="btn-icon h-8 w-8 rounded-full"
+                title="Ver código fuente"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2.9-.3 2-.4 3-.4s2 .1 3 .4c2.3-1.6 3.3-1.2 3.3-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.5-2.7 5.5-5.3 5.8.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/>
+                </svg>
+              </a>
+              <a
+                href="https://github.com/moestilos"
+                target="_blank"
+                rel="noreferrer"
+                class="inline-flex h-8 items-center rounded-full bg-bg-card/70 px-3 text-xs font-semibold text-fg-muted ring-1 ring-border transition hover:text-fg hover:ring-border-strong"
+              >
+                @moestilos
+              </a>
             </div>
-
-            <div>
-              <h4 class="mb-4 text-2xs font-bold uppercase tracking-[0.18em] text-fg-subtle">Datos</h4>
-              <ul class="space-y-2.5 text-sm text-fg-muted">
-                <li>Vía <a href="https://mangadex.org" target="_blank" rel="noreferrer" class="font-medium text-fg link-hover">MangaDex</a></li>
-                <li>Imágenes cacheadas localmente</li>
-                <li>Cero trackers · sin ads</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="mt-10 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-fg-subtle sm:flex-row">
-            <span>© {new Date().getFullYear()} MoesMan · uso personal</span>
-            <span>Hecho por <a href="https://github.com/moestilos" target="_blank" rel="noreferrer" class="font-semibold text-fg-muted link-hover">@moestilos</a></span>
           </div>
         </div>
       </footer>

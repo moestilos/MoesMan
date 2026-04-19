@@ -10,12 +10,12 @@ interface Props {
 const { manga, priority = false, size = 'md', rank } = Astro.props;
 const href = `/manga/${manga.id}`;
 const cover = manga.coverUrl ?? '/placeholder-cover.svg';
-const statusLabel: Record<string, { label: string; tone: string; dot: string }> = {
-  ongoing: { label: 'En curso', tone: 'text-emerald-300 ring-emerald-500/25 bg-emerald-500/10', dot: 'bg-emerald-400' },
-  completed: { label: 'Completo', tone: 'text-sky-300 ring-sky-500/25 bg-sky-500/10', dot: 'bg-sky-400' },
-  hiatus: { label: 'Pausado', tone: 'text-amber-300 ring-amber-500/25 bg-amber-500/10', dot: 'bg-amber-400' },
-  cancelled: { label: 'Cancelado', tone: 'text-rose-300 ring-rose-500/25 bg-rose-500/10', dot: 'bg-rose-400' },
-  unknown: { label: '', tone: '', dot: '' },
+const statusLabel: Record<string, { label: string; dot: string }> = {
+  ongoing: { label: 'En curso', dot: 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.7)]' },
+  completed: { label: 'Completo', dot: 'bg-sky-400 shadow-[0_0_6px_rgba(56,189,248,0.7)]' },
+  hiatus: { label: 'Pausado', dot: 'bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.7)]' },
+  cancelled: { label: 'Cancelado', dot: 'bg-rose-400 shadow-[0_0_6px_rgba(248,113,113,0.7)]' },
+  unknown: { label: '', dot: '' },
 };
 const statusInfo = manga.status ? statusLabel[manga.status] : statusLabel.unknown;
 const isNsfw = manga.contentRating === 'pornographic';
@@ -48,34 +48,34 @@ const isEcchi = manga.contentRating === 'erotica';
     <!-- Rank badge top-left -->
     {rank !== undefined && (
       <div class="absolute left-2 top-2">
-        <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-black/75 px-1.5 font-mono text-[11px] font-bold text-white ring-1 ring-white/10 backdrop-blur-sm">
+        <span class="inline-flex h-7 min-w-7 items-center justify-center rounded-lg bg-black/80 px-2 font-mono text-[11px] font-bold tabular-nums text-white ring-1 ring-white/10 backdrop-blur-sm">
           #{rank}
         </span>
       </div>
     )}
 
-    <!-- Right-top badges -->
-    <div class="absolute right-2 top-2 flex flex-col items-end gap-1">
-      {isNsfw && (
-        <span class="inline-flex items-center rounded bg-rose-600/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white ring-1 ring-rose-400/30">
-          18+
+    <!-- Rating badge top-right (18+/16+ only, high priority warning) -->
+    {(isNsfw || isEcchi) && (
+      <div class="absolute right-2 top-2">
+        <span class:list={[
+          'inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-black tracking-wider text-white ring-1 backdrop-blur-sm',
+          isNsfw
+            ? 'bg-rose-600/95 ring-rose-400/40 shadow-[0_0_10px_-2px_rgba(244,63,94,0.6)]'
+            : 'bg-rose-500/70 ring-rose-400/30',
+        ]}>
+          {isNsfw ? '18+' : '16+'}
         </span>
-      )}
-      {isEcchi && !isNsfw && (
-        <span class="inline-flex items-center rounded bg-rose-500/75 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white ring-1 ring-rose-400/30">
-          16+
-        </span>
-      )}
-      {statusInfo.label && (
-        <span class:list={['inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-semibold ring-1 ring-inset backdrop-blur-sm', statusInfo.tone]}>
-          <span class:list={['inline-block h-1 w-1 rounded-full', statusInfo.dot]}></span>
-          {statusInfo.label}
-        </span>
-      )}
-    </div>
+      </div>
+    )}
 
-    <!-- Title + meta at bottom -->
+    <!-- Title + status + meta at bottom -->
     <div class="absolute inset-x-0 bottom-0 p-3">
+      {statusInfo.label && (
+        <div class="mb-1.5 inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-white/90">
+          <span class:list={['inline-block h-1.5 w-1.5 flex-none rounded-full', statusInfo.dot]}></span>
+          <span>{statusInfo.label}</span>
+        </div>
+      )}
       <h3
         class="line-clamp-2 text-[13px] font-semibold leading-snug text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"
         title={manga.title}

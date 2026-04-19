@@ -4,62 +4,42 @@ interface Props {
   withText?: boolean;
   className?: string;
 }
-const { size = 38, withText = true, className = '' } = Astro.props;
+const { size = 32, withText = true, className = '' } = Astro.props;
 const uid = Math.random().toString(36).slice(2, 8);
 ---
 
-<a href="/" class:list={['group flex items-center gap-3 select-none', className]} aria-label="MoesMan">
+<a href="/" class:list={['group inline-flex items-center gap-2.5 select-none', className]} aria-label="MoesMan">
   <span class="relative flex-none" style={`width:${size}px;height:${size}px`}>
     <svg
-      viewBox="0 0 64 64"
+      viewBox="0 0 40 40"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
-      class="h-full w-full transition-transform duration-500 ease-out group-hover:scale-105"
+      class="h-full w-full transition-transform duration-500 ease-out group-hover:rotate-[8deg]"
     >
       <defs>
-        <linearGradient id={`lg-bg-${uid}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#1a1a22"/>
-          <stop offset="100%" stop-color="#08080b"/>
-        </linearGradient>
-        <linearGradient id={`lg-brand-${uid}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#ff9eb4"/>
-          <stop offset="55%" stop-color="#f5356a"/>
-          <stop offset="100%" stop-color="#ba0e44"/>
-        </linearGradient>
-        <linearGradient id={`lg-acc-${uid}`} x1="0" y1="1" x2="0" y2="0">
-          <stop offset="0%" stop-color="#7c3aed"/>
-          <stop offset="100%" stop-color="#c4b5fd"/>
+        <linearGradient id={`lg-${uid}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="rgb(var(--brand-400))"/>
+          <stop offset="100%" stop-color="rgb(var(--brand-700))"/>
         </linearGradient>
       </defs>
-      <rect width="64" height="64" rx="16" fill={`url(#lg-bg-${uid})`}/>
-      <rect x="0.5" y="0.5" width="63" height="63" rx="15.5" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-
-      <!-- Left peak -->
-      <path
-        d="M 13 49 L 13 20 Q 13 15 18 15 L 21 15 Q 24 15 26 18 L 32 32 L 29 44 Z"
-        fill={`url(#lg-brand-${uid})`}
-      />
-      <!-- Right peak -->
-      <path
-        d="M 51 49 L 51 20 Q 51 15 46 15 L 43 15 Q 40 15 38 18 L 32 32 L 35 44 Z"
-        fill={`url(#lg-brand-${uid})`}
-      />
-      <!-- Center accent valley -->
-      <path d="M 29 44 L 32 32 L 35 44 Z" fill={`url(#lg-acc-${uid})`}/>
-
-      <!-- Corner panel markers -->
-      <path d="M 51 10 L 57 10 L 57 16" fill="none" stroke={`url(#lg-brand-${uid})`} stroke-width="1.6" stroke-linecap="round"/>
-      <path d="M 7 54 L 7 48 M 7 54 L 13 54" fill="none" stroke={`url(#lg-acc-${uid})`} stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
+      <!-- Torii-inspired: two columns + top beam (Japanese zen) -->
+      <rect width="40" height="40" rx="10" fill="rgb(var(--brand-950) / 0.85)"/>
+      <rect x="0.5" y="0.5" width="39" height="39" rx="9.5" fill="none" stroke="rgba(255,255,255,0.08)"/>
+      <!-- Top beam -->
+      <rect x="7" y="10" width="26" height="3" rx="1" fill={`url(#lg-${uid})`}/>
+      <!-- Second beam slightly thinner -->
+      <rect x="9" y="15" width="22" height="2" rx="0.8" fill={`url(#lg-${uid})`} opacity="0.8"/>
+      <!-- Left column -->
+      <rect x="12" y="13" width="3" height="17" rx="1" fill={`url(#lg-${uid})`}/>
+      <!-- Right column -->
+      <rect x="25" y="13" width="3" height="17" rx="1" fill={`url(#lg-${uid})`}/>
+      <!-- Bottom dot -->
+      <circle cx="20" cy="30" r="1.5" fill={`url(#lg-${uid})`}/>
     </svg>
   </span>
   {withText && (
-    <span class="flex flex-col leading-none">
-      <span class="font-display text-[17px] font-extrabold tracking-tight text-fg transition-colors group-hover:text-brand-300">
-        Moes<span class="text-gradient-brand">Man</span>
-      </span>
-      <span class="mt-1 text-[9px] font-bold uppercase tracking-[0.22em] text-fg-subtle">
-        Manga Library
-      </span>
+    <span class="font-display text-[15px] font-extrabold tracking-tight leading-none">
+      Moes<span class="text-gradient-brand">Man</span>
     </span>
   )}
 </a>
