@@ -8,9 +8,10 @@ const isActive = (p: string) =>
 const q = Astro.url.searchParams.get('q') ?? '';
 
 const navItems = [
-  { href: '/', label: 'Inicio', seccion: 'inicio' },
-  { href: '/search', label: 'Explorar', seccion: 'explorar' },
-  { href: '/library', label: 'Biblioteca', seccion: 'biblioteca' },
+  { href: '/', label: 'Inicio' },
+  { href: '/search', label: 'Explorar' },
+  { href: '/library', label: 'Biblioteca' },
+  { href: '/history', label: 'Historial' },
 ];
 ---
 
@@ -20,13 +21,13 @@ const navItems = [
 >
   <div
     id="pill-nav"
-    class="pointer-events-auto flex items-center gap-1 p-1.5 rounded-full border border-border-strong bg-bg-raised/80 backdrop-blur-xl shadow-2xl shadow-black/40 max-w-full transition-all duration-300 hover:border-brand-500/40"
+    class="pointer-events-auto flex items-center gap-2 p-1.5 rounded-full border border-white/[0.08] bg-bg-raised/85 backdrop-blur-xl shadow-[0_8px_32px_-8px_rgba(0,0,0,0.5)] max-w-full transition-all duration-300 hover:border-brand-500/40"
   >
     <!-- Logo + wordmark -->
     <a
       href="/"
       aria-label="Ako — Inicio"
-      class="group flex flex-none items-center gap-2 rounded-full pl-1.5 pr-3 py-0.5 hover:bg-white/[0.04] transition-colors"
+      class="flex flex-none items-center gap-2 rounded-full px-2 py-1 transition-colors hover:bg-white/[0.04]"
     >
       <Logo size={28} withText={false} />
       <span class="hidden sm:inline font-semibold tracking-[-0.025em] text-white text-[15px] leading-none">
@@ -34,20 +35,17 @@ const navItems = [
       </span>
     </a>
 
-    <span class="hidden lg:block w-px h-5 bg-border-strong mx-1"></span>
-
-    <!-- Nav links + indicador deslizante -->
-    <nav id="nav-links" class="hidden lg:flex items-center relative">
+    <!-- Nav links con indicador deslizante (solo desktop) -->
+    <nav id="nav-links" class="hidden lg:flex items-center relative pl-1 pr-1 border-l border-white/[0.07]">
       <span
         id="nav-indicador"
-        class="absolute top-1/2 -translate-y-1/2 h-8 rounded-full bg-brand-500/15 border border-brand-500/30 transition-all duration-300 ease-out opacity-0 pointer-events-none"
+        class="absolute top-1/2 -translate-y-1/2 h-8 rounded-full bg-white/[0.07] ring-1 ring-brand-500/30 transition-all duration-300 ease-out opacity-0 pointer-events-none"
       ></span>
       {navItems.map((n) => (
         <a
           href={n.href}
-          data-seccion={n.seccion}
           class:list={[
-            'link-nav relative z-10 px-3 py-1.5 text-sm rounded-full transition-colors',
+            'link-nav relative z-10 px-3.5 py-1.5 text-[13.5px] font-medium rounded-full transition-colors',
             isActive(n.href) ? 'text-white' : 'text-fg-muted hover:text-white',
           ]}
         >
@@ -56,10 +54,8 @@ const navItems = [
       ))}
     </nav>
 
-    <span class="hidden lg:block w-px h-5 bg-border-strong mx-1"></span>
-
-    <!-- Search inline compacto -->
-    <form action="/search" method="get" class="hidden md:block w-[200px] lg:w-[240px]">
+    <!-- Search (md+) -->
+    <form action="/search" method="get" class="hidden md:block ml-auto lg:ml-0 w-[180px] lg:w-[220px] border-l border-white/[0.07] pl-2">
       <label class="relative block">
         <span class="sr-only">Buscar manga</span>
         <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-fg-subtle">
@@ -79,30 +75,11 @@ const navItems = [
       </label>
     </form>
 
-    <span class="hidden md:block w-px h-5 bg-border-strong mx-1"></span>
-
-    <!-- Historial icon (md+) -->
-    <a
-      href="/history"
-      aria-label="Historial"
-      title="Historial"
-      class:list={[
-        'hidden md:inline-flex h-8 w-8 flex-none items-center justify-center rounded-full transition-colors',
-        isActive('/history') ? 'text-brand-400 bg-brand-500/10' : 'text-fg-muted hover:text-white hover:bg-white/[0.06]',
-      ]}
-    >
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 3v5h5"/>
-        <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/>
-        <path d="M12 7v5l4 2"/>
-      </svg>
-    </a>
-
-    <!-- Mobile: search icon shortcut (<md hide bar) -->
+    <!-- Mobile: search shortcut + hint -->
     <a
       href="/search"
       aria-label="Buscar"
-      class="md:hidden inline-flex h-8 w-8 items-center justify-center rounded-full text-fg-muted hover:text-white hover:bg-white/[0.06] transition-colors"
+      class="md:hidden ml-auto inline-flex h-8 w-8 items-center justify-center rounded-full text-fg-muted hover:text-white hover:bg-white/[0.06] transition-colors"
     >
       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"/>
@@ -110,14 +87,13 @@ const navItems = [
       </svg>
     </a>
 
-    <!-- UserMenu (CTA derecha) -->
-    <div class="flex-none">
+    <!-- UserMenu a la derecha -->
+    <div class="flex-none border-l border-white/[0.07] pl-1">
       <UserMenu client:only="react" />
     </div>
   </div>
 </header>
 
-<!-- Espaciador obligatorio -->
 <div class="h-20" aria-hidden="true"></div>
 
 <script is:inline>
@@ -127,7 +103,7 @@ const navItems = [
     const navContainer = document.getElementById('nav-links');
     if (!navLinks.length || !indicador || !navContainer) return;
 
-    let activo = document.querySelector('#nav-links .link-nav.text-white');
+    const activo = document.querySelector('#nav-links .link-nav.text-white');
 
     function mover(target) {
       if (!target) { indicador.style.opacity = '0'; return; }
@@ -144,7 +120,7 @@ const navItems = [
     const init = () => requestAnimationFrame(() => mover(activo));
     init();
     window.addEventListener('load', init);
-    window.addEventListener('resize', () => mover(activo));
+    window.addEventListener('resize', init);
 
     const header = document.getElementById('header-nav');
     let lastY = -1;

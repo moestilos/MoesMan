@@ -5,19 +5,36 @@ import MangaGrid from '@/components/MangaGrid.astro';
 import GridSkeleton from '@/components/GridSkeleton.astro';
 import GenreTabs from '@/components/GenreTabs.astro';
 import { getProvider } from '@/lib/providers';
-import { findCategory } from '@/lib/providers/categories';
+import { findCategory, CATEGORIES } from '@/lib/providers/categories';
 import { readNsfwCookie, contentRatingsFor } from '@/lib/ssr-prefs';
 
 const q = (Astro.url.searchParams.get('q') ?? '').trim();
-const genreSlug = Astro.url.searchParams.get('genre') ?? '';
 const orderParam = Astro.url.searchParams.get('c') ?? '';
+
+// Multi via ?genres=a,b,c | legacy ?genre=a
+const rawMulti = Astro.url.searchParams.get('genres');
+const rawSingle = Astro.url.searchParams.get('genre');
+const slugs = (rawMulti ? rawMulti.split(',') : rawSingle ? [rawSingle] : [])
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 const provider = getProvider('mangadex');
 const nsfw = readNsfwCookie(Astro.request.headers.get('cookie'));
-const ratings = contentRatingsFor(nsfw);
+const baseRatings = contentRatingsFor(nsfw);
 
-const cat = genreSlug ? findCategory(genreSlug) : null;
-const ratingsForCat = cat?.ratingOverride ?? ratings;
+// Combinar categorías seleccionadas
+const cats = slugs.map(findCategory).filter((c): c is NonNullable<typeof c> => !!c);
+
+const combinedTagIds = cats.flatMap((c) => c.tagIds ?? []);
+// Primera demográfica gana (son mutuamente exclusivas en MangaDex)
+const firstDemographic = cats.find((c) => c.demographic)?.demographic;
+// Primera originalLanguage gana
+const firstOrigLang = cats.find((c) => c.originalLanguage)?.originalLanguage;
+// Si alguna tiene languageOverride, úsalo (hentai)
+const lang = cats.find((c) => c.languageOverride)?.languageOverride;
+// Primera ratingOverride gana
+const firstRating = cats.find((c) => c.ratingOverride)?.ratingOverride;
+const ratings = firstRating ?? baseRatings;
 
 let items: Awaited<ReturnType<typeof provider.browse>> = [];
 let error: string | null = null;
@@ -26,11 +43,11 @@ if (!q) {
   try {
     items = await provider.browse({
       limit: 48,
-      tagIds: cat?.tagIds,
-      demographic: cat?.demographic,
-      originalLanguage: cat?.originalLanguage,
-      language: cat?.languageOverride,
-      contentRating: ratingsForCat,
+      tagIds: combinedTagIds.length > 0 ? combinedTagIds : undefined,
+      demographic: firstDemographic,
+      originalLanguage: firstOrigLang,
+      language: lang,
+      contentRating: ratings,
       order: orderParam === 'latest' ? 'latest' : 'popular',
     });
   } catch (e) {
@@ -38,23 +55,24 @@ if (!q) {
   }
 }
 
+const catsLabels = cats.map((c) => c.label).join(' · ');
 const title = q
   ? `Buscar: ${q}`
-  : cat
-    ? cat.label
+  : cats.length > 0
+    ? catsLabels
     : 'Explorar manga';
 ---
 
 <Base title={`${title} — Ako`}>
-  <section class="mb-8 sm:mb-10">
+  <section class="mb-6 sm:mb-8">
     <span class="section-kicker">
-      {q ? 'Buscador' : cat ? 'Género' : 'Catálogo'}
+      {q ? 'Buscador' : cats.length > 0 ? (cats.length > 1 ? `${cats.length} géneros` : 'Género') : 'Catálogo'}
     </span>
     <h1 class="mt-3 font-display text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.05] tracking-tighter">
       {q ? (
         <>Resultados para <span class="text-gradient-brand">“{q}”</span></>
-      ) : cat ? (
-        <><span class="text-gradient-brand">{cat.label}</span></>
+      ) : cats.length > 0 ? (
+        <><span class="text-gradient-brand">{catsLabels}</span></>
       ) : (
         <>Explorar <span class="text-gradient-brand">manga</span></>
       )}
@@ -62,8 +80,8 @@ const title = q
     <p class="mt-2 text-[15px] text-fg-muted max-w-xl">
       {q
         ? 'Desliza para cargar más resultados.'
-        : cat
-          ? `Los más populares del género ${cat.label}.`
+        : cats.length > 0
+          ? `Títulos que cumplen con ${cats.length > 1 ? 'todos los géneros seleccionados' : 'el género seleccionado'}.`
           : 'Descubre por géneros o busca por título, autor o etiqueta.'}
     </p>
   </section>
@@ -81,6 +99,12 @@ const title = q
   ) : items.length > 0 ? (
     <MangaGrid items={items} />
   ) : !error ? (
-    <GridSkeleton count={18} />
+    <div class="py-16 text-center">
+      <p class="text-fg-muted">
+        {cats.length > 1
+          ? 'No hay títulos que cumplan todos los géneros seleccionados. Prueba quitando alguno.'
+          : 'Cargando…'}
+      </p>
+    </div>
   ) : null}
 </Base>
