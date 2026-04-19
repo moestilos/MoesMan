@@ -15,154 +15,193 @@ const navItems = [
 ---
 
 <header
-  class="fixed inset-x-0 top-0 z-40 flex justify-center pointer-events-none
-         px-3 pt-3 sm:px-4 sm:pt-4"
+  class="fixed inset-x-0 top-0 z-40 pointer-events-none
+         px-2 pt-2 sm:px-4 sm:pt-4"
 >
-  <div class="island-wrap pointer-events-auto relative w-full max-w-[1120px]">
-    <!-- Glow brand suave bajo la isla -->
-    <div class="island-glow" aria-hidden="true"></div>
+  <!-- Desktop/tablet: 3-column grid con isla principal centrada + profile pill derecha -->
+  <div class="mx-auto hidden max-w-[1440px] items-center gap-3 md:grid md:grid-cols-[1fr_auto_1fr]">
+    <div aria-hidden="true"></div>
 
-    <div
-      class="island relative flex h-12 w-full items-center gap-1.5 rounded-full pl-1.5 pr-1.5
-             transition-shadow duration-300"
-    >
-    <a
-      href="/"
-      aria-label="MoesMan — Inicio"
-      class="group flex h-9 flex-none items-center gap-2 rounded-full pl-1.5 pr-3 hover:bg-bg-hover/50 transition-colors"
-    >
-      <span class="flex-none">
-        <Logo size={28} withText={false} />
-      </span>
-      <span class="hidden sm:inline font-display text-sm font-extrabold tracking-tight">
-        Moes<span class="text-gradient-brand">Man</span>
-      </span>
-    </a>
-
-    <span class="hidden sm:inline-block h-5 w-px bg-border-strong"></span>
-
-    <nav class="hidden md:flex items-center gap-0.5">
-      {navItems.map((n) => {
-        const active = isActive(n.href);
-        return (
-          <a
-            href={n.href}
-            class:list={[
-              'inline-flex h-9 items-center rounded-full px-3.5 text-[13px] font-semibold tracking-tight transition-all',
-              active
-                ? 'bg-gradient-brand text-white shadow-glow-sm'
-                : 'text-fg-muted hover:text-fg hover:bg-bg-hover/60',
-            ]}
-          >
-            {n.label}
-          </a>
-        );
-      })}
-    </nav>
-
-    <span class="hidden md:inline-block h-5 w-px bg-border-strong mx-0.5"></span>
-
-    <form action="/search" method="get" class="flex-1 min-w-0 max-w-[360px] ml-auto md:ml-0">
-      <label class="relative block group/search">
-        <span class="sr-only">Buscar manga</span>
-        <span
-          class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-fg-subtle transition-colors group-focus-within/search:text-brand-400"
-          aria-hidden="true"
+    <!-- ISLA PRINCIPAL -->
+    <div class="island-wrap pointer-events-auto relative">
+      <div class="island-glow" aria-hidden="true"></div>
+      <div class="island relative flex h-12 items-center gap-1 rounded-full pl-1.5 pr-1.5">
+        <a
+          href="/"
+          aria-label="MoesMan — Inicio"
+          class="group flex h-9 flex-none items-center gap-2 rounded-full pl-1.5 pr-3 hover:bg-bg-hover/40 transition-colors"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.3-4.3"></path>
+          <Logo size={28} withText={false} />
+          <span class="font-display text-[15px] font-extrabold tracking-tight leading-none">
+            Moes<span class="text-gradient-brand">Man</span>
+          </span>
+        </a>
+
+        <span class="inline-block h-5 w-px bg-border-strong mx-0.5"></span>
+
+        <nav class="flex items-center gap-0.5">
+          {navItems.map((n) => {
+            const active = isActive(n.href);
+            return (
+              <a
+                href={n.href}
+                class:list={[
+                  'inline-flex h-9 items-center rounded-full px-3.5 text-[13px] font-semibold tracking-tight transition-all',
+                  active
+                    ? 'bg-gradient-brand text-white shadow-glow-sm'
+                    : 'text-fg-muted hover:text-fg hover:bg-bg-hover/50',
+                ]}
+              >
+                {n.label}
+              </a>
+            );
+          })}
+        </nav>
+
+        <span class="inline-block h-5 w-px bg-border-strong mx-0.5"></span>
+
+        <form action="/search" method="get" class="w-[260px] lg:w-[320px]">
+          <label class="relative block group/search">
+            <span class="sr-only">Buscar manga</span>
+            <span
+              class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-fg-subtle transition-colors group-focus-within/search:text-brand-400"
+              aria-hidden="true"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+              </svg>
+            </span>
+            <input
+              type="search"
+              name="q"
+              value={q}
+              placeholder="Buscar manga…"
+              autocomplete="off"
+              class="h-9 w-full rounded-full bg-bg-elevated/60 pl-8 pr-3 text-[13px] text-fg placeholder:text-fg-subtle
+                     ring-1 ring-inset ring-border/80 transition-all duration-200
+                     focus:ring-brand-500/50 focus:bg-bg-elevated focus:shadow-glow-sm focus:outline-none"
+            />
+          </label>
+        </form>
+      </div>
+    </div>
+
+    <!-- DERECHA: Profile pill -->
+    <div class="island-wrap pointer-events-auto relative justify-self-end">
+      <div class="island-glow" aria-hidden="true"></div>
+      <div class="island relative flex h-12 items-center gap-0.5 rounded-full pl-1 pr-1">
+        <a
+          href="/history"
+          aria-label="Historial"
+          title="Historial"
+          class:list={[
+            'inline-flex h-9 w-9 flex-none items-center justify-center rounded-full transition-colors',
+            isActive('/history') ? 'text-brand-400 bg-brand-500/10' : 'text-fg-muted hover:text-fg hover:bg-bg-hover/50',
+          ]}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v5h5"/>
+            <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/>
+            <path d="M12 7v5l4 2"/>
           </svg>
-        </span>
-        <input
-          type="search"
-          name="q"
-          value={q}
-          placeholder="Buscar…"
-          autocomplete="off"
-          class="h-9 w-full rounded-full bg-bg-elevated/70 pl-8 pr-10 text-[13px] text-fg placeholder:text-fg-subtle
-                 ring-1 ring-inset ring-border/80 transition-all duration-200
-                 focus:ring-brand-500/50 focus:bg-bg-elevated focus:shadow-glow-sm focus:outline-none"
-        />
-        <kbd
-          class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 hidden h-5 items-center gap-0.5 rounded bg-bg/70 px-1.5 font-mono text-[10px] font-semibold text-fg-subtle ring-1 ring-border md:inline-flex"
+        </a>
+        <span class="inline-block h-5 w-px bg-border-strong"></span>
+        <UserMenu client:only="react" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile: Una sola isla full-width, logo + search + user -->
+  <div class="mx-auto flex items-center gap-2 md:hidden">
+    <div class="island-wrap pointer-events-auto relative flex-1">
+      <div class="island-glow" aria-hidden="true"></div>
+      <div class="island relative flex h-12 items-center gap-1 rounded-full pl-1.5 pr-1.5">
+        <a
+          href="/"
+          aria-label="MoesMan"
+          class="flex h-9 flex-none items-center gap-2 rounded-full pl-1.5 pr-2 hover:bg-bg-hover/40 transition-colors"
         >
-          <span>⌘</span>K
-        </kbd>
-      </label>
-    </form>
-
-    <span class="inline-block h-5 w-px bg-border-strong"></span>
-
-    <a
-      href="/history"
-      aria-label="Historial"
-      title="Historial"
-      class:list={[
-        'inline-flex h-9 w-9 flex-none items-center justify-center rounded-full transition-colors',
-        isActive('/history') ? 'text-brand-400 bg-brand-500/10' : 'text-fg-muted hover:text-fg hover:bg-bg-hover/60',
-      ]}
-    >
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 3v5h5"/>
-        <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/>
-        <path d="M12 7v5l4 2"/>
-      </svg>
-    </a>
-
-    <UserMenu client:only="react" />
+          <Logo size={26} withText={false} />
+        </a>
+        <form action="/search" method="get" class="min-w-0 flex-1">
+          <label class="relative block group/search">
+            <span class="sr-only">Buscar</span>
+            <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-fg-subtle" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+              </svg>
+            </span>
+            <input
+              type="search"
+              name="q"
+              value={q}
+              placeholder="Buscar…"
+              autocomplete="off"
+              class="h-9 w-full rounded-full bg-bg-elevated/60 pl-8 pr-3 text-[13px] text-fg placeholder:text-fg-subtle
+                     ring-1 ring-inset ring-border/80 transition-all duration-200
+                     focus:ring-brand-500/50 focus:bg-bg-elevated focus:outline-none"
+            />
+          </label>
+        </form>
+      </div>
+    </div>
+    <div class="island-wrap pointer-events-auto relative flex-none">
+      <div class="island-glow" aria-hidden="true"></div>
+      <div class="island relative flex h-12 items-center rounded-full pl-1 pr-1">
+        <UserMenu client:only="react" />
+      </div>
     </div>
   </div>
 </header>
 
+<!-- Spacer -->
+<div aria-hidden="true" class="h-[64px] sm:h-[80px]"></div>
+
 <style>
   .island-wrap {
-    /* Glow suave bajo la isla que combina con el starfield */
-    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.55));
+    filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.5));
   }
   .island-glow {
     position: absolute;
-    inset: -14px -20% -30px -20%;
+    inset: -10px -20% -22px -20%;
     background: radial-gradient(
-      ellipse 60% 100% at 50% 50%,
-      rgb(var(--brand-500) / 0.22) 0%,
-      rgb(var(--brand-500) / 0.08) 35%,
-      transparent 70%
+      ellipse 70% 100% at 50% 50%,
+      rgb(var(--brand-500) / 0.28) 0%,
+      rgb(var(--brand-500) / 0.1) 38%,
+      transparent 72%
     );
     filter: blur(22px);
     pointer-events: none;
     z-index: -1;
-    opacity: 0;
+    opacity: 0.55;
     transition: opacity 500ms ease-out;
   }
   .island {
-    /* Base glass dark con tint hacia brand */
     background:
       linear-gradient(
         180deg,
-        rgba(255, 255, 255, 0.05) 0%,
-        rgba(255, 255, 255, 0.01) 50%,
-        rgba(0, 0, 0, 0.1) 100%
+        rgba(255, 255, 255, 0.06) 0%,
+        rgba(255, 255, 255, 0.015) 45%,
+        rgba(0, 0, 0, 0.08) 100%
       ),
       radial-gradient(
-        120% 200% at 50% -50%,
-        rgb(var(--brand-500) / 0.1) 0%,
+        140% 220% at 50% -60%,
+        rgb(var(--brand-500) / 0.12) 0%,
         transparent 55%
       ),
-      rgba(14, 14, 18, 0.62);
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+      rgba(12, 12, 16, 0.68);
+    backdrop-filter: blur(28px) saturate(170%);
+    -webkit-backdrop-filter: blur(28px) saturate(170%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow:
-      /* Top highlight */
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.09),
-      /* Inner bottom soft shadow */
-      inset 0 -1px 0 0 rgba(0, 0, 0, 0.35),
-      /* Outer soft */
-      0 4px 24px -8px rgba(0, 0, 0, 0.6);
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.11),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.4),
+      0 4px 20px -8px rgba(0, 0, 0, 0.55);
     isolation: isolate;
+    transition: box-shadow 300ms ease, background 300ms ease;
   }
-  /* Gradient border effect via conic-gradient mask */
   .island::before {
     content: '';
     position: absolute;
@@ -170,63 +209,68 @@ const navItems = [
     border-radius: 9999px;
     padding: 1px;
     background: conic-gradient(
-      from 210deg at 50% 50%,
-      rgb(var(--brand-500) / 0.35) 0deg,
-      transparent 60deg,
-      transparent 180deg,
-      rgb(var(--brand-400) / 0.25) 250deg,
-      transparent 320deg
+      from 0deg at 50% 50%,
+      transparent 0deg,
+      rgb(var(--brand-500) / 0.4) 30deg,
+      transparent 90deg,
+      transparent 210deg,
+      rgb(var(--brand-400) / 0.3) 250deg,
+      transparent 310deg
     );
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
-    opacity: 0.9;
+    opacity: 0.85;
     z-index: 0;
+    animation: rotate-border 20s linear infinite;
   }
-  /* Subtle dot/grid pattern inside to echo starfield */
   .island::after {
     content: '';
     position: absolute;
     inset: 0;
     border-radius: 9999px;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-    background-size: 18px 18px;
-    mask-image: radial-gradient(ellipse at center, black 0%, black 50%, transparent 90%);
-    -webkit-mask-image: radial-gradient(ellipse at center, black 0%, black 50%, transparent 90%);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 0.8px, transparent 0.8px);
+    background-size: 14px 14px;
+    mask-image: radial-gradient(ellipse at center, black 0%, black 55%, transparent 95%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 0%, black 55%, transparent 95%);
     pointer-events: none;
-    opacity: 0.4;
+    opacity: 0.5;
     z-index: 0;
   }
-  /* Scroll state: intensifica glow y shadow */
   :global(html.scrolled) .island-glow {
     opacity: 1;
   }
   :global(html.scrolled) .island {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.07) 0%,
+        rgba(255, 255, 255, 0.02) 45%,
+        rgba(0, 0, 0, 0.12) 100%
+      ),
+      radial-gradient(
+        140% 220% at 50% -60%,
+        rgb(var(--brand-500) / 0.14) 0%,
+        transparent 55%
+      ),
+      rgba(10, 10, 14, 0.82);
     box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
-      inset 0 -1px 0 0 rgba(0, 0, 0, 0.45),
-      0 12px 36px -10px rgba(0, 0, 0, 0.8);
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.14),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.5),
+      0 14px 38px -10px rgba(0, 0, 0, 0.8);
   }
-  /* Hijos sobre los pseudos */
   .island > * {
     position: relative;
     z-index: 1;
   }
+
+  @keyframes rotate-border {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .island::before { animation: none; }
+  }
 </style>
-
-<div aria-hidden="true" class="h-[72px] sm:h-[80px]"></div>
-
-<script is:inline>
-  document.addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-      const input = document.querySelector('header input[name="q"]');
-      if (input) {
-        e.preventDefault();
-        input.focus();
-        input.select();
-      }
-    }
-  });
-</script>

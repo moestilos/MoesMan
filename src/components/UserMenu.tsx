@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { clearAuth, getToken, getUser, updateUser, type AuthUser } from '@/lib/auth-client';
 import { api } from '@/lib/api';
 import NsfwToggle from './NsfwToggle';
+import ThemePicker from './ThemePicker';
 
 export default function UserMenu() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -73,8 +74,13 @@ export default function UserMenu() {
           {open && (
             <>
               <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
-              <div className="absolute right-0 z-40 mt-2 w-64 animate-fade-in rounded-xl bg-bg-card p-1.5 ring-1 ring-border shadow-card">
-                <div className="px-3 py-2 border-b border-border text-xs font-semibold uppercase tracking-wider text-fg-subtle">
+              <div className="absolute right-0 z-40 mt-2 w-72 animate-fade-in rounded-xl bg-bg-card p-2 ring-1 ring-border shadow-card">
+                <div className="px-3 pt-1 pb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-fg-subtle">
+                  Tema
+                </div>
+                <ThemePicker />
+                <div className="my-1 border-t border-border" />
+                <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-fg-subtle">
                   Preferencias
                 </div>
                 <NsfwToggle />
@@ -176,7 +182,12 @@ export default function UserMenu() {
             </a>
 
             <div className="my-1 border-t border-border pt-1">
-              <div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-fg-subtle">
+              <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-fg-subtle">
+                Tema
+              </div>
+              <ThemePicker />
+              <div className="my-1 border-t border-border"></div>
+              <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-fg-subtle">
                 Preferencias
               </div>
               <NsfwToggle />

@@ -4,6 +4,9 @@ import Header from '@/components/Header.astro';
 import BottomNav from '@/components/BottomNav.astro';
 import BgStarfield from '@/components/BgStarfield.astro';
 import InstallPrompt from '@/components/InstallPrompt';
+import { readThemeCookie } from '@/lib/theme';
+
+const themeId = readThemeCookie(Astro.request.headers.get('cookie'));
 
 interface Props {
   title?: string;
@@ -21,7 +24,7 @@ const {
 ---
 
 <!doctype html>
-<html lang="es" class="dark">
+<html lang="es" class="dark" data-theme={themeId}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
