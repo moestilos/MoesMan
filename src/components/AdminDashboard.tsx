@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getToken, isAuthed, getUser } from '@/lib/auth-client';
+import DonutChart, { type DonutSegment } from './DonutChart';
 
 interface Stats {
   totals: {
@@ -13,6 +14,8 @@ interface Stats {
   last30Days: Array<[string, number]>;
   topPaths: Array<{ path: string; count: number }>;
   recentUsers: Array<{ id: string; username: string; email: string; createdAt: string }>;
+  byDevice?: Array<{ key: string; label: string; count: number }>;
+  byBrowser?: Array<{ label: string; count: number }>;
 }
 
 const ADMIN_EMAIL = 'gmateosoficial@gmail.com';
@@ -107,6 +110,30 @@ export default function AdminDashboard() {
           </div>
         )}
       </section>
+
+      {/* Donut charts: Device + Browser */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <DonutChart
+          subtitle="Audiencia"
+          title="Dispositivos"
+          centerLabel="Total visitas"
+          segments={(stats.byDevice ?? []).map(
+            (d): DonutSegment => ({ key: d.key, label: d.label, value: d.count }),
+          )}
+        />
+        <DonutChart
+          subtitle="Tecnología"
+          title="Navegadores"
+          centerLabel="Total"
+          segments={(stats.byBrowser ?? []).slice(0, 6).map(
+            (b, i): DonutSegment => ({
+              key: b.label.toLowerCase(),
+              label: b.label,
+              value: b.count,
+            }),
+          )}
+        />
+      </div>
 
       {/* Top paths */}
       <div className="grid gap-6 lg:grid-cols-2">

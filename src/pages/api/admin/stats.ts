@@ -29,6 +29,36 @@ export const GET: APIRoute = async (ctx) => {
     .sort(([a], [b]) => a.localeCompare(b))
     .slice(-30);
 
+  // Por dispositivo (parse UA)
+  const deviceCount = { mobile: 0, tablet: 0, desktop: 0 };
+  db.visits.forEach((v) => {
+    const ua = (v.userAgent ?? '').toLowerCase();
+    if (/ipad|tablet|playbook|silk/.test(ua)) deviceCount.tablet++;
+    else if (/mobi|android|iphone|ipod|opera mini|iemobile|blackberry/.test(ua)) deviceCount.mobile++;
+    else deviceCount.desktop++;
+  });
+  const byDevice = [
+    { key: 'mobile', label: 'Móvil', count: deviceCount.mobile },
+    { key: 'desktop', label: 'Desktop', count: deviceCount.desktop },
+    { key: 'tablet', label: 'Tablet', count: deviceCount.tablet },
+  ];
+
+  // Por navegador
+  const browserCount: Record<string, number> = {};
+  db.visits.forEach((v) => {
+    const ua = v.userAgent ?? '';
+    let name = 'Otros';
+    if (/Edg\//.test(ua)) name = 'Edge';
+    else if (/OPR\/|Opera/.test(ua)) name = 'Opera';
+    else if (/Firefox\//.test(ua)) name = 'Firefox';
+    else if (/Chrome\//.test(ua)) name = 'Chrome';
+    else if (/Safari\//.test(ua)) name = 'Safari';
+    browserCount[name] = (browserCount[name] ?? 0) + 1;
+  });
+  const byBrowser = Object.entries(browserCount)
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count);
+
   // Top paths (últimos 7 días)
   const now = Date.now();
   const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -66,5 +96,7 @@ export const GET: APIRoute = async (ctx) => {
     last30Days,
     topPaths,
     recentUsers,
+    byDevice,
+    byBrowser,
   });
 };
