@@ -208,6 +208,9 @@
   }
   .btn:disabled { opacity: 0.4; pointer-events: none; }
 
+  /* Heredar base de .btn si se usan sueltas */
+  .btn-primary, .btn-secondary, .btn-ghost { @apply btn; }
+
   .btn-primary {
     color: white;
     background: linear-gradient(180deg, rgb(var(--brand-400)) 0%, rgb(var(--brand-600)) 50%, rgb(var(--brand-700)) 100%);

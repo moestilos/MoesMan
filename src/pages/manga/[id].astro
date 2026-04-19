@@ -264,8 +264,11 @@ const lastChapter = chapters[chapters.length - 1];
                   href={`/read/${c.id}?manga=${manga.id}`}
                   class="flex min-w-0 flex-1 items-center gap-3 px-3 py-3 sm:gap-4 sm:px-4 sm:py-3.5"
                 >
-                  <span class="inline-flex h-10 w-12 flex-none items-center justify-center rounded-lg bg-bg-elevated ring-1 ring-border font-mono text-xs font-bold tabular-nums text-fg-muted transition group-hover:text-brand-300 group-hover:ring-brand-500/30 sm:h-11 sm:w-14 sm:text-sm">
-                    {c.number ?? '?'}
+                  <span class="flex-none flex items-baseline gap-1 w-12 sm:w-14">
+                    <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-fg-subtle">Cap</span>
+                    <span class="font-display text-base font-bold tabular-nums text-fg transition group-hover:text-brand-300 sm:text-lg">
+                      {c.number ?? '?'}
+                    </span>
                   </span>
                   <div class="min-w-0 flex-1">
                     <div class="truncate text-sm font-semibold">
@@ -282,22 +285,14 @@ const lastChapter = chapters[chapters.length - 1];
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                   </span>
                 </a>
-                <div class="flex items-center gap-1">
-                  <DownloadChapterZip
-                    client:visible
-                    mangaTitle={manga.title}
-                    chapterId={c.id}
-                    chapterNumber={c.number}
-                    chapterTitle={c.title}
-                    compact
-                  />
-                  <DownloadChapterButton
-                    client:visible
-                    chapterId={c.id}
-                    chapterNumber={c.number}
-                    compact
-                  />
-                </div>
+                <DownloadChapterZip
+                  client:visible
+                  mangaTitle={manga.title}
+                  chapterId={c.id}
+                  chapterNumber={c.number}
+                  chapterTitle={c.title}
+                  compact
+                />
               </li>
             ))}
           </ul>
