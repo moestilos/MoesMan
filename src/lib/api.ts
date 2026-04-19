@@ -119,6 +119,16 @@ export const api = {
       request<ProgressRow[]>(`/progress/${providerId}/${mangaId}`, { token }),
     history: (token: string, limit = 30) =>
       request<ProgressRow[]>(`/progress/history?limit=${limit}`, { token }),
+    remove: (token: string, providerId: string, chapterId: string) =>
+      request<{ removed: number }>(`/progress/${providerId}/${chapterId}/delete`, {
+        method: 'POST',
+        token,
+      }),
+    clearAll: (token: string) =>
+      request<{ removed: number }>('/progress/clear', {
+        method: 'POST',
+        token,
+      }),
   },
 
   favorites: {

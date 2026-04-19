@@ -135,6 +135,31 @@ function mapDetail(m: MDManga, langs: string[]): MangaDetail {
   };
 }
 
+function dedupeChapters(list: Chapter[], langPref: string[]): Chapter[] {
+  const byKey = new Map<string, Chapter>();
+  const rankLang = (l: string) => {
+    const i = langPref.indexOf(l);
+    return i === -1 ? 999 : i;
+  };
+  const rankTime = (t: string | null) => (t ? Date.parse(t) || 0 : 0);
+  for (const c of list) {
+    const key = c.number ?? `oneshot-${c.id}`;
+    const prev = byKey.get(key);
+    if (!prev) {
+      byKey.set(key, c);
+      continue;
+    }
+    const lPrev = rankLang(prev.language);
+    const lNew = rankLang(c.language);
+    if (lNew < lPrev) {
+      byKey.set(key, c);
+    } else if (lNew === lPrev) {
+      if (rankTime(c.publishedAt) > rankTime(prev.publishedAt)) byKey.set(key, c);
+    }
+  }
+  return [...byKey.values()];
+}
+
 function mapChapter(c: MDChapter): Chapter {
   const group = c.relationships.find((r) => r.type === 'scanlation_group');
   return {
@@ -240,9 +265,20 @@ export class MangaDexProvider implements MangaProvider {
         'contentRating[]': ['safe', 'suggestive', 'erotica'],
         includeExternalUrl: '0',
       });
-      return data.data
+      const mapped = data.data
         .map(mapChapter)
         .filter((c) => c.pages && c.pages > 0);
+      const deduped = dedupeChapters(mapped, langs);
+      // Reordenar numéricamente (dedupe rompe orden de API)
+      deduped.sort((a, b) => {
+        const na = a.number === null ? Infinity : parseFloat(a.number);
+        const nb = b.number === null ? Infinity : parseFloat(b.number);
+        if (Number.isNaN(na) && Number.isNaN(nb)) return 0;
+        if (Number.isNaN(na)) return 1;
+        if (Number.isNaN(nb)) return -1;
+        return order === 'asc' ? na - nb : nb - na;
+      });
+      return deduped;
     });
   }
 
