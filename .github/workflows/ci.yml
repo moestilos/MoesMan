@@ -71,23 +71,35 @@ jobs:
         working-directory: api
         run: |
           npm run build
-          node dist/main.js &
+          node dist/main.js > /tmp/api.log 2>&1 &
           API_PID=$!
-          # Esperar a que el puerto responda (cualquier HTTP code = vivo)
+          # Esperar TCP :3000
           for i in $(seq 1 30); do
-            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/auth/me || echo 000)
-            if [ "$code" != "000" ]; then echo "API viva (HTTP $code)"; break; fi
-            if [ $i -eq 30 ]; then echo "API no arrancó"; kill $API_PID 2>/dev/null; exit 1; fi
+            if (echo > /dev/tcp/localhost/3000) 2>/dev/null; then
+              echo "puerto 3000 abierto (intento $i)"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "API no arrancó. Log:"; cat /tmp/api.log || true
+              kill $API_PID 2>/dev/null; exit 1
+            fi
             sleep 1
           done
-          # /auth/me sin token debe devolver 401 (guard JWT aplicado)
-          code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/auth/me)
+          # Pequeña gracia para inicialización Nest completa
+          sleep 2
+          # /auth/me sin token debe devolver 401 (guard JWT activo)
+          code=$(curl -sS -o /dev/null -w "%{http_code}" http://localhost:3000/api/auth/me)
           echo "auth/me sin token => $code"
-          [ "$code" = "401" ] || { echo "esperado 401, obtenido $code"; kill $API_PID; exit 1; }
-          # Register + login real
-          reg=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" \
+          if [ "$code" != "401" ]; then
+            echo "esperado 401, obtenido $code"; cat /tmp/api.log; kill $API_PID; exit 1
+          fi
+          # Register real
+          reg=$(curl -sS -o /dev/null -w "%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
             -d '{"email":"ci@test.dev","username":"ci_user","password":"password123"}' \
             http://localhost:3000/api/auth/register)
           echo "register => $reg"
-          [ "$reg" = "201" ] || [ "$reg" = "200" ] || { kill $API_PID; exit 1; }
-          kill $API_PID
+          if [ "$reg" != "201" ] && [ "$reg" != "200" ]; then
+            cat /tmp/api.log; kill $API_PID; exit 1
+          fi
+          kill $API_PID 2>/dev/null || true
