@@ -37,9 +37,9 @@ export default function HeroCarousel({ items, intervalMs = 7000 }: Props) {
     <section
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      className="relative mb-12 overflow-hidden rounded-3xl ring-1 ring-border"
+      className="relative mb-10 overflow-hidden rounded-2xl ring-1 ring-border sm:mb-12 sm:rounded-3xl"
     >
-      <div className="relative aspect-[21/9] w-full">
+      <div className="relative aspect-[4/3] w-full sm:aspect-[16/9] lg:aspect-[21/9]">
         {items.map((item, i) => (
           <div
             key={item.id}
