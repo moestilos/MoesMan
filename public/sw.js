@@ -153,7 +153,43 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(staleWhileRevalidate(req, SHELL_CACHE));
 });
 
-// Mensajes opcionales (p. ej. forzar update)
+// Mensajes: SKIP_WAITING + PRECACHE_CHAPTER (descarga offline)
 self.addEventListener('message', (event) => {
-  if (event.data === 'SKIP_WAITING') self.skipWaiting();
+  if (event.data === 'SKIP_WAITING') {
+    self.skipWaiting();
+    return;
+  }
+  if (event.data && event.data.type === 'PRECACHE_CHAPTER') {
+    const { urls, chapterId } = event.data;
+    event.waitUntil(precacheChapter(urls, chapterId, event.source));
+  }
 });
+
+async function precacheChapter(urls, chapterId, client) {
+  const cache = await caches.open(PAGES_CACHE);
+  let done = 0;
+  const total = urls.length;
+  for (const u of urls) {
+    try {
+      const existing = await cache.match(u);
+      if (!existing) {
+        const res = await fetch(u);
+        if (res.ok) await cache.put(u, res.clone());
+      }
+    } catch (e) {
+      // ignorar fallos individuales
+    }
+    done++;
+    if (client && client.postMessage) {
+      client.postMessage({
+        type: 'PRECACHE_PROGRESS',
+        chapterId,
+        done,
+        total,
+      });
+    }
+  }
+  if (client && client.postMessage) {
+    client.postMessage({ type: 'PRECACHE_DONE', chapterId, total });
+  }
+}

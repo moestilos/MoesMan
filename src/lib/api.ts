@@ -1,4 +1,6 @@
-const API_BASE = import.meta.env.PUBLIC_API_BASE ?? 'http://localhost:3000/api';
+// Backend embebido: mismas rutas same-origin (/api/*). Sin CORS.
+// Override con PUBLIC_API_BASE si usas NestJS externo.
+const API_BASE = import.meta.env.PUBLIC_API_BASE ?? '/api';
 
 export interface AuthUser {
   id: string;
