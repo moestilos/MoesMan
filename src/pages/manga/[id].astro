@@ -2,6 +2,8 @@
 import Base from '@/layouts/Base.astro';
 import MangaActions from '@/components/MangaActions';
 import DownloadChapterButton from '@/components/DownloadChapterButton';
+import DownloadChapterZip from '@/components/DownloadChapterZip';
+import DownloadMangaZip from '@/components/DownloadMangaZip';
 import { getProvider } from '@/lib/providers';
 
 const { id } = Astro.params;
@@ -214,6 +216,13 @@ const lastChapter = chapters[chapters.length - 1];
                     Último · Cap. {lastChapter.number ?? '?'}
                   </a>
                 )}
+                {chapters.length > 0 && (
+                  <DownloadMangaZip
+                    client:only="react"
+                    mangaTitle={manga.title}
+                    chapters={chapters.map((c) => ({ id: c.id, number: c.number, title: c.title }))}
+                  />
+                )}
                 <MangaActions
                   client:only="react"
                   providerId="mangadex"
@@ -273,12 +282,22 @@ const lastChapter = chapters[chapters.length - 1];
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                   </span>
                 </a>
-                <DownloadChapterButton
-                  client:visible
-                  chapterId={c.id}
-                  chapterNumber={c.number}
-                  compact
-                />
+                <div class="flex items-center gap-1">
+                  <DownloadChapterZip
+                    client:visible
+                    mangaTitle={manga.title}
+                    chapterId={c.id}
+                    chapterNumber={c.number}
+                    chapterTitle={c.title}
+                    compact
+                  />
+                  <DownloadChapterButton
+                    client:visible
+                    chapterId={c.id}
+                    chapterNumber={c.number}
+                    compact
+                  />
+                </div>
               </li>
             ))}
           </ul>

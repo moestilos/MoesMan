@@ -53,8 +53,8 @@ export default {
       },
       fontFamily: {
         sans: ['"Zen Kaku Gothic New"', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
-        display: ['"Shippori Mincho B1"', '"Zen Kaku Gothic New"', 'ui-serif', 'Georgia', 'serif'],
-        rounded: ['"Zen Maru Gothic"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Klee One"', '"Zen Kaku Gothic New"', 'ui-serif', 'Georgia', 'serif'],
+        brand: ['Caveat', '"Klee One"', 'cursive'],
         mono: ['ui-monospace', '"SF Mono"', 'Menlo', 'monospace'],
       },
       fontSize: {

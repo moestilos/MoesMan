@@ -32,7 +32,7 @@ const navItems = [
           class="group flex h-9 flex-none items-center gap-2 rounded-full pl-1.5 pr-3 hover:bg-bg-hover/40 transition-colors"
         >
           <Logo size={28} withText={false} />
-          <span class="font-display text-[15px] font-extrabold tracking-tight leading-none">
+          <span class="font-brand text-[22px] font-bold leading-none tracking-tight">
             Moes<span class="text-gradient-brand">Man</span>
           </span>
         </a>
@@ -46,13 +46,11 @@ const navItems = [
               <a
                 href={n.href}
                 class:list={[
-                  'inline-flex h-9 items-center rounded-full px-3.5 text-[13px] font-semibold tracking-tight transition-all',
-                  active
-                    ? 'bg-gradient-brand text-white shadow-glow-sm'
-                    : 'text-fg-muted hover:text-fg hover:bg-bg-hover/50',
+                  'nav-pill',
+                  active ? 'nav-pill--active' : '',
                 ]}
               >
-                {n.label}
+                <span class="relative z-10">{n.label}</span>
               </a>
             );
           })}
@@ -60,27 +58,28 @@ const navItems = [
 
         <span class="inline-block h-5 w-px bg-border-strong mx-0.5"></span>
 
-        <form action="/search" method="get" class="w-[260px] lg:w-[320px]">
-          <label class="relative block group/search">
+        <form action="/search" method="get" class="search-form">
+          <label class="search-label">
             <span class="sr-only">Buscar manga</span>
-            <span
-              class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-fg-subtle transition-colors group-focus-within/search:text-brand-400"
-              aria-hidden="true"
+            <button
+              type="button"
+              aria-label="Abrir búsqueda"
+              class="search-icon-btn"
+              data-search-trigger
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"></circle>
                 <path d="m21 21-4.3-4.3"></path>
               </svg>
-            </span>
+            </button>
             <input
               type="search"
               name="q"
               value={q}
               placeholder="Buscar manga…"
               autocomplete="off"
-              class="h-9 w-full rounded-full bg-bg-elevated/60 pl-8 pr-3 text-[13px] text-fg placeholder:text-fg-subtle
-                     ring-1 ring-inset ring-border/80 transition-all duration-200
-                     focus:ring-brand-500/50 focus:bg-bg-elevated focus:shadow-glow-sm focus:outline-none"
+              class="search-input"
+              data-search-input
             />
           </label>
         </form>
@@ -161,7 +160,7 @@ const navItems = [
 
 <style>
   .island-wrap {
-    filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.5));
+    /* No usar `filter` aqui: rompe backdrop-filter del hijo */
   }
   .island-glow {
     position: absolute;
@@ -191,7 +190,7 @@ const navItems = [
         rgb(var(--brand-500) / 0.12) 0%,
         transparent 55%
       ),
-      rgba(12, 12, 16, 0.68);
+      rgba(10, 10, 14, 0.85);
     backdrop-filter: blur(28px) saturate(170%);
     -webkit-backdrop-filter: blur(28px) saturate(170%);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -224,7 +223,7 @@ const navItems = [
     pointer-events: none;
     opacity: 0.85;
     z-index: 0;
-    animation: rotate-border 20s linear infinite;
+    /* sin rotación */
   }
   .island::after {
     content: '';
@@ -273,4 +272,156 @@ const navItems = [
   @media (prefers-reduced-motion: reduce) {
     .island::before { animation: none; }
   }
+
+  /* ---------- Nav pills (coherentes con la isla) ---------- */
+  .nav-pill {
+    display: inline-flex;
+    height: 36px;
+    padding: 0 14px;
+    align-items: center;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: rgba(181, 181, 189, 1);
+    transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    isolation: isolate;
+  }
+  .nav-pill:hover {
+    color: #f5f5f7;
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .nav-pill--active {
+    color: #ffffff;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 50%, rgba(0,0,0,0.06) 100%),
+      radial-gradient(120% 180% at 50% -60%, rgb(var(--brand-500) / 0.35) 0%, transparent 60%),
+      rgba(20, 20, 26, 0.7);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.14),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.2),
+      inset 0 0 0 1px rgb(var(--brand-500) / 0.22),
+      0 0 18px -4px rgb(var(--brand-500) / 0.35);
+  }
+  .nav-pill--active::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 9999px;
+    padding: 1px;
+    background: conic-gradient(
+      from 0deg at 50% 50%,
+      transparent 0deg,
+      rgb(var(--brand-400) / 0.55) 40deg,
+      transparent 120deg,
+      transparent 220deg,
+      rgb(var(--brand-500) / 0.45) 280deg,
+      transparent 340deg
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    /* sin rotación */
+    z-index: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nav-pill--active::before { animation: none; }
+  }
+
+  /* ---------- Search expandible ---------- */
+  .search-form { display: flex; align-items: center; }
+  .search-label {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    height: 36px;
+    width: 36px;
+    transition: width 320ms cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .search-label:hover { background: rgba(255, 255, 255, 0.06); }
+  .search-label.is-open {
+    width: 280px;
+    background: rgba(10, 10, 14, 0.6);
+    border-color: rgb(var(--brand-500) / 0.4);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+      0 0 18px -4px rgb(var(--brand-500) / 0.35);
+  }
+  @media (min-width: 1024px) {
+    .search-label.is-open { width: 340px; }
+  }
+  .search-icon-btn {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    color: rgba(181, 181, 189, 1);
+    transition: color 200ms;
+  }
+  .search-icon-btn:hover { color: #f5f5f7; }
+  .search-label.is-open .search-icon-btn { color: rgb(var(--brand-400)); }
+  .search-input {
+    flex: 1;
+    height: 100%;
+    min-width: 0;
+    padding: 0 12px 0 4px;
+    font-size: 13px;
+    color: #f5f5f7;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    opacity: 0;
+    transition: opacity 200ms 120ms;
+  }
+  .search-label.is-open .search-input { opacity: 1; }
+  .search-input::placeholder { color: rgba(124, 124, 134, 1); }
 </style>
+
+<script is:inline>
+  (() => {
+    const label = document.querySelector('.search-label');
+    const trigger = document.querySelector('[data-search-trigger]');
+    const input = document.querySelector('[data-search-input]');
+    if (!label || !trigger || !input) return;
+
+    const open = () => {
+      label.classList.add('is-open');
+      setTimeout(() => input.focus(), 150);
+    };
+    const close = () => {
+      if (input.value.trim() === '') label.classList.remove('is-open');
+    };
+
+    // Si hay query en URL, abrir
+    if (input.value.trim() !== '') label.classList.add('is-open');
+
+    trigger.addEventListener('click', (e) => {
+      if (!label.classList.contains('is-open')) {
+        e.preventDefault();
+        open();
+      }
+    });
+    input.addEventListener('focus', open);
+    input.addEventListener('blur', () => setTimeout(close, 120));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && label.classList.contains('is-open')) {
+        input.value = '';
+        input.blur();
+        label.classList.remove('is-open');
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        open();
+      }
+    });
+  })();
+</script>

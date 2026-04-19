@@ -165,6 +165,14 @@ export default function UserMenu() {
               </svg>
               Mi perfil
             </a>
+            {user.email?.toLowerCase() === 'gmateosoficial@gmail.com' && (
+              <a href="/admin" className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-bg-hover">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-400">
+                  <path d="M12 2 4 6v6c0 5 3.4 9.5 8 10 4.6-.5 8-5 8-10V6l-8-4z"/>
+                </svg>
+                <span className="font-semibold text-brand-300">Admin panel</span>
+              </a>
+            )}
             <a href="/library" className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-bg-hover">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-fg-muted">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>

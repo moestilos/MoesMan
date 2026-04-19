@@ -44,16 +44,25 @@ const title = q
 ---
 
 <Base title={`${title} — MoesMan`}>
-  <section class="mb-6">
-    <h1 class="text-2xl sm:text-3xl font-bold">
-      {q ? <>Resultados para <span class="text-brand-400">“{q}”</span></> : title}
+  <section class="mb-8 sm:mb-10">
+    <span class="section-kicker">
+      {q ? 'Buscador' : cat ? 'Género' : 'Catálogo'}
+    </span>
+    <h1 class="mt-3 font-display text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.05] tracking-tighter">
+      {q ? (
+        <>Resultados para <span class="text-gradient-brand">“{q}”</span></>
+      ) : cat ? (
+        <><span class="text-gradient-brand">{cat.label}</span></>
+      ) : (
+        <>Explorar <span class="text-gradient-brand">manga</span></>
+      )}
     </h1>
-    <p class="mt-1 text-sm text-fg-muted">
+    <p class="mt-2 text-[15px] text-fg-muted max-w-xl">
       {q
-        ? 'Scroll para cargar más.'
+        ? 'Desliza para cargar más resultados.'
         : cat
-          ? `Los más populares de ${cat.label}.`
-          : 'Explora por géneros o usa la barra de búsqueda.'}
+          ? `Los más populares del género ${cat.label}.`
+          : 'Descubre por géneros o busca por título, autor o etiqueta.'}
     </p>
   </section>
 

@@ -46,11 +46,21 @@ export interface DbProgress {
   updatedAt: string;
 }
 
+export interface DbVisit {
+  id: string;
+  ip: string;
+  path: string;
+  userAgent?: string;
+  day: string; // YYYY-MM-DD
+  createdAt: string;
+}
+
 interface DbShape {
   users: DbUser[];
   library: DbLibraryEntry[];
   favorites: DbFavorite[];
   progress: DbProgress[];
+  visits: DbVisit[];
 }
 
 const DEFAULT_DATA_FILE = join(process.cwd(), 'data', 'moesman.json');
@@ -62,7 +72,7 @@ let writeQueue: Promise<void> = Promise.resolve();
 async function load(): Promise<DbShape> {
   if (cache) return cache;
   if (!existsSync(FILE)) {
-    const empty: DbShape = { users: [], library: [], favorites: [], progress: [] };
+    const empty: DbShape = { users: [], library: [], favorites: [], progress: [], visits: [] };
     await mkdir(dirname(FILE), { recursive: true });
     await writeFile(FILE, JSON.stringify(empty, null, 2), 'utf8');
     cache = empty;
@@ -75,6 +85,7 @@ async function load(): Promise<DbShape> {
     library: parsed.library ?? [],
     favorites: parsed.favorites ?? [],
     progress: parsed.progress ?? [],
+    visits: parsed.visits ?? [],
   };
   return cache;
 }

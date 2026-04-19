@@ -40,7 +40,7 @@ const {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Klee+One:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap"
       rel="stylesheet"
     />
     <title>{title}</title>
@@ -109,6 +109,22 @@ const {
       };
       window.addEventListener('scroll', onScroll, { passive: true });
       onScroll();
+
+      // Tracker de visitas — IP-dedup server-side. Evita reenvio si ya lo hicimos hoy.
+      try {
+        const KEY = 'moesman:visit:day';
+        const today = new Date().toISOString().slice(0, 10);
+        if (localStorage.getItem(KEY) !== today) {
+          fetch('/api/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: location.pathname }),
+            keepalive: true,
+          })
+            .then(() => localStorage.setItem(KEY, today))
+            .catch(() => {});
+        }
+      } catch {}
     </script>
   </body>
 </html>
