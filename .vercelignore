@@ -1,6 +1,6 @@
-api/
-docker-compose.yml
-Dockerfile
-.dockerignore
-data/
-drizzle/
+/api
+/docker-compose.yml
+/Dockerfile
+/.dockerignore
+/data
+/drizzle
