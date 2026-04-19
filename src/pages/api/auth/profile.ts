@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import bcrypt from 'bcryptjs';
 import { requireUser, json, jsonError, signToken } from '@/server/auth';
-import { commit, getDb } from '@/server/db';
+import { findUserByEmail, findUserById, findUserByUsername, updateUserFields } from '@/server/db';
 
 export const prerender = false;
 
@@ -19,11 +19,9 @@ export const PATCH: APIRoute = async (ctx) => {
     return jsonError(400, 'Invalid JSON');
   }
 
-  const db = await getDb();
-  const user = db.users.find((u) => u.id === auth.id);
+  const user = await findUserById(auth.id);
   if (!user) return jsonError(404, 'Usuario no encontrado');
 
-  // Cambio de email o username requiere contraseña actual
   const needsAuth =
     body.email !== undefined || body.username !== undefined || body.newPassword !== undefined;
   if (needsAuth) {
@@ -33,36 +31,45 @@ export const PATCH: APIRoute = async (ctx) => {
     if (!ok) return jsonError(401, 'Contraseña actual incorrecta');
   }
 
+  const patch: Partial<{ email: string; username: string; passwordHash: string }> = {};
+
   if (body.email !== undefined) {
     const email = String(body.email ?? '').trim().toLowerCase();
     if (!EMAIL_RE.test(email)) return jsonError(400, 'Email inválido');
-    if (email !== user.email && db.users.some((u) => u.email === email && u.id !== user.id)) {
-      return jsonError(409, 'Email ya en uso');
+    if (email !== user.email) {
+      const clash = await findUserByEmail(email);
+      if (clash && clash.id !== user.id) return jsonError(409, 'Email ya en uso');
+      patch.email = email;
     }
-    user.email = email;
   }
 
   if (body.username !== undefined) {
     const username = String(body.username ?? '').trim();
     if (!USERNAME_RE.test(username)) return jsonError(400, 'Usuario inválido (3-32, a-z 0-9 _.-)');
-    if (username !== user.username && db.users.some((u) => u.username === username && u.id !== user.id)) {
-      return jsonError(409, 'Usuario ya en uso');
+    if (username !== user.username) {
+      const clash = await findUserByUsername(username);
+      if (clash && clash.id !== user.id) return jsonError(409, 'Usuario ya en uso');
+      patch.username = username;
     }
-    user.username = username;
   }
 
   if (body.newPassword !== undefined) {
     const np = String(body.newPassword ?? '');
     if (np.length < 8) return jsonError(400, 'Nueva contraseña mínima 8 caracteres');
-    user.passwordHash = await bcrypt.hash(np, 10);
+    patch.passwordHash = await bcrypt.hash(np, 10);
   }
 
-  await commit();
+  const updated = Object.keys(patch).length > 0 ? await updateUserFields(user.id, patch) : user;
+  if (!updated) return jsonError(500, 'Error actualizando usuario');
 
-  // Re-firmar token (el contenido del token no cambia pero por si acaso)
-  const token = await signToken(user);
+  const token = await signToken(updated);
   return json({
-    user: { id: user.id, email: user.email, username: user.username, avatarUrl: user.avatarUrl ?? null },
+    user: {
+      id: updated.id,
+      email: updated.email,
+      username: updated.username,
+      avatarUrl: updated.avatarUrl ?? null,
+    },
     token,
   });
 };

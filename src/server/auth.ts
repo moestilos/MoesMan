@@ -1,7 +1,13 @@
 import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import type { APIContext } from 'astro';
-import { commit, getDb, nowIso, uuid, type DbUser } from './db';
+import {
+  findUserByEmail,
+  findUserById,
+  findUserByUsername,
+  insertUser,
+  type DbUser,
+} from './db';
 
 const SECRET_RAW =
   process.env.JWT_SECRET ??
@@ -29,8 +35,7 @@ export async function verifyToken(token: string): Promise<AuthUser | null> {
   try {
     const { payload } = await jwtVerify(token, SECRET);
     if (!payload.sub) return null;
-    const db = await getDb();
-    const u = db.users.find((x) => x.id === payload.sub);
+    const u = await findUserById(String(payload.sub));
     if (!u) return null;
     return { id: u.id, email: u.email, username: u.username, avatarUrl: u.avatarUrl ?? null };
   } catch {
@@ -83,20 +88,11 @@ export async function registerUser(input: {
   if (!USERNAME_RE.test(username)) return { error: 'Usuario inválido (3-32, a-z 0-9 _.-)', status: 400 };
   if (password.length < 8) return { error: 'Contraseña mínima 8 caracteres', status: 400 };
 
-  const db = await getDb();
-  if (db.users.some((u) => u.email === email)) return { error: 'Email ya registrado', status: 409 };
-  if (db.users.some((u) => u.username === username)) return { error: 'Usuario ya en uso', status: 409 };
+  if (await findUserByEmail(email)) return { error: 'Email ya registrado', status: 409 };
+  if (await findUserByUsername(username)) return { error: 'Usuario ya en uso', status: 409 };
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const user: DbUser = {
-    id: uuid(),
-    email,
-    username,
-    passwordHash,
-    createdAt: nowIso(),
-  };
-  db.users.push(user);
-  await commit();
+  const user = await insertUser({ email, username, passwordHash });
   const token = await signToken(user);
   return {
     user: { id: user.id, email: user.email, username: user.username, avatarUrl: user.avatarUrl ?? null },
@@ -110,8 +106,7 @@ export async function loginUser(input: {
 }): Promise<{ user: AuthUser; token: string } | { error: string; status: number }> {
   const email = String(input.email ?? '').trim().toLowerCase();
   const password = String(input.password ?? '');
-  const db = await getDb();
-  const user = db.users.find((u) => u.email === email);
+  const user = await findUserByEmail(email);
   if (!user) return { error: 'Credenciales inválidas', status: 401 };
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) return { error: 'Credenciales inválidas', status: 401 };
