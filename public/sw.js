@@ -6,7 +6,7 @@
 //   - API proxy (/api/*): network-first con fallback cache (SWR)
 //   - Fallback offline: /offline.html para navegaciones fallidas
 
-const SW_VERSION = 'moesman-v1';
+const SW_VERSION = 'moesman-v3';
 const SHELL_CACHE = `shell-${SW_VERSION}`;
 const COVERS_CACHE = `covers-${SW_VERSION}`;
 const PAGES_CACHE = `pages-${SW_VERSION}`;
@@ -113,14 +113,22 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navegaciones (HTML): SWR + fallback offline
+  // Navegaciones (HTML): network-first con fallback offline
+  // (SWR servía HTML viejo cacheado al romper algo)
   if (req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html')) {
     event.respondWith(
       (async () => {
         try {
-          return await staleWhileRevalidate(req, SHELL_CACHE);
+          const res = await fetch(req);
+          if (res.ok && !url.pathname.startsWith('/read/')) {
+            const cache = await caches.open(SHELL_CACHE);
+            cache.put(req, res.clone());
+          }
+          return res;
         } catch {
           const cache = await caches.open(SHELL_CACHE);
+          const hit = await cache.match(req);
+          if (hit) return hit;
           const offline = await cache.match('/offline.html');
           return offline ?? Response.error();
         }

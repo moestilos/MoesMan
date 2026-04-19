@@ -60,13 +60,23 @@ const {
       </footer>
     )}
     <InstallPrompt client:idle />
-    <script is:inline>
+    <script is:inline define:vars={{ isProd: import.meta.env.PROD }}>
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch((err) => {
-            console.warn('SW registro fallido:', err);
+        if (isProd) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch((err) => {
+              console.warn('SW registro fallido:', err);
+            });
           });
-        });
+        } else {
+          // En dev: desregistrar SW previo y limpiar caches (evita servir HTML viejo)
+          navigator.serviceWorker.getRegistrations().then((regs) => {
+            regs.forEach((r) => r.unregister());
+          });
+          if (window.caches) {
+            caches.keys().then((keys) => keys.forEach((k) => caches.delete(k)));
+          }
+        }
       }
     </script>
   </body>
