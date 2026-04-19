@@ -63,10 +63,10 @@ const lastChapter = chapters[chapters.length - 1];
           <div class="absolute inset-0 bg-gradient-to-r from-bg/90 via-bg/30 to-transparent"></div>
         </div>
 
-        <div class="container-app relative z-10 py-10 sm:py-16">
-          <div class="grid gap-8 md:grid-cols-[260px_1fr] md:gap-10 lg:grid-cols-[300px_1fr] lg:gap-14">
+        <div class="container-app relative z-10 py-8 sm:py-12 lg:py-16">
+          <div class="grid gap-6 sm:gap-8 md:grid-cols-[240px_1fr] md:gap-10 lg:grid-cols-[300px_1fr] lg:gap-14">
             <!-- Cover -->
-            <div class="mx-auto w-44 sm:w-56 md:w-full md:max-w-[300px]">
+            <div class="mx-auto w-40 xs:w-44 sm:w-56 md:w-full md:max-w-[300px]">
               <div class="group relative">
                 <img
                   src={cover}
@@ -81,7 +81,7 @@ const lastChapter = chapters[chapters.length - 1];
             <div class="flex min-w-0 flex-col gap-5">
               <div>
                 <span class="section-kicker">Manga · MangaDex</span>
-                <h1 class="mt-3 font-display text-3xl sm:text-5xl font-black leading-[1.05] tracking-tighter">{manga.title}</h1>
+                <h1 class="mt-3 font-display text-2xl xs:text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-black leading-[1.05] tracking-tighter break-words">{manga.title}</h1>
                 {manga.altTitles.length > 0 && (
                   <p class="mt-2 line-clamp-1 text-sm text-fg-muted">
                     Conocido como · {manga.altTitles.slice(0, 3).join(' · ')}

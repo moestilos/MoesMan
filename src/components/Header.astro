@@ -17,11 +17,11 @@ const navItems = [
 
 <header
   id="header-nav"
-  class="fixed top-4 inset-x-0 z-50 flex justify-center px-3 sm:px-4 pointer-events-none transition-all duration-300"
+  class="fixed top-3 sm:top-4 inset-x-0 z-50 flex justify-center px-2 sm:px-4 pointer-events-none transition-all duration-300"
 >
   <div
     id="pill-nav"
-    class="pointer-events-auto flex items-center gap-2 p-1.5 rounded-full border border-white/[0.08] bg-bg-raised/85 backdrop-blur-xl shadow-[0_8px_32px_-8px_rgba(0,0,0,0.5)] max-w-full transition-all duration-300 hover:border-brand-500/40"
+    class="pointer-events-auto flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 rounded-full border border-white/[0.08] bg-bg-raised/85 backdrop-blur-xl shadow-[0_8px_32px_-8px_rgba(0,0,0,0.5)] max-w-full transition-all duration-300 hover:border-brand-500/40"
   >
     <!-- Logo + wordmark -->
     <a
@@ -30,7 +30,7 @@ const navItems = [
       class="flex flex-none items-center gap-2 rounded-full px-2 py-1 transition-colors hover:bg-white/[0.04]"
     >
       <Logo size={28} withText={false} />
-      <span class="hidden sm:inline font-semibold tracking-[-0.025em] text-white text-[15px] leading-none">
+      <span class="hidden md:inline font-semibold tracking-[-0.025em] text-white text-[15px] leading-none">
         Ako
       </span>
     </a>
@@ -94,7 +94,7 @@ const navItems = [
   </div>
 </header>
 
-<div class="h-20" aria-hidden="true"></div>
+<div class="h-16 sm:h-20" aria-hidden="true"></div>
 
 <script is:inline>
   (() => {

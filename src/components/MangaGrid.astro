@@ -21,7 +21,7 @@ const { items, emptyLabel = 'Sin resultados.', ranked = false } = Astro.props;
     <p class="text-sm text-fg-muted">{emptyLabel}</p>
   </div>
 ) : (
-  <div class="grid gap-4 sm:gap-5 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 animate-fade-in">
+  <div class="grid gap-3 sm:gap-4 lg:gap-5 grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 animate-fade-in">
     {items.map((m, i) => <MangaCard manga={m} priority={i < 6} rank={ranked ? i + 1 : undefined} />)}
   </div>
 )}
