@@ -53,8 +53,8 @@ export default {
       },
       fontFamily: {
         sans: ['"Zen Kaku Gothic New"', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
-        display: ['"Zen Kaku Gothic New"', '"Zen Antique"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        accent: ['"Zen Antique"', 'serif'],
+        display: ['"Shippori Mincho B1"', '"Zen Kaku Gothic New"', 'ui-serif', 'Georgia', 'serif'],
+        rounded: ['"Zen Maru Gothic"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['ui-monospace', '"SF Mono"', 'Menlo', 'monospace'],
       },
       fontSize: {
