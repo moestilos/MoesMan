@@ -147,10 +147,59 @@ const lastChapter = chapters[chapters.length - 1];
 
               <!-- Description -->
               {manga.description && (
-                <p class="max-w-3xl text-[15px] leading-relaxed text-fg-muted whitespace-pre-line">
-                  {manga.description.length > 400 ? manga.description.slice(0, 400) + '…' : manga.description}
-                </p>
+                <div class="max-w-3xl">
+                  <div
+                    id="manga-desc"
+                    data-collapsed
+                    class="relative text-[15px] leading-relaxed text-fg-muted/95 whitespace-pre-line
+                           [&[data-collapsed]]:max-h-[7.5em] [&[data-collapsed]]:overflow-hidden"
+                  >
+                    {manga.description}
+                    <span
+                      class="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-bg/95 to-transparent
+                             [#manga-desc:not([data-collapsed])_&]:hidden"
+                    ></span>
+                  </div>
+                  {manga.description.length > 240 && (
+                    <button
+                      type="button"
+                      id="manga-desc-toggle"
+                      class="mt-2 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-brand-400 transition hover:text-brand-300"
+                    >
+                      <span data-more>Ver más</span>
+                      <span data-less class="hidden">Ver menos</span>
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="transition-transform"
+                      >
+                        <path d="m6 9 6 6 6-6"/>
+                      </svg>
+                    </button>
+                  )}
+                </div>
               )}
+              <script is:inline>
+                (() => {
+                  const t = document.getElementById('manga-desc-toggle');
+                  const d = document.getElementById('manga-desc');
+                  if (!t || !d) return;
+                  t.addEventListener('click', () => {
+                    const collapsed = d.hasAttribute('data-collapsed');
+                    if (collapsed) d.removeAttribute('data-collapsed');
+                    else d.setAttribute('data-collapsed', '');
+                    t.querySelector('[data-more]').classList.toggle('hidden');
+                    t.querySelector('[data-less]').classList.toggle('hidden');
+                    t.querySelector('svg').style.transform = collapsed ? 'rotate(180deg)' : 'rotate(0deg)';
+                  });
+                })();
+              </script>
 
               <!-- CTAs -->
               <div class="mt-2 flex flex-wrap items-center gap-3">

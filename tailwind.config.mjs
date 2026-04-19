@@ -51,9 +51,10 @@ export default {
         info: { 400: '#60a5fa', 500: '#3b82f6' },
       },
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
-        display: ['"Inter Display"', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+        sans: ['"Zen Kaku Gothic New"', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        display: ['"Zen Kaku Gothic New"', '"Zen Antique"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        accent: ['"Zen Antique"', 'serif'],
+        mono: ['ui-monospace', '"SF Mono"', 'Menlo', 'monospace'],
       },
       fontSize: {
         '2xs': ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.02em' }],

@@ -7,15 +7,15 @@ const activeSlug = Astro.url.searchParams.get('genre');
 const visible = CATEGORIES.filter((c) => nsfw || !c.nsfwOnly);
 ---
 
-<div class="mb-8 -mx-4 px-4 sm:mx-0 sm:px-0">
-  <div class="flex gap-2 overflow-x-auto pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+<div class="mb-8">
+  <div class="pill-row">
     <a
       href="/search"
       class:list={[
-        'inline-flex flex-none items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium ring-1 ring-inset transition',
+        'inline-flex flex-none items-center rounded-full px-4 py-2 text-sm font-medium ring-1 ring-inset transition whitespace-nowrap',
         !activeSlug && Astro.url.pathname === '/search'
-          ? 'bg-brand-600 text-white ring-brand-400 shadow-glow'
-          : 'bg-bg-card text-fg-muted ring-border hover:text-fg hover:ring-brand-500/40',
+          ? 'bg-brand-600 text-white ring-brand-400 shadow-glow-sm'
+          : 'bg-bg-card text-fg-muted ring-border hover:text-fg hover:ring-border-strong',
       ]}
     >
       Todo
@@ -26,8 +26,8 @@ const visible = CATEGORIES.filter((c) => nsfw || !c.nsfwOnly);
         class:list={[
           'inline-flex flex-none items-center rounded-full px-4 py-2 text-sm font-medium ring-1 ring-inset transition whitespace-nowrap',
           activeSlug === c.slug
-            ? 'bg-brand-600 text-white ring-brand-400 shadow-glow'
-            : 'bg-bg-card text-fg-muted ring-border hover:text-fg hover:ring-brand-500/40',
+            ? 'bg-brand-600 text-white ring-brand-400 shadow-glow-sm'
+            : 'bg-bg-card text-fg-muted ring-border hover:text-fg hover:ring-border-strong',
         ]}
       >
         {c.label}

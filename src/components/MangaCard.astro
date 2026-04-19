@@ -24,73 +24,65 @@ const isEcchi = manga.contentRating === 'erotica';
 
 <a
   href={href}
-  class="group relative block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+  class="group relative block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
 >
-  <!-- Tilted stack effect -->
-  <div class="relative aspect-[2/3] w-full overflow-hidden rounded-2xl bg-bg-card ring-1 ring-border shadow-card transition-all duration-500 ease-out group-hover:-translate-y-1.5 group-hover:shadow-card-lg group-hover:ring-brand-500/40">
+  <div class="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-bg-card ring-1 ring-border transition-all duration-300 ease-out group-hover:ring-brand-500/30 group-hover:shadow-card-lg">
     <img
       src={cover}
       alt={manga.title}
       loading={priority ? 'eager' : 'lazy'}
       decoding="async"
-      class="absolute inset-0 h-full w-full object-cover transition-all duration-[900ms] ease-out group-hover:scale-[1.08]"
+      class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
       onerror="this.src='/placeholder-cover.svg'"
     />
 
-    <!-- Gradient vignette -->
-    <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/95 via-black/35 to-transparent transition-opacity duration-500"></div>
-    <!-- Brand accent on hover -->
-    <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-brand-950/0 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:from-brand-950/70 group-hover:opacity-100"></div>
-    <!-- Inner highlight -->
-    <div class="pointer-events-none absolute inset-0 rounded-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]"></div>
+    <!-- Base vignette -->
+    <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
 
-    <!-- Rank badge (top-left) -->
+    <!-- Subtle brand tint on hover -->
+    <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-brand-950/0 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:from-brand-900/50 group-hover:opacity-100"></div>
+
+    <!-- Inner highlight for glass feel -->
+    <div class="pointer-events-none absolute inset-0 rounded-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"></div>
+
+    <!-- Rank badge top-left -->
     {rank !== undefined && (
-      <div class="absolute left-2 top-2 flex items-center gap-1">
-        <span class="inline-flex h-7 min-w-7 items-center justify-center rounded-lg bg-black/80 px-1.5 text-xs font-black text-white ring-1 ring-white/10 backdrop-blur">
+      <div class="absolute left-2 top-2">
+        <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-black/75 px-1.5 font-mono text-[11px] font-bold text-white ring-1 ring-white/10 backdrop-blur-sm">
           #{rank}
         </span>
       </div>
     )}
 
     <!-- Right-top badges -->
-    <div class="absolute right-2 top-2 flex flex-col items-end gap-1.5">
+    <div class="absolute right-2 top-2 flex flex-col items-end gap-1">
       {isNsfw && (
-        <span class="inline-flex items-center gap-1 rounded-md bg-rose-600/95 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-[0_0_12px_-2px_rgba(244,63,94,0.7)] ring-1 ring-rose-400/30">
+        <span class="inline-flex items-center rounded bg-rose-600/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white ring-1 ring-rose-400/30">
           18+
         </span>
       )}
       {isEcchi && !isNsfw && (
-        <span class="inline-flex items-center gap-1 rounded-md bg-rose-500/80 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white ring-1 ring-rose-400/30">
+        <span class="inline-flex items-center rounded bg-rose-500/75 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white ring-1 ring-rose-400/30">
           16+
         </span>
       )}
       {statusInfo.label && (
-        <span class:list={['inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold ring-1 ring-inset backdrop-blur', statusInfo.tone]}>
-          <span class:list={['inline-block h-1.5 w-1.5 rounded-full', statusInfo.dot]}></span>
+        <span class:list={['inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-semibold ring-1 ring-inset backdrop-blur-sm', statusInfo.tone]}>
+          <span class:list={['inline-block h-1 w-1 rounded-full', statusInfo.dot]}></span>
           {statusInfo.label}
         </span>
       )}
     </div>
 
-    <!-- Hover play indicator -->
-    <div class="absolute inset-0 flex items-center justify-center">
-      <span class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-brand-600 text-white opacity-0 ring-2 ring-white/20 shadow-[0_0_40px_-5px_rgba(245,53,106,0.9)] backdrop-blur transition-all duration-500 ease-spring group-hover:opacity-100 group-hover:scale-110 scale-75">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M8 5v14l11-7z"/>
-        </svg>
-      </span>
-    </div>
-
     <!-- Title + meta at bottom -->
-    <div class="absolute inset-x-0 bottom-0 p-3.5">
+    <div class="absolute inset-x-0 bottom-0 p-3">
       <h3
-        class="line-clamp-2 font-display text-sm font-bold leading-tight tracking-tight text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]"
+        class="line-clamp-2 text-[13px] font-semibold leading-snug text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"
         title={manga.title}
       >
         {manga.title}
       </h3>
-      <div class="mt-1.5 flex items-center gap-1.5 text-[11px] font-medium text-white/75">
+      <div class="mt-1 flex items-center gap-1.5 text-[10px] font-medium text-white/65">
         {manga.year && <span class="tabular-nums">{manga.year}</span>}
         {manga.year && manga.tags && manga.tags.length > 0 && <span class="opacity-40">·</span>}
         {manga.tags && manga.tags.length > 0 && (

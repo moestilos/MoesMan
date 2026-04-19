@@ -14,22 +14,10 @@
     @apply bg-bg text-fg antialiased;
     color-scheme: dark;
     scroll-behavior: smooth;
-    font-feature-settings: 'cv11', 'ss01', 'ss03';
+    font-feature-settings: 'palt';
   }
   body {
     @apply min-h-screen bg-bg font-sans text-base;
-    background-image:
-      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(245, 53, 106, 0.08), transparent 55%),
-      radial-gradient(ellipse 60% 40% at 100% 10%, rgba(139, 92, 246, 0.05), transparent 55%),
-      radial-gradient(ellipse 50% 50% at 0% 100%, rgba(245, 53, 106, 0.03), transparent 60%);
-    background-attachment: fixed;
-  }
-  body::before {
-    content: '';
-    @apply pointer-events-none fixed inset-0 z-0 opacity-[0.015];
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    background-size: 256px 256px;
-    mix-blend-mode: overlay;
   }
   *::selection {
     @apply bg-brand-500/30 text-fg;
@@ -154,15 +142,49 @@
 
   /* ---------- Horizontal rails ---------- */
   .rail {
-    @apply -mx-4 flex gap-4 overflow-x-auto px-4 pb-4 sm:mx-0 sm:px-0
-           snap-x snap-mandatory
+    @apply -mx-4 flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory
+           pl-4 pr-16 sm:mx-0 sm:pl-0
            [scrollbar-width:none] [-ms-overflow-style:none];
+    -webkit-mask-image: linear-gradient(
+      to right,
+      black 0,
+      black calc(100% - 80px),
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      black 0,
+      black calc(100% - 80px),
+      transparent
+    );
+    /* Padding extra dentro del mask para que el último card se lea */
+    padding-top: 4px;
   }
   .rail::-webkit-scrollbar {
     display: none;
   }
   .rail > * {
     @apply snap-start flex-none;
+  }
+  /* Tabs pill horizontales (GenreTabs) */
+  .pill-row {
+    @apply -mx-4 flex gap-2 overflow-x-auto pb-3 pl-4 pr-16 sm:mx-0 sm:pl-0
+           [scrollbar-width:none] [-ms-overflow-style:none];
+    -webkit-mask-image: linear-gradient(
+      to right,
+      black 0,
+      black calc(100% - 60px),
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      black 0,
+      black calc(100% - 60px),
+      transparent
+    );
+  }
+  .pill-row::-webkit-scrollbar {
+    display: none;
   }
 
   /* ---------- Utility: gradient text ---------- */

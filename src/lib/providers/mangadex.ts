@@ -93,23 +93,41 @@ function findCoverFilename(rels: MDRelationship[]): string | null {
   return file ?? null;
 }
 
+// Script latino (sin CJK/kana/hangul) — para evitar mostrar títulos sin traducir
+function isLatinScript(s: string): boolean {
+  return !/[\u3040-\u30ff\u31f0-\u31ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uac00-\ud7af]/.test(s);
+}
+
 function pickBestTitle(m: MDManga, langs: string[]): string {
-  // Prioridad: título principal en lang pref > altTitle en lang pref > título en EN > primer altTitle > fallback
-  for (const l of langs) {
-    if (m.attributes.title[l]) return m.attributes.title[l];
+  const preferred = [...langs, 'en', 'ja-ro', 'ko-ro', 'zh-ro', 'zh-ro-ph'];
+
+  // 1) Main title en orden de preferencia
+  for (const k of preferred) {
+    const v = m.attributes.title[k];
+    if (v && isLatinScript(v)) return v;
   }
-  for (const l of langs) {
-    const hit = m.attributes.altTitles.find((t) => t[l]);
-    if (hit && hit[l]) return hit[l]!;
+  // 2) AltTitles en orden de preferencia
+  for (const k of preferred) {
+    const hit = m.attributes.altTitles.find((t) => t[k] && isLatinScript(t[k]!));
+    if (hit) return hit[k]!;
   }
-  if (m.attributes.title.en) return m.attributes.title.en;
-  const firstAlt = m.attributes.altTitles.find((t) => Object.values(t).some(Boolean));
-  if (firstAlt) {
-    const val = Object.values(firstAlt).find(Boolean);
-    if (val) return val;
+  // 3) Cualquier altTitle en script latino
+  for (const t of m.attributes.altTitles) {
+    for (const v of Object.values(t)) {
+      if (v && isLatinScript(v)) return v;
+    }
   }
-  const any = Object.values(m.attributes.title).find(Boolean);
-  return any ?? 'Sin título';
+  // 4) Cualquier main title en script latino
+  for (const v of Object.values(m.attributes.title)) {
+    if (v && isLatinScript(v)) return v;
+  }
+  // 5) Fallback último: cualquier valor (puede ser CJK)
+  const firstMain = Object.values(m.attributes.title).find(Boolean);
+  if (firstMain) return firstMain;
+  const firstAlt = m.attributes.altTitles
+    .flatMap((t) => Object.values(t))
+    .find(Boolean);
+  return firstAlt ?? 'Sin título';
 }
 
 function mapSummary(m: MDManga, langs: string[]): MangaSummary {

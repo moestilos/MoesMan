@@ -2,6 +2,7 @@
 import '@/styles/global.css';
 import Header from '@/components/Header.astro';
 import BottomNav from '@/components/BottomNav.astro';
+import BgAurora from '@/components/BgAurora.astro';
 import InstallPrompt from '@/components/InstallPrompt';
 
 interface Props {
@@ -36,18 +37,19 @@ const {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Zen+Antique&display=swap"
       rel="stylesheet"
     />
     <title>{title}</title>
   </head>
   <body class:list={[hideChrome && 'reader-mode']}>
+    {!hideChrome && <BgAurora />}
     {!hideChrome && <Header />}
     <main class:list={[!fullBleed && 'container-app pt-6 pb-24 sm:pt-8', 'relative z-10']}>
       <slot />
     </main>
     {!hideChrome && (
-      <footer class="mt-20 border-t border-border bg-bg-sunken/50">
+      <footer class="relative z-10 mt-20 border-t border-border bg-bg-sunken/80 backdrop-blur">
         <div class="container-app py-12">
           <div class="grid gap-10 md:grid-cols-[1.6fr_1fr_1fr] md:gap-16">
             <div>
