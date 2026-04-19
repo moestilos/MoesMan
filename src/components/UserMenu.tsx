@@ -255,19 +255,25 @@ function Avatar({
   );
 }
 
-async function resizeImage(file: File, maxSize: number): Promise<string> {
+async function resizeImage(file: File, size: number): Promise<string> {
   const bitmap = await createImageBitmap(file);
-  const ratio = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
-  const w = Math.round(bitmap.width * ratio);
-  const h = Math.round(bitmap.height * ratio);
+  const srcSize = Math.min(bitmap.width, bitmap.height);
+  const sx = (bitmap.width - srcSize) / 2;
+  const sy = (bitmap.height - srcSize) / 2;
   const canvas = document.createElement('canvas');
-  canvas.width = w;
-  canvas.height = h;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Canvas no disponible');
-  ctx.drawImage(bitmap, 0, 0, w, h);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(bitmap, sx, sy, srcSize, srcSize, 0, 0, size, size);
   bitmap.close?.();
-  // Preferir JPEG para fotos (menor peso); PNG conserva transparencia
-  const mime = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-  return canvas.toDataURL(mime, 0.85);
+  let q = 0.82;
+  let data = canvas.toDataURL('image/jpeg', q);
+  while (data.length > 900 * 1024 && q > 0.4) {
+    q -= 0.1;
+    data = canvas.toDataURL('image/jpeg', q);
+  }
+  return data;
 }

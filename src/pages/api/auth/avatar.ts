@@ -4,7 +4,7 @@ import { commit, getDb } from '@/server/db';
 
 export const prerender = false;
 
-const MAX_BYTES = 256 * 1024; // 256 KB base64 → ~192 KB imagen
+const MAX_BYTES = 1024 * 1024; // 1 MB base64 (~750 KB imagen)
 
 export const POST: APIRoute = async (ctx) => {
   const user = await requireUser(ctx);
@@ -31,7 +31,7 @@ export const POST: APIRoute = async (ctx) => {
 
   if (typeof raw !== 'string') return jsonError(400, 'avatarUrl requerido');
   if (!raw.startsWith('data:image/')) return jsonError(400, 'Formato inválido (data URL image/*)');
-  if (raw.length > MAX_BYTES) return jsonError(413, 'Imagen demasiado grande (máx 256KB)');
+  if (raw.length > MAX_BYTES) return jsonError(413, 'Imagen demasiado grande');
 
   const db = await getDb();
   const u = db.users.find((x) => x.id === user.id);
