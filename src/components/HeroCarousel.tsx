@@ -127,14 +127,15 @@ export default function HeroCarousel({ items, intervalMs = 7000 }: Props) {
                 )}
 
                 {/* CTAs */}
-                <div className="mt-1 flex flex-wrap gap-2">
-                  <a href={`/manga/${item.id}`} className="btn btn-primary">
+                <div className="mt-1 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                  <a href={`/manga/${item.id}`} className="btn btn-primary justify-center">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                       <path d="M8 5v14l11-7z"/>
                     </svg>
-                    Ver detalles
+                    Ver
+                    <span className="hidden xs:inline">&nbsp;detalles</span>
                   </a>
-                  <a href="/search" className="btn btn-secondary">Explorar</a>
+                  <a href="/search" className="btn btn-secondary justify-center">Explorar</a>
                 </div>
               </div>
 
