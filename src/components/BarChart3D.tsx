@@ -1,25 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 interface Props {
-  data: Array<[string, number]>; // [day, count]
-  height?: number;
+  data: Array<[string, number]>;
   className?: string;
   title?: string;
   subtitle?: string;
 }
 
-// Isometric 3D bars rendered with SVG polygons (front + top + right side).
-// Perspective simulado con ejes isométricos. Sin deps externas.
+// Area chart moderno: linea suave + fill gradient + puntos hover.
+// Limpio, pro, sin 3D fake.
 export default function BarChart3D({
   data,
-  height = 260,
   className = '',
   title,
   subtitle,
 }: Props) {
   const [mounted, setMounted] = useState(false);
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 60);
@@ -27,66 +25,108 @@ export default function BarChart3D({
   }, []);
 
   const max = useMemo(() => Math.max(1, ...data.map(([, v]) => v)), [data]);
+  const total = useMemo(() => data.reduce((s, [, v]) => s + v, 0), [data]);
+  const avg = data.length > 0 ? total / data.length : 0;
   const count = data.length;
 
-  // Layout
-  const depth = 14; // desplazamiento isométrico diagonal
-  const padLeft = 40;
-  const padRight = 20;
-  const padTop = 20;
-  const padBottom = 36;
-  const W = 900; // viewBox width (scalable)
-  const H = height;
-  const plotW = W - padLeft - padRight - depth;
-  const plotH = H - padTop - padBottom - depth;
-  const barGap = 3;
-  const barW = Math.max(6, plotW / Math.max(1, count) - barGap);
+  const W = 900;
+  const H = 280;
+  const padL = 44;
+  const padR = 20;
+  const padT = 24;
+  const padB = 36;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
 
-  // Y axis ticks
+  // Si pocos datos, replicar puntos para no dar impresión de línea plana
+  // Si count === 1, mostramos como KPI grande en vez de line chart
+  const singleMode = count <= 1;
+
+  // Points
+  const pts = data.map(([day, v], i) => {
+    const x = count === 1 ? padL + plotW / 2 : padL + (i / (count - 1)) * plotW;
+    const y = padT + plotH - (v / max) * plotH;
+    return { x, y, day, v };
+  });
+
+  // Smooth path (catmull-rom → bezier)
+  function smoothPath(points: { x: number; y: number }[]): string {
+    if (points.length === 0) return '';
+    if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
+    let d = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i - 1] ?? points[i];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[i + 2] ?? p2;
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+      d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+    }
+    return d;
+  }
+  const linePath = smoothPath(pts);
+  const areaPath =
+    pts.length > 0
+      ? `${linePath} L ${pts[pts.length - 1].x} ${padT + plotH} L ${pts[0].x} ${padT + plotH} Z`
+      : '';
+
   const ticks = 4;
   const tickVals = Array.from({ length: ticks + 1 }, (_, i) => Math.round((max * i) / ticks));
+
+  const hoverPt = hoverIdx !== null ? pts[hoverIdx] : null;
 
   return (
     <section className={`surface p-4 sm:p-6 ${className}`}>
       {(title || subtitle) && (
-        <div className="mb-4">
-          {subtitle && <span className="section-kicker">{subtitle}</span>}
-          {title && <h3 className="mt-2 font-display text-lg sm:text-xl font-bold tracking-tight">{title}</h3>}
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            {subtitle && <span className="section-kicker">{subtitle}</span>}
+            {title && <h3 className="mt-2 font-display text-lg sm:text-xl font-bold tracking-tight">{title}</h3>}
+          </div>
+          <div className="flex flex-none items-baseline gap-3 text-right">
+            <div>
+              <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-fg-subtle">Total</div>
+              <div className="font-display text-lg sm:text-xl font-black tabular-nums text-fg">{total}</div>
+            </div>
+            <div>
+              <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-fg-subtle">Promedio</div>
+              <div className="font-display text-lg sm:text-xl font-black tabular-nums text-brand-300">
+                {avg.toFixed(1)}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
       {count === 0 ? (
-        <p className="py-10 text-center text-sm text-fg-muted">Sin datos.</p>
+        <p className="py-10 text-center text-sm text-fg-muted">Sin datos aún.</p>
       ) : (
         <div
-          ref={containerRef}
-          className="relative w-full h-[200px] xs:h-[240px] sm:h-auto sm:aspect-[900/260] overflow-hidden rounded-lg"
+          className="relative w-full h-[220px] xs:h-[260px] sm:h-auto sm:aspect-[900/280] overflow-hidden"
+          onMouseLeave={() => setHoverIdx(null)}
         >
           <svg
+            ref={svgRef}
             viewBox={`0 0 ${W} ${H}`}
-            className="absolute inset-0 h-full w-full overflow-visible"
+            className="absolute inset-0 h-full w-full"
+            preserveAspectRatio="none"
           >
             <defs>
-              <linearGradient id="bar3d-front" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="rgb(var(--brand-300))" stopOpacity="1" />
-                <stop offset="55%" stopColor="rgb(var(--brand-500))" stopOpacity="1" />
-                <stop offset="100%" stopColor="rgb(var(--brand-700))" stopOpacity="1" />
+              <linearGradient id="area-fill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="rgb(var(--brand-400))" stopOpacity="0.55" />
+                <stop offset="60%" stopColor="rgb(var(--brand-500))" stopOpacity="0.15" />
+                <stop offset="100%" stopColor="rgb(var(--brand-500))" stopOpacity="0" />
               </linearGradient>
-              <linearGradient id="bar3d-front-hover" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="rgb(var(--brand-200))" stopOpacity="1" />
-                <stop offset="55%" stopColor="rgb(var(--brand-400))" stopOpacity="1" />
-                <stop offset="100%" stopColor="rgb(var(--brand-600))" stopOpacity="1" />
+              <linearGradient id="area-line" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="rgb(var(--brand-300))" />
+                <stop offset="50%" stopColor="rgb(var(--brand-500))" />
+                <stop offset="100%" stopColor="rgb(var(--accent-500))" />
               </linearGradient>
-              <linearGradient id="bar3d-top" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="rgb(var(--brand-200))" stopOpacity="1" />
-                <stop offset="100%" stopColor="rgb(var(--brand-400))" stopOpacity="1" />
-              </linearGradient>
-              <linearGradient id="bar3d-side" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="rgb(var(--brand-600))" stopOpacity="1" />
-                <stop offset="100%" stopColor="rgb(var(--brand-900))" stopOpacity="1" />
-              </linearGradient>
-              <filter id="bar3d-glow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="6" result="blur" />
+              <filter id="line-glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
                 <feMerge>
                   <feMergeNode in="blur" />
                   <feMergeNode in="SourceGraphic" />
@@ -94,33 +134,25 @@ export default function BarChart3D({
               </filter>
             </defs>
 
-            {/* Grid Y lines (back plane) */}
+            {/* Grid Y */}
             {tickVals.map((v, i) => {
-              const y = padTop + plotH - (v / max) * plotH;
+              const y = padT + plotH - (v / max) * plotH;
               return (
                 <g key={`grid-${i}`}>
                   <line
-                    x1={padLeft + depth}
+                    x1={padL}
                     y1={y}
-                    x2={padLeft + depth + plotW}
+                    x2={W - padR}
                     y2={y}
-                    stroke="rgba(255,255,255,0.06)"
+                    stroke="rgba(255,255,255,0.05)"
                     strokeWidth="1"
-                    strokeDasharray="2 4"
-                  />
-                  <line
-                    x1={padLeft}
-                    y1={y + depth}
-                    x2={padLeft + depth}
-                    y2={y}
-                    stroke="rgba(255,255,255,0.04)"
-                    strokeWidth="1"
+                    strokeDasharray={i === 0 ? '' : '3 4'}
                   />
                   <text
-                    x={padLeft - 6}
-                    y={y + depth + 4}
-                    fill="rgba(200,200,210,0.65)"
-                    fontSize="13"
+                    x={padL - 8}
+                    y={y + 4}
+                    fill="rgba(200,200,210,0.55)"
+                    fontSize="11"
                     fontWeight="600"
                     textAnchor="end"
                     className="tabular-nums"
@@ -131,117 +163,113 @@ export default function BarChart3D({
               );
             })}
 
-            {/* Floor (base plane, isometric parallelogram) */}
-            <path
-              d={`M ${padLeft} ${padTop + plotH + depth} L ${padLeft + plotW} ${padTop + plotH + depth} L ${padLeft + plotW + depth} ${padTop + plotH} L ${padLeft + depth} ${padTop + plotH} Z`}
-              fill="rgba(255,255,255,0.02)"
-              stroke="rgba(255,255,255,0.05)"
-              strokeWidth="1"
-            />
+            {/* Area fill */}
+            {!singleMode && (
+              <path
+                d={areaPath}
+                fill="url(#area-fill)"
+                style={{
+                  opacity: mounted ? 1 : 0,
+                  transition: 'opacity 600ms ease-out',
+                }}
+              />
+            )}
+            {/* Line */}
+            {!singleMode && (
+              <path
+                d={linePath}
+                fill="none"
+                stroke="url(#area-line)"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                filter="url(#line-glow)"
+                style={{
+                  strokeDasharray: 3000,
+                  strokeDashoffset: mounted ? 0 : 3000,
+                  transition: 'stroke-dashoffset 1200ms cubic-bezier(0.16,1,0.3,1)',
+                }}
+              />
+            )}
 
-            {/* Bars */}
-            {data.map(([day, count], i) => {
-              const x0 = padLeft + depth + i * (barW + barGap);
-              const targetH = (count / max) * plotH;
-              const h = mounted ? targetH : 0;
-              const y0 = padTop + plotH - h;
+            {/* Dots + hover zones */}
+            {pts.map((p, i) => {
               const isHover = hoverIdx === i;
-              const isDim = hoverIdx !== null && !isHover;
-
-              // Front face
-              const frontPts = `${x0},${y0} ${x0 + barW},${y0} ${x0 + barW},${y0 + h} ${x0},${y0 + h}`;
-              // Top face (parallelogram)
-              const topPts = `${x0},${y0} ${x0 + barW},${y0} ${x0 + barW - depth},${y0 - depth} ${x0 - depth},${y0 - depth}`;
-              // Right side face
-              const sidePts = `${x0 + barW},${y0} ${x0 + barW - depth},${y0 - depth} ${x0 + barW - depth},${y0 + h - depth} ${x0 + barW},${y0 + h}`;
-
-              const label = day.slice(-5); // MM-DD
-
+              const zoneW = Math.max(24, plotW / Math.max(1, count - 1));
               return (
-                <g
-                  key={day}
-                  style={{
-                    opacity: isDim ? 0.4 : 1,
-                    transition: 'opacity 200ms ease',
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={() => setHoverIdx(i)}
-                  onMouseLeave={() => setHoverIdx(null)}
-                >
-                  {/* Clickable invisible rect (full height for easy hover) */}
+                <g key={`pt-${i}`}>
+                  {/* Hover zone invisible */}
                   <rect
-                    x={x0 - 2}
-                    y={padTop - depth}
-                    width={barW + 4}
-                    height={plotH + depth}
+                    x={p.x - zoneW / 2}
+                    y={padT}
+                    width={zoneW}
+                    height={plotH}
                     fill="transparent"
+                    onMouseEnter={() => setHoverIdx(i)}
+                    style={{ cursor: 'pointer' }}
                   />
-                  {/* Side */}
-                  <polygon
-                    points={sidePts}
-                    fill="url(#bar3d-side)"
+                  {/* Dot */}
+                  <circle
+                    cx={p.x}
+                    cy={p.y}
+                    r={isHover ? 6 : singleMode ? 5 : 3}
+                    fill={isHover || singleMode ? 'rgb(var(--brand-400))' : 'rgb(var(--brand-500))'}
+                    stroke="#0a0a0d"
+                    strokeWidth={isHover || singleMode ? 3 : 2}
                     style={{
-                      transition: 'all 900ms cubic-bezier(0.16,1,0.3,1)',
+                      transition: 'r 160ms ease, fill 160ms ease',
+                      opacity: mounted ? 1 : 0,
+                      transitionProperty: 'r, fill, opacity',
+                      filter: isHover ? 'drop-shadow(0 0 8px rgb(var(--brand-500) / 0.8))' : undefined,
                     }}
                   />
-                  {/* Front */}
-                  <polygon
-                    points={frontPts}
-                    fill={isHover ? 'url(#bar3d-front-hover)' : 'url(#bar3d-front)'}
-                    filter={isHover ? 'url(#bar3d-glow)' : undefined}
-                    style={{
-                      transition: 'all 900ms cubic-bezier(0.16,1,0.3,1)',
-                    }}
-                  />
-                  {/* Top */}
-                  <polygon
-                    points={topPts}
-                    fill="url(#bar3d-top)"
-                    style={{
-                      transition: 'all 900ms cubic-bezier(0.16,1,0.3,1)',
-                    }}
-                  />
-                  {/* Value label on hover */}
-                  {isHover && (
-                    <g>
-                      <rect
-                        x={x0 - 20}
-                        y={y0 - depth - 30}
-                        width={barW + 40}
-                        height="22"
-                        rx="5"
-                        fill="rgba(14,14,18,0.96)"
-                        stroke="rgba(255,255,255,0.18)"
-                        strokeWidth="1"
-                      />
-                      <text
-                        x={x0 + barW / 2 - depth / 2}
-                        y={y0 - depth - 13}
-                        fill="#fff"
-                        fontSize="14"
-                        fontWeight="700"
-                        textAnchor="middle"
-                        className="tabular-nums"
-                      >
-                        {count}
-                      </text>
-                    </g>
-                  )}
-                  {/* X label (sparse: 5 a lo largo) */}
-                  {(count > 0 && (i % Math.max(1, Math.ceil(data.length / 5)) === 0 || i === data.length - 1)) && (
-                    <text
-                      x={x0 + barW / 2}
-                      y={padTop + plotH + depth + 18}
-                      fill="rgba(200,200,210,0.65)"
-                      fontSize="12"
-                      fontWeight="600"
-                      textAnchor="middle"
-                      className="tabular-nums"
-                    >
-                      {label}
-                    </text>
-                  )}
                 </g>
+              );
+            })}
+
+            {/* Hover vertical line + tooltip */}
+            {hoverPt && (
+              <g>
+                <line
+                  x1={hoverPt.x}
+                  y1={padT}
+                  x2={hoverPt.x}
+                  y2={padT + plotH}
+                  stroke="rgba(255,255,255,0.18)"
+                  strokeWidth="1"
+                  strokeDasharray="3 3"
+                />
+                {/* Tooltip */}
+                <g transform={`translate(${Math.min(Math.max(padL, hoverPt.x - 50), W - padR - 100)}, ${Math.max(padT, hoverPt.y - 54)})`}>
+                  <rect width="100" height="42" rx="6" fill="rgba(14,14,18,0.96)" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+                  <text x="10" y="16" fill="rgba(200,200,210,0.7)" fontSize="10" fontWeight="700" letterSpacing="0.5">
+                    {hoverPt.day.slice(-5)}
+                  </text>
+                  <text x="10" y="34" fill="#fff" fontSize="16" fontWeight="800" className="tabular-nums">
+                    {hoverPt.v}
+                    <tspan fill="rgba(200,200,210,0.6)" fontSize="10" fontWeight="600"> visitas</tspan>
+                  </text>
+                </g>
+              </g>
+            )}
+
+            {/* X labels sparse */}
+            {pts.map((p, i) => {
+              const step = Math.max(1, Math.ceil(count / 5));
+              if (count > 1 && (i % step !== 0 && i !== count - 1)) return null;
+              return (
+                <text
+                  key={`xl-${i}`}
+                  x={p.x}
+                  y={padT + plotH + 20}
+                  fill="rgba(200,200,210,0.6)"
+                  fontSize="11"
+                  fontWeight="600"
+                  textAnchor="middle"
+                  className="tabular-nums"
+                >
+                  {p.day.slice(-5)}
+                </text>
               );
             })}
           </svg>
