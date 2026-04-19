@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getToken, isAuthed, getUser } from '@/lib/auth-client';
 import DonutChart, { type DonutSegment } from './DonutChart';
+import BarChart3D from './BarChart3D';
 import AdminMangaList from './AdminMangaList';
 
 interface Stats {
@@ -63,8 +64,6 @@ export default function AdminDashboard() {
     );
   }
 
-  const maxDay = Math.max(1, ...stats.last30Days.map(([, v]) => v));
-
   return (
     <div className="space-y-8 animate-fade-in-up">
       {/* Totales */}
@@ -80,37 +79,12 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      {/* Gráfico por día */}
-      <section className="surface p-6">
-        <div className="mb-4">
-          <span className="section-kicker">Tráfico</span>
-          <h3 className="mt-2 font-display text-xl font-bold">Visitas únicas por día (últimos 30)</h3>
-        </div>
-        {stats.last30Days.length === 0 ? (
-          <p className="py-8 text-center text-sm text-fg-muted">Sin visitas registradas aún.</p>
-        ) : (
-          <div className="flex h-48 items-end gap-1">
-            {stats.last30Days.map(([day, count]) => {
-              const h = Math.max(4, (count / maxDay) * 100);
-              return (
-                <div
-                  key={day}
-                  className="group relative flex-1 min-w-[8px]"
-                  title={`${day} — ${count} visitas`}
-                >
-                  <div
-                    className="w-full rounded-t-md bg-gradient-to-t from-brand-700 to-brand-400 transition-all hover:from-brand-500 hover:to-brand-300"
-                    style={{ height: `${h}%` }}
-                  />
-                  <div className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 rounded-md bg-bg-elevated px-2 py-0.5 text-[10px] font-semibold text-fg ring-1 ring-border opacity-0 transition-opacity group-hover:opacity-100 whitespace-nowrap">
-                    {count}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
+      {/* Gráfico por día 3D */}
+      <BarChart3D
+        subtitle="Tráfico"
+        title="Visitas únicas por día (últimos 30)"
+        data={stats.last30Days}
+      />
 
       {/* Donut charts: Device + Browser */}
       <div className="grid gap-6 lg:grid-cols-2">
