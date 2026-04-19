@@ -1,0 +1,20 @@
+---
+import MangaCard from './MangaCard.astro';
+import type { MangaSummary } from '@/lib/providers/types';
+
+interface Props {
+  items: MangaSummary[];
+  emptyLabel?: string;
+}
+const { items, emptyLabel = 'Sin resultados.' } = Astro.props;
+---
+
+{items.length === 0 ? (
+  <p class="py-16 text-center text-fg-muted">{emptyLabel}</p>
+) : (
+  <div
+    class="grid gap-4 sm:gap-5 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 animate-fade-in"
+  >
+    {items.map((m, i) => <MangaCard manga={m} priority={i < 6} />)}
+  </div>
+)}

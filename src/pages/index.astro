@@ -1,0 +1,97 @@
+---
+import Base from '@/layouts/Base.astro';
+import MangaGrid from '@/components/MangaGrid.astro';
+import GridSkeleton from '@/components/GridSkeleton.astro';
+import { getProvider } from '@/lib/providers';
+
+const provider = getProvider('mangadex');
+
+const featuredQueries = ['one piece', 'chainsaw man', 'jujutsu kaisen', 'solo leveling'];
+const pick = featuredQueries[Math.floor(Math.random() * featuredQueries.length)];
+
+let popular: Awaited<ReturnType<typeof provider.search>> = [];
+let trending: Awaited<ReturnType<typeof provider.search>> = [];
+let error: string | null = null;
+
+try {
+  [popular, trending] = await Promise.all([
+    provider.search({ query: pick, limit: 18 }),
+    provider.search({ query: 'manga', limit: 12 }),
+  ]);
+} catch (e) {
+  error = e instanceof Error ? e.message : 'Error cargando';
+}
+
+const hero = popular[0];
+---
+
+<Base title="MoesMan — Inicio">
+  {hero && (
+    <section class="relative mb-12 overflow-hidden rounded-3xl ring-1 ring-border animate-slide-up">
+      <div class="relative aspect-[16/9] sm:aspect-[21/9] w-full bg-bg-card">
+        {hero.coverUrl && (
+          <img
+            src={hero.coverUrl}
+            alt=""
+            aria-hidden="true"
+            class="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl opacity-60"
+          />
+        )}
+        <div class="absolute inset-0 bg-gradient-to-r from-bg via-bg/80 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-bg via-transparent to-transparent"></div>
+        <div class="relative z-10 flex h-full items-end sm:items-center">
+          <div class="flex max-w-2xl flex-col gap-4 p-6 sm:p-10">
+            <span class="badge-brand w-fit">Destacado</span>
+            <h1 class="text-3xl sm:text-5xl font-bold leading-tight drop-shadow">
+              {hero.title}
+            </h1>
+            {hero.tags && hero.tags.length > 0 && (
+              <div class="flex flex-wrap gap-1.5">
+                {hero.tags.slice(0, 5).map((t) => <span class="badge-muted">{t}</span>)}
+              </div>
+            )}
+            <div class="flex gap-3">
+              <a href={`/manga/${hero.id}`} class="btn-primary">Ver detalles</a>
+              <a href="/search" class="btn-ghost">Explorar</a>
+            </div>
+          </div>
+          {hero.coverUrl && (
+            <div class="hidden md:block absolute right-10 bottom-1/2 translate-y-1/2 w-56 lg:w-72">
+              <img
+                src={hero.coverUrl}
+                alt={hero.title}
+                class="rounded-xl ring-1 ring-white/10 shadow-card"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {error && (
+    <div class="mb-8 rounded-xl border border-brand-500/40 bg-brand-500/10 p-4 text-sm text-brand-200">
+      No se pudo conectar con MangaDex: {error}
+    </div>
+  )}
+
+  <section class="mb-12">
+    <header class="mb-4 flex items-end justify-between">
+      <h2 class="text-xl sm:text-2xl font-bold">Populares ahora</h2>
+      <a href="/search" class="text-sm link-hover text-fg-muted">Ver más →</a>
+    </header>
+    {popular.length === 0 && !error ? (
+      <GridSkeleton count={12} />
+    ) : (
+      <MangaGrid items={popular.slice(0, 12)} />
+    )}
+  </section>
+
+  <section class="mb-6">
+    <header class="mb-4 flex items-end justify-between">
+      <h2 class="text-xl sm:text-2xl font-bold">En tendencia</h2>
+      <a href="/search" class="text-sm link-hover text-fg-muted">Ver más →</a>
+    </header>
+    {trending.length === 0 && !error ? <GridSkeleton count={12} /> : <MangaGrid items={trending} />}
+  </section>
+</Base>

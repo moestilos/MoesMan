@@ -1,0 +1,69 @@
+---
+import Base from '@/layouts/Base.astro';
+import Reader from '@/components/Reader';
+import { getProvider } from '@/lib/providers';
+
+const { chapterId } = Astro.params;
+if (!chapterId) return Astro.redirect('/');
+
+const mangaIdParam = Astro.url.searchParams.get('manga');
+const provider = getProvider('mangadex');
+
+let pages: string[] = [];
+let chapters: Array<{ id: string; number: string | null; title: string | null; language: string }> = [];
+let error: string | null = null;
+let mangaId = mangaIdParam ?? '';
+
+try {
+  const pageData = await provider.getChapterPages(chapterId);
+  pages = pageData.pages;
+
+  if (mangaId) {
+    const full = await provider.listChapters({ mangaId, limit: 300, order: 'asc' });
+    chapters = full.map((c) => ({
+      id: c.id,
+      number: c.number,
+      title: c.title,
+      language: c.language,
+    }));
+  }
+} catch (e) {
+  error = e instanceof Error ? e.message : 'Error';
+}
+---
+
+<Base title="Lector — MoesMan" fullBleed>
+  {error ? (
+    <div class="container-app py-20 text-center">
+      <h1 class="text-2xl font-bold mb-2">Error cargando capítulo</h1>
+      <p class="text-fg-muted">{error}</p>
+      <a href="/" class="btn-primary mt-6">Volver al inicio</a>
+    </div>
+  ) : pages.length === 0 ? (
+    <div class="container-app py-20 text-center">
+      <h1 class="text-2xl font-bold mb-2">Capítulo vacío</h1>
+      <p class="text-fg-muted">Este capítulo no tiene páginas disponibles.</p>
+    </div>
+  ) : (
+    <Reader
+      client:load
+      mangaId={mangaId}
+      chapterId={chapterId}
+      pages={pages}
+      chapters={chapters}
+    />
+  )}
+</Base>
+
+<style is:global>
+  body {
+    background: #000 !important;
+    background-image: none !important;
+  }
+  footer {
+    display: none;
+  }
+  header.sticky:first-of-type {
+    display: none;
+  }
+</style>

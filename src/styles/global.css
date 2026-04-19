@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply bg-bg text-fg antialiased;
+    color-scheme: dark;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply min-h-screen bg-bg font-sans;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(244, 63, 94, 0.10), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 100% 0%, rgba(139, 92, 246, 0.06), transparent 60%);
+    background-attachment: fixed;
+  }
+  *::selection {
+    @apply bg-brand-500/30 text-fg;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-track {
+    @apply bg-bg-elevated;
+  }
+  *::-webkit-scrollbar-thumb {
+    @apply bg-border-strong rounded-full;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    @apply bg-fg-subtle;
+  }
+}
+
+@layer components {
+  .container-app {
+    @apply mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-10;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 ring-1 ring-inset ring-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-primary {
+    @apply btn bg-brand-600 hover:bg-brand-500 text-white shadow-glow;
+  }
+  .btn-ghost {
+    @apply btn bg-bg-card hover:bg-bg-hover text-fg ring-border;
+  }
+  .card {
+    @apply bg-bg-card ring-1 ring-border rounded-2xl overflow-hidden transition-all duration-300;
+  }
+  .skeleton {
+    @apply bg-bg-card relative overflow-hidden;
+    background-image: linear-gradient(90deg, #17171a 0%, #222226 50%, #17171a 100%);
+    background-size: 400px 100%;
+    animation: shimmer 1.6s linear infinite;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset;
+  }
+  .badge-brand {
+    @apply badge bg-brand-500/10 text-brand-300 ring-brand-500/30;
+  }
+  .badge-muted {
+    @apply badge bg-bg-hover text-fg-muted ring-border;
+  }
+  .link-hover {
+    @apply transition-colors duration-200 hover:text-brand-400;
+  }
+}

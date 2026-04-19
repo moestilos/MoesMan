@@ -1,0 +1,48 @@
+---
+const pathname = Astro.url.pathname;
+const isActive = (p: string) => (pathname === p ? 'text-fg' : 'text-fg-muted hover:text-fg');
+const q = Astro.url.searchParams.get('q') ?? '';
+---
+
+<header class="sticky top-0 z-40 border-b border-border/70 bg-bg/70 backdrop-blur-xl">
+  <div class="container-app flex h-16 items-center gap-4 sm:gap-6">
+    <a href="/" class="flex items-center gap-2 group">
+      <span
+        class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 font-black text-white shadow-glow ring-1 ring-brand-400/30"
+      >
+        M
+      </span>
+      <span class="text-lg font-bold tracking-tight group-hover:text-brand-400 transition-colors">
+        MoesMan
+      </span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-5 text-sm font-medium">
+      <a href="/" class={`link-hover ${isActive('/')}`}>Inicio</a>
+      <a href="/search" class={`link-hover ${isActive('/search')}`}>Explorar</a>
+    </nav>
+
+    <form action="/search" method="get" class="ml-auto flex-1 max-w-md">
+      <label class="relative block">
+        <span class="sr-only">Buscar manga</span>
+        <span
+          class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-fg-subtle"
+          aria-hidden="true"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+        </span>
+        <input
+          type="search"
+          name="q"
+          value={q}
+          placeholder="Buscar manga…"
+          autocomplete="off"
+          class="w-full rounded-xl bg-bg-card pl-9 pr-3 py-2.5 text-sm text-fg placeholder:text-fg-subtle ring-1 ring-inset ring-border focus:ring-brand-500/60 focus:outline-none transition"
+        />
+      </label>
+    </form>
+  </div>
+</header>

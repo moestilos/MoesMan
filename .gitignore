@@ -1,0 +1,11 @@
+node_modules
+dist
+.astro
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+.vercel
+.vscode/*
+!.vscode/extensions.json

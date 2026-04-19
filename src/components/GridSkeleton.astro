@@ -1,0 +1,13 @@
+---
+interface Props {
+  count?: number;
+}
+const { count = 12 } = Astro.props;
+const arr = Array.from({ length: count });
+---
+
+<div class="grid gap-4 sm:gap-5 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+  {arr.map(() => (
+    <div class="skeleton aspect-[2/3] rounded-xl"></div>
+  ))}
+</div>

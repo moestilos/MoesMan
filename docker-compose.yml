@@ -1,0 +1,56 @@
+# MoesMan — entorno Docker
+# Fase 1: solo 'web'. Postgres preparado pero comentado (Fase 2).
+#
+# Uso:
+#   docker compose up web           -> desarrollo producción (build)
+#   docker compose up web-dev       -> desarrollo con hot reload
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: moesman-web:latest
+    container_name: moesman-web
+    ports:
+      - "4321:4321"
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 4321
+    restart: unless-stopped
+
+  web-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: moesman-web-dev:latest
+    container_name: moesman-web-dev
+    ports:
+      - "4321:4321"
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./astro.config.mjs:/app/astro.config.mjs
+      - ./tailwind.config.mjs:/app/tailwind.config.mjs
+      - ./tsconfig.json:/app/tsconfig.json
+    environment:
+      HOST: 0.0.0.0
+    profiles: ["dev"]
+
+  # --- Fase 2 (descomenta cuando añadas el backend NestJS + Drizzle) ---
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: moesman-db
+  #   environment:
+  #     POSTGRES_USER: moesman
+  #     POSTGRES_PASSWORD: moesman
+  #     POSTGRES_DB: moesman
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - moesman-db:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+# volumes:
+#   moesman-db:
