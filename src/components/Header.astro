@@ -3,31 +3,55 @@ import UserMenu from './UserMenu';
 import Logo from './Logo.astro';
 
 const pathname = Astro.url.pathname;
-const isActive = (p: string) =>
-  pathname === p
-    ? 'text-fg after:scale-x-100'
-    : 'text-fg-muted hover:text-fg after:scale-x-0 hover:after:scale-x-100';
+const navItem = (p: string) =>
+  pathname === p || (p !== '/' && pathname.startsWith(p))
+    ? 'text-fg'
+    : 'text-fg-muted hover:text-fg';
+const navUnderline = (p: string) =>
+  pathname === p || (p !== '/' && pathname.startsWith(p)) ? 'scale-x-100' : 'scale-x-0';
 const q = Astro.url.searchParams.get('q') ?? '';
 ---
 
-<header class="sticky top-0 z-40 border-b border-border/60 bg-bg/70 backdrop-blur-xl supports-[backdrop-filter]:bg-bg/60">
+<header
+  class="sticky top-0 z-40 transition-all duration-300
+         [html.scrolled_&]:bg-bg/85 [html.scrolled_&]:backdrop-blur-xl [html.scrolled_&]:shadow-[0_1px_0_0_rgba(255,255,255,0.04)]
+         bg-bg/40 backdrop-blur-sm"
+>
   <div class="container-app flex h-16 items-center gap-3 sm:gap-6">
-    <Logo size={36} />
+    <Logo size={38} />
 
-    <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
-      <a href="/" class:list={['relative py-1 transition-colors after:absolute after:-bottom-0.5 after:left-0 after:h-0.5 after:w-full after:origin-left after:bg-brand-500 after:transition-transform after:duration-300', isActive('/')]}>Inicio</a>
-      <a href="/search" class:list={['relative py-1 transition-colors after:absolute after:-bottom-0.5 after:left-0 after:h-0.5 after:w-full after:origin-left after:bg-brand-500 after:transition-transform after:duration-300', isActive('/search')]}>Explorar</a>
-      <a href="/library" class:list={['relative py-1 transition-colors after:absolute after:-bottom-0.5 after:left-0 after:h-0.5 after:w-full after:origin-left after:bg-brand-500 after:transition-transform after:duration-300', isActive('/library')]}>Biblioteca</a>
+    <nav class="hidden md:flex items-center gap-1 text-sm font-medium ml-2">
+      {[
+        { href: '/', label: 'Inicio' },
+        { href: '/search', label: 'Explorar' },
+        { href: '/library', label: 'Biblioteca' },
+      ].map(({ href, label }) => (
+        <a
+          href={href}
+          class:list={[
+            'group relative rounded-full px-3.5 py-2 transition-colors',
+            navItem(href),
+          ]}
+        >
+          <span>{label}</span>
+          <span
+            class:list={[
+              'pointer-events-none absolute left-3.5 right-3.5 -bottom-0.5 h-0.5 rounded-full bg-brand-500 transition-transform duration-300 origin-left',
+              navUnderline(href),
+            ]}
+          ></span>
+        </a>
+      ))}
     </nav>
 
-    <form action="/search" method="get" class="flex-1 max-w-md ml-auto md:mx-auto md:max-w-sm lg:max-w-md">
+    <form action="/search" method="get" class="flex-1 max-w-md ml-auto md:mx-auto md:max-w-[480px]">
       <label class="relative block group/search">
         <span class="sr-only">Buscar manga</span>
         <span
           class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-fg-subtle transition-colors group-focus-within/search:text-brand-400"
           aria-hidden="true"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
             <path d="m21 21-4.3-4.3"></path>
           </svg>
@@ -36,13 +60,17 @@ const q = Astro.url.searchParams.get('q') ?? '';
           type="search"
           name="q"
           value={q}
-          placeholder="Buscar manga…"
+          placeholder="Buscar manga, autor, género…"
           autocomplete="off"
-          class="w-full rounded-full bg-bg-card/80 pl-10 pr-4 py-2.5 text-sm text-fg placeholder:text-fg-subtle ring-1 ring-inset ring-border focus:ring-brand-500/60 focus:bg-bg-card focus:outline-none transition-all duration-200"
+          class="w-full rounded-full bg-bg-card/60 pl-10 pr-14 py-2.5 text-sm text-fg placeholder:text-fg-subtle
+                 ring-1 ring-inset ring-border transition-all duration-200
+                 focus:ring-brand-500/50 focus:bg-bg-card focus:shadow-glow-sm focus:outline-none"
         />
-        <span class="pointer-events-none absolute inset-y-0 right-3 hidden items-center md:flex">
-          <kbd class="rounded border border-border bg-bg-elevated px-1.5 py-0.5 text-[10px] font-mono text-fg-subtle opacity-0 transition-opacity group-focus-within/search:opacity-0">⏎</kbd>
-        </span>
+        <kbd
+          class="pointer-events-none absolute inset-y-0 right-2.5 my-auto hidden h-6 items-center gap-1 rounded-md bg-bg-elevated px-1.5 font-mono text-2xs font-semibold text-fg-subtle ring-1 ring-border md:inline-flex"
+        >
+          <span>⌘</span>K
+        </kbd>
       </label>
     </form>
 
@@ -51,7 +79,10 @@ const q = Astro.url.searchParams.get('q') ?? '';
         href="/history"
         aria-label="Historial de lectura"
         title="Historial"
-        class={`inline-flex h-9 w-9 items-center justify-center rounded-full bg-bg-card ring-1 ring-border transition hover:ring-brand-500/40 ${pathname === '/history' ? 'text-brand-400 ring-brand-500/50' : 'text-fg-muted hover:text-fg'}`}
+        class:list={[
+          'btn-icon',
+          pathname === '/history' ? 'text-brand-400 ring-brand-500/50' : '',
+        ]}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 3v5h5"/>
@@ -63,3 +94,17 @@ const q = Astro.url.searchParams.get('q') ?? '';
     </div>
   </div>
 </header>
+
+<script is:inline>
+  // Atajo ⌘K / Ctrl+K para enfocar search
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      const input = document.querySelector('header input[name="q"]');
+      if (input) {
+        e.preventDefault();
+        input.focus();
+        input.select();
+      }
+    }
+  });
+</script>

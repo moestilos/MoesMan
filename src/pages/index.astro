@@ -1,9 +1,11 @@
 ---
 import Base from '@/layouts/Base.astro';
 import MangaGrid from '@/components/MangaGrid.astro';
+import MangaCard from '@/components/MangaCard.astro';
 import GridSkeleton from '@/components/GridSkeleton.astro';
 import ContinueReading from '@/components/ContinueReading';
 import GenreTabs from '@/components/GenreTabs.astro';
+import HeroCarousel from '@/components/HeroCarousel';
 import { getProvider } from '@/lib/providers';
 import { readNsfwCookie, contentRatingsFor } from '@/lib/ssr-prefs';
 import { CATEGORIES } from '@/lib/providers/categories';
@@ -12,7 +14,7 @@ const provider = getProvider('mangadex');
 const nsfw = readNsfwCookie(Astro.request.headers.get('cookie'));
 const ratings = contentRatingsFor(nsfw);
 
-const featured = ['shonen', 'isekai', 'romance'];
+const featured = ['shonen', 'isekai', 'romance', 'accion'];
 
 let popular: Awaited<ReturnType<typeof provider.popular>> = [];
 let latest: Awaited<ReturnType<typeof provider.latest>> = [];
@@ -21,7 +23,7 @@ let error: string | null = null;
 
 try {
   const [pop, lat, ...rows] = await Promise.all([
-    provider.popular({ limit: 18, contentRating: ratings }),
+    provider.popular({ limit: 24, contentRating: ratings }),
     provider.latest({ limit: 18, contentRating: ratings }),
     ...featured.map(async (slug) => {
       const cat = CATEGORIES.find((c) => c.slug === slug);
@@ -42,41 +44,92 @@ try {
 } catch (e) {
   error = e instanceof Error ? e.message : 'Error cargando';
 }
+
+const heroItems = popular.slice(0, 5).map((m) => ({
+  id: m.id,
+  title: m.title,
+  coverUrl: m.coverUrl,
+  tags: m.tags ?? [],
+  year: m.year ?? null,
+  status: m.status,
+}));
+const topRanked = popular.slice(0, 10);
 ---
 
 <Base title="MoesMan — Inicio">
   {error && (
-    <div class="mb-6 rounded-xl border border-brand-500/40 bg-brand-500/10 p-4 text-sm text-brand-200">
+    <div class="mb-6 rounded-2xl border border-brand-500/30 bg-brand-500/5 p-4 text-sm text-brand-200">
       No se pudo conectar con MangaDex: {error}
     </div>
   )}
+
+  {heroItems.length > 0 && <HeroCarousel client:load items={heroItems} />}
 
   <GenreTabs />
 
   <ContinueReading client:idle />
 
-  <section class="mb-12">
-    <header class="mb-4 flex items-end justify-between">
-      <h2 class="text-xl sm:text-2xl font-bold">Populares ahora</h2>
-      <a href="/search?c=popular" class="text-sm link-hover text-fg-muted">Ver más →</a>
-    </header>
-    {popular.length === 0 && !error ? <GridSkeleton count={12} /> : <MangaGrid items={popular} />}
-  </section>
+  {topRanked.length > 0 && (
+    <section class="mb-16 animate-fade-in-up">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">Rankings</span>
+          <h2 class="section-title mt-2">Top 10 de la semana</h2>
+        </div>
+        <a href="/search?c=popular" class="text-sm link-hover text-fg-muted">Ver más →</a>
+      </div>
+      <div class="rail">
+        {topRanked.map((m, i) => (
+          <div class="w-[180px] sm:w-[200px]">
+            <MangaCard manga={m} rank={i + 1} priority={i < 5} />
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {popular.length > 10 && (
+    <section class="mb-16">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">Tendencia</span>
+          <h2 class="section-title mt-2">Populares ahora</h2>
+        </div>
+      </div>
+      <MangaGrid items={popular.slice(10, 22)} />
+    </section>
+  )}
 
   {genreRows.map((row) => (
-    <section class="mb-12">
-      <header class="mb-4 flex items-end justify-between">
-        <h2 class="text-xl sm:text-2xl font-bold">{row.label}</h2>
+    <section class="mb-16">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">Género</span>
+          <h2 class="section-title mt-2">{row.label}</h2>
+        </div>
         <a href={`/search?genre=${row.slug}`} class="text-sm link-hover text-fg-muted">Ver más →</a>
-      </header>
-      {row.items.length === 0 ? <GridSkeleton count={12} /> : <MangaGrid items={row.items} />}
+      </div>
+      {row.items.length === 0 ? (
+        <GridSkeleton count={12} />
+      ) : (
+        <div class="rail">
+          {row.items.map((m, i) => (
+            <div class="w-[150px] sm:w-[180px]">
+              <MangaCard manga={m} priority={i < 3} />
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   ))}
 
   <section class="mb-6">
-    <header class="mb-4 flex items-end justify-between">
-      <h2 class="text-xl sm:text-2xl font-bold">Actualizados recientemente</h2>
-    </header>
+    <div class="section-header">
+      <div>
+        <span class="section-kicker">Novedades</span>
+        <h2 class="section-title mt-2">Actualizados recientemente</h2>
+      </div>
+    </div>
     {latest.length === 0 && !error ? <GridSkeleton count={12} /> : <MangaGrid items={latest} />}
   </section>
 </Base>

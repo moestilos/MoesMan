@@ -4,56 +4,60 @@ interface Props {
   withText?: boolean;
   className?: string;
 }
-const { size = 36, withText = true, className = '' } = Astro.props;
+const { size = 38, withText = true, className = '' } = Astro.props;
 const uid = Math.random().toString(36).slice(2, 8);
 ---
 
-<a href="/" class:list={['group flex items-center gap-2.5 select-none', className]} aria-label="MoesMan — Inicio">
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 64 64"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-hidden="true"
-    class="transition-transform duration-300 group-hover:scale-105"
-  >
-    <defs>
-      <linearGradient id={`lg-bg-${uid}`} x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#1a1a1f"/>
-        <stop offset="100%" stop-color="#0a0a0b"/>
-      </linearGradient>
-      <linearGradient id={`lg-brand-${uid}`} x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#fb7185"/>
-        <stop offset="60%" stop-color="#f43f5e"/>
-        <stop offset="100%" stop-color="#be123c"/>
-      </linearGradient>
-      <linearGradient id={`lg-acc-${uid}`} x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#c4b5fd"/>
-        <stop offset="100%" stop-color="#7c3aed"/>
-      </linearGradient>
-    </defs>
-    <rect width="64" height="64" rx="14" fill={`url(#lg-bg-${uid})`}/>
-    <g>
+<a href="/" class:list={['group flex items-center gap-3 select-none', className]} aria-label="MoesMan">
+  <span class="relative flex-none" style={`width:${size}px;height:${size}px`}>
+    <svg
+      viewBox="0 0 64 64"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      class="h-full w-full transition-transform duration-500 ease-out group-hover:scale-105"
+    >
+      <defs>
+        <linearGradient id={`lg-bg-${uid}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#1a1a22"/>
+          <stop offset="100%" stop-color="#08080b"/>
+        </linearGradient>
+        <linearGradient id={`lg-brand-${uid}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#ff9eb4"/>
+          <stop offset="55%" stop-color="#f5356a"/>
+          <stop offset="100%" stop-color="#ba0e44"/>
+        </linearGradient>
+        <linearGradient id={`lg-acc-${uid}`} x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stop-color="#7c3aed"/>
+          <stop offset="100%" stop-color="#c4b5fd"/>
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="16" fill={`url(#lg-bg-${uid})`}/>
+      <rect x="0.5" y="0.5" width="63" height="63" rx="15.5" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+
+      <!-- Left peak -->
       <path
-        d="M 14 48 L 14 20 Q 14 16 18 16 L 22 16 Q 25 16 27 19 L 32 35 L 29 44 Z"
+        d="M 13 49 L 13 20 Q 13 15 18 15 L 21 15 Q 24 15 26 18 L 32 32 L 29 44 Z"
         fill={`url(#lg-brand-${uid})`}
       />
+      <!-- Right peak -->
       <path
-        d="M 50 48 L 50 20 Q 50 16 46 16 L 42 16 Q 39 16 37 19 L 32 35 L 35 44 Z"
+        d="M 51 49 L 51 20 Q 51 15 46 15 L 43 15 Q 40 15 38 18 L 32 32 L 35 44 Z"
         fill={`url(#lg-brand-${uid})`}
       />
-      <path d="M 29 44 L 32 35 L 35 44 Z" fill={`url(#lg-acc-${uid})`} opacity="0.95"/>
-      <circle cx="32" cy="52" r="2" fill={`url(#lg-brand-${uid})`}/>
-    </g>
-    <path d="M 52 10 L 58 10 L 58 16" fill="none" stroke={`url(#lg-brand-${uid})`} stroke-width="1.5" stroke-linecap="round"/>
-    <path d="M 6 54 L 6 48 M 6 54 L 12 54" fill="none" stroke={`url(#lg-acc-${uid})`} stroke-width="1.5" stroke-linecap="round" opacity="0.75"/>
-  </svg>
+      <!-- Center accent valley -->
+      <path d="M 29 44 L 32 32 L 35 44 Z" fill={`url(#lg-acc-${uid})`}/>
+
+      <!-- Corner panel markers -->
+      <path d="M 51 10 L 57 10 L 57 16" fill="none" stroke={`url(#lg-brand-${uid})`} stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M 7 54 L 7 48 M 7 54 L 13 54" fill="none" stroke={`url(#lg-acc-${uid})`} stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
+    </svg>
+  </span>
   {withText && (
     <span class="flex flex-col leading-none">
-      <span class="text-[17px] font-extrabold tracking-tight text-fg group-hover:text-brand-300 transition-colors">
-        Moes<span class="text-brand-400">Man</span>
+      <span class="font-display text-[17px] font-extrabold tracking-tight text-fg transition-colors group-hover:text-brand-300">
+        Moes<span class="text-gradient-brand">Man</span>
       </span>
-      <span class="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-fg-subtle">
+      <span class="mt-1 text-[9px] font-bold uppercase tracking-[0.22em] text-fg-subtle">
         Manga Library
       </span>
     </span>

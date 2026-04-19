@@ -3,17 +3,33 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --header-h: 64px;
+    --bottomnav-h: 56px;
+  }
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
   html {
     @apply bg-bg text-fg antialiased;
     color-scheme: dark;
     scroll-behavior: smooth;
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
   }
   body {
-    @apply min-h-screen bg-bg font-sans;
+    @apply min-h-screen bg-bg font-sans text-base;
     background-image:
-      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(244, 63, 94, 0.10), transparent 60%),
-      radial-gradient(ellipse 50% 40% at 100% 0%, rgba(139, 92, 246, 0.06), transparent 60%);
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(245, 53, 106, 0.08), transparent 55%),
+      radial-gradient(ellipse 60% 40% at 100% 10%, rgba(139, 92, 246, 0.05), transparent 55%),
+      radial-gradient(ellipse 50% 50% at 0% 100%, rgba(245, 53, 106, 0.03), transparent 60%);
     background-attachment: fixed;
+  }
+  body::before {
+    content: '';
+    @apply pointer-events-none fixed inset-0 z-0 opacity-[0.015];
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+    mix-blend-mode: overlay;
   }
   *::selection {
     @apply bg-brand-500/30 text-fg;
@@ -23,48 +39,150 @@
     height: 10px;
   }
   *::-webkit-scrollbar-track {
-    @apply bg-bg-elevated;
+    @apply bg-transparent;
   }
   *::-webkit-scrollbar-thumb {
-    @apply bg-border-strong rounded-full;
+    @apply bg-border-strong rounded-full border-2 border-solid border-transparent bg-clip-padding;
   }
   *::-webkit-scrollbar-thumb:hover {
     @apply bg-fg-subtle;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500/60 ring-offset-2 ring-offset-bg;
+  }
+  h1, h2, h3, h4, h5 {
+    @apply font-display;
   }
 }
 
 @layer components {
   .container-app {
-    @apply mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-10;
+    @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-10 xl:px-14;
   }
+
+  /* ---------- Buttons ---------- */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 ring-1 ring-inset ring-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold tracking-tight
+           ring-1 ring-inset ring-transparent transition-all duration-200 ease-out
+           disabled:opacity-40 disabled:pointer-events-none
+           active:scale-[0.98];
   }
   .btn-primary {
-    @apply btn bg-brand-600 hover:bg-brand-500 text-white shadow-glow;
+    @apply btn text-white ring-0 bg-gradient-to-b from-brand-500 to-brand-700
+           shadow-[0_2px_0_0_rgba(255,255,255,0.08)_inset,0_0_30px_-8px_rgba(245,53,106,0.65)]
+           hover:from-brand-400 hover:to-brand-600 hover:shadow-glow hover:-translate-y-0.5;
+  }
+  .btn-secondary {
+    @apply btn bg-bg-card text-fg ring-border hover:ring-border-strong hover:bg-bg-hover;
   }
   .btn-ghost {
-    @apply btn bg-bg-card hover:bg-bg-hover text-fg ring-border;
+    @apply btn bg-transparent text-fg-muted ring-border/60 hover:text-fg hover:ring-border-strong hover:bg-bg-card/70;
   }
+  .btn-icon {
+    @apply inline-flex h-9 w-9 flex-none items-center justify-center rounded-full
+           bg-bg-card/70 ring-1 ring-border text-fg-muted
+           transition-all duration-200
+           hover:ring-border-strong hover:text-fg hover:bg-bg-hover
+           active:scale-95;
+  }
+
+  /* ---------- Surfaces ---------- */
   .card {
-    @apply bg-bg-card ring-1 ring-border rounded-2xl overflow-hidden transition-all duration-300;
+    @apply rounded-2xl bg-bg-card ring-1 ring-border shadow-card overflow-hidden;
   }
+  .surface {
+    @apply rounded-2xl bg-bg-card/80 backdrop-blur ring-1 ring-border;
+  }
+  .glass {
+    @apply bg-bg/70 backdrop-blur-xl backdrop-saturate-150 ring-1 ring-border/60 shadow-inset;
+  }
+
+  /* ---------- Skeletons ---------- */
   .skeleton {
-    @apply bg-bg-card relative overflow-hidden;
-    background-image: linear-gradient(90deg, #17171a 0%, #222226 50%, #17171a 100%);
+    @apply relative overflow-hidden bg-bg-card;
+    background-image: linear-gradient(
+      90deg,
+      rgba(26, 26, 34, 1) 0%,
+      rgba(34, 34, 43, 1) 50%,
+      rgba(26, 26, 34, 1) 100%
+    );
     background-size: 400px 100%;
-    animation: shimmer 1.6s linear infinite;
+    animation: shimmer 1.8s linear infinite;
   }
+
+  /* ---------- Badges ---------- */
   .badge {
-    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset;
+    @apply inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-2xs font-semibold
+           uppercase tracking-wider ring-1 ring-inset;
   }
   .badge-brand {
     @apply badge bg-brand-500/10 text-brand-300 ring-brand-500/30;
   }
   .badge-muted {
-    @apply badge bg-bg-hover text-fg-muted ring-border;
+    @apply badge bg-white/[0.04] text-fg-muted ring-white/[0.06];
   }
+  .badge-dot {
+    @apply inline-block h-1.5 w-1.5 rounded-full bg-current;
+  }
+
+  /* ---------- Links ---------- */
   .link-hover {
     @apply transition-colors duration-200 hover:text-brand-400;
+  }
+
+  /* ---------- Section header ---------- */
+  .section-header {
+    @apply mb-5 flex items-end justify-between gap-4;
+  }
+  .section-title {
+    @apply font-display text-xl sm:text-2xl font-bold tracking-tight;
+  }
+  .section-kicker {
+    @apply inline-flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-[0.14em] text-brand-400;
+  }
+  .section-kicker::before {
+    content: '';
+    @apply inline-block h-px w-6 bg-brand-500/60;
+  }
+
+  /* ---------- Inputs ---------- */
+  .input {
+    @apply w-full rounded-xl bg-bg-card/80 px-3.5 py-2.5 text-sm text-fg placeholder:text-fg-subtle
+           ring-1 ring-inset ring-border transition-all duration-200
+           focus:outline-none focus:ring-brand-500/60 focus:bg-bg-card;
+  }
+
+  /* ---------- Horizontal rails ---------- */
+  .rail {
+    @apply -mx-4 flex gap-4 overflow-x-auto px-4 pb-4 sm:mx-0 sm:px-0
+           snap-x snap-mandatory
+           [scrollbar-width:none] [-ms-overflow-style:none];
+  }
+  .rail::-webkit-scrollbar {
+    display: none;
+  }
+  .rail > * {
+    @apply snap-start flex-none;
+  }
+
+  /* ---------- Utility: gradient text ---------- */
+  .text-gradient-brand {
+    @apply bg-gradient-to-br from-brand-300 via-brand-500 to-accent-500 bg-clip-text text-transparent;
+  }
+
+  /* ---------- Divider ---------- */
+  .divider {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-border-strong to-transparent;
+  }
+}
+
+@layer utilities {
+  .mask-fade-r {
+    mask-image: linear-gradient(to right, black 85%, transparent);
+    -webkit-mask-image: linear-gradient(to right, black 85%, transparent);
+  }
+  .mask-fade-b {
+    mask-image: linear-gradient(to bottom, black 70%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent);
   }
 }
