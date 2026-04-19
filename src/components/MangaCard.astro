@@ -20,6 +20,15 @@ const statusLabel: Record<string, { label: string; dot: string }> = {
 const statusInfo = manga.status ? statusLabel[manga.status] : statusLabel.unknown;
 const isNsfw = manga.contentRating === 'pornographic';
 const isEcchi = manga.contentRating === 'erotica';
+
+// Tipo por idioma original: ko → Manhwa, zh → Manhua, resto → Manga
+function typeOf(lang?: string): { label: string; tone: string } | null {
+  if (!lang) return null;
+  if (lang === 'ko') return { label: 'Manhwa', tone: 'bg-violet-500/80 ring-violet-400/30' };
+  if (lang === 'zh' || lang === 'zh-hk') return { label: 'Manhua', tone: 'bg-amber-500/80 ring-amber-400/30' };
+  return { label: 'Manga', tone: 'bg-sky-500/80 ring-sky-400/30' };
+}
+const typeBadge = typeOf(manga.originalLanguage);
 ---
 
 <a
@@ -54,9 +63,19 @@ const isEcchi = manga.contentRating === 'erotica';
       </div>
     )}
 
-    <!-- Rating badge top-right (18+/16+ only, high priority warning) -->
-    {(isNsfw || isEcchi) && (
-      <div class="absolute right-2 top-2">
+    <!-- Top-right badges: TIPO + rating -->
+    <div class="absolute right-2 top-2 flex flex-col items-end gap-1">
+      {typeBadge && (
+        <span
+          class:list={[
+            'inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white ring-1 backdrop-blur-sm',
+            typeBadge.tone,
+          ]}
+        >
+          {typeBadge.label}
+        </span>
+      )}
+      {(isNsfw || isEcchi) && (
         <span class:list={[
           'inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-black tracking-wider text-white ring-1 backdrop-blur-sm',
           isNsfw
@@ -65,8 +84,8 @@ const isEcchi = manga.contentRating === 'erotica';
         ]}>
           {isNsfw ? '18+' : '16+'}
         </span>
-      </div>
-    )}
+      )}
+    </div>
 
     <!-- Title + status + meta at bottom -->
     <div class="absolute inset-x-0 bottom-0 p-3">

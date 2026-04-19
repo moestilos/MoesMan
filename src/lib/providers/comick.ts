@@ -106,6 +106,7 @@ function mapSummary(x: CKSearchItem): MangaSummary {
     status: statusOf(x.status),
     contentRating: (x.content_rating as MangaSummary['contentRating']) ?? 'unknown',
     tags: [],
+    originalLanguage: x.country,
   };
 }
 

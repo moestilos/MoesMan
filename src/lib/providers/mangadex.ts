@@ -146,6 +146,7 @@ function mapSummary(m: MDManga, langs: string[]): MangaSummary {
         return raw ? translateTag(raw) : '';
       })
       .filter(Boolean),
+    originalLanguage: m.attributes.originalLanguage,
   };
 }
 
@@ -232,7 +233,9 @@ export class MangaDexProvider implements MangaProvider {
         'contentRating[]': ratings,
         'order[relevance]': 'desc',
       });
-      return data.data.map((m) => mapSummary(m, langs));
+      return data.data
+        .map((m) => mapSummary(m, langs))
+        .filter((m) => m.title && m.title !== 'Sin título' && m.coverUrl);
     });
   }
 
@@ -250,7 +253,9 @@ export class MangaDexProvider implements MangaProvider {
         hasAvailableChapters: 'true',
         'order[followedCount]': 'desc',
       });
-      return data.data.map((m) => mapSummary(m, langs));
+      return data.data
+        .map((m) => mapSummary(m, langs))
+        .filter((m) => m.title && m.title !== 'Sin título' && m.coverUrl);
     });
   }
 
@@ -268,7 +273,9 @@ export class MangaDexProvider implements MangaProvider {
         hasAvailableChapters: 'true',
         'order[latestUploadedChapter]': 'desc',
       });
-      return data.data.map((m) => mapSummary(m, langs));
+      return data.data
+        .map((m) => mapSummary(m, langs))
+        .filter((m) => m.title && m.title !== 'Sin título' && m.coverUrl);
     });
   }
 
@@ -304,7 +311,9 @@ export class MangaDexProvider implements MangaProvider {
       else if (order === 'latest') params['order[latestUploadedChapter]'] = 'desc';
       else params['order[relevance]'] = 'desc';
       const data = await mdFetch<{ data: MDManga[] }>('/manga', params);
-      return data.data.map((m) => mapSummary(m, langs));
+      return data.data
+        .map((m) => mapSummary(m, langs))
+        .filter((m) => m.title && m.title !== 'Sin título' && m.coverUrl);
     });
   }
 

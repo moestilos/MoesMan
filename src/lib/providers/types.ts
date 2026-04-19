@@ -10,6 +10,7 @@ export interface MangaSummary {
   contentRating?: 'safe' | 'suggestive' | 'erotica' | 'pornographic' | 'unknown';
   tags?: string[];
   score?: number | null;
+  originalLanguage?: string;
 }
 
 export interface MangaDetail extends MangaSummary {
