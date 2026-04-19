@@ -1,8 +1,8 @@
 /**
- * Auto-migración en arranque. Usa drizzle-kit migrate con archivos ./drizzle
- * Para desarrollo/F2 también se puede usar `drizzle-kit push` directamente.
+ * Aplica migraciones ./drizzle al Postgres de DATABASE_URL.
+ * DATABASE_URL debe estar en el entorno (docker-compose lo inyecta, en local: `export DATABASE_URL=...`).
+ * Alternativa en desarrollo: `npm run db:push` (sincroniza sin migraciones).
  */
-import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { Pool } from 'pg';

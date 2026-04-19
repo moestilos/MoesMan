@@ -7,12 +7,14 @@ interface Props {
   title?: string;
   description?: string;
   fullBleed?: boolean;
+  hideChrome?: boolean;
 }
 
 const {
   title = 'MoesMan — Tu biblioteca de manga',
   description = 'Lector y biblioteca personal de manga en español.',
   fullBleed = false,
+  hideChrome = false,
 } = Astro.props;
 ---
 
@@ -38,24 +40,25 @@ const {
     />
     <title>{title}</title>
   </head>
-  <body>
-    <Header />
+  <body class:list={[hideChrome && 'reader-mode']}>
+    {!hideChrome && <Header />}
     <main class={fullBleed ? '' : 'container-app py-8 sm:py-10'}>
       <slot />
     </main>
-    <footer class="container-app py-10 text-xs text-fg-subtle">
-      <div class="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-6">
-        <span>MoesMan · biblioteca personal de manga</span>
-        <span>
-          Datos vía <a
-            href="https://mangadex.org"
-            target="_blank"
-            rel="noreferrer"
-            class="link-hover">MangaDex</a
-          >
-        </span>
-      </div>
-    </footer>
+    {!hideChrome && (
+      <footer class="container-app py-10 text-xs text-fg-subtle">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-6">
+          <span>MoesMan · biblioteca personal de manga</span>
+          <span>
+            Datos vía <a
+              href="https://mangadex.org"
+              target="_blank"
+              rel="noreferrer"
+              class="link-hover">MangaDex</a>
+          </span>
+        </div>
+      </footer>
+    )}
     <InstallPrompt client:idle />
     <script is:inline>
       if ('serviceWorker' in navigator) {
