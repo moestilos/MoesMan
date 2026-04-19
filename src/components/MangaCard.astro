@@ -26,13 +26,13 @@ const isEcchi = manga.contentRating === 'erotica';
   href={href}
   class="group relative block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
 >
-  <div class="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-bg-card ring-1 ring-border transition-all duration-300 ease-out group-hover:ring-brand-500/30 group-hover:shadow-card-lg">
+  <div class="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-bg-card ring-1 ring-border transition-[box-shadow,transform] duration-[var(--dur-base)] ease-[var(--ease-out)] group-hover:ring-brand-500/35 group-hover:shadow-card-lg group-active:scale-[0.985]">
     <img
       src={cover}
       alt={manga.title}
       loading={priority ? 'eager' : 'lazy'}
       decoding="async"
-      class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+      class="absolute inset-0 h-full w-full object-cover transition-transform duration-[650ms] ease-[var(--ease-out)] group-hover:scale-[1.04]"
       onerror="this.src='/placeholder-cover.svg'"
     />
 
