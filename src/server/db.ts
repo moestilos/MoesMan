@@ -12,6 +12,7 @@ export interface DbUser {
   email: string;
   username: string;
   passwordHash: string;
+  avatarUrl?: string | null;
   createdAt: string;
 }
 

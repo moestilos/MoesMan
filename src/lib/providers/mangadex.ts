@@ -93,12 +93,31 @@ function findCoverFilename(rels: MDRelationship[]): string | null {
   return file ?? null;
 }
 
+function pickBestTitle(m: MDManga, langs: string[]): string {
+  // Prioridad: título principal en lang pref > altTitle en lang pref > título en EN > primer altTitle > fallback
+  for (const l of langs) {
+    if (m.attributes.title[l]) return m.attributes.title[l];
+  }
+  for (const l of langs) {
+    const hit = m.attributes.altTitles.find((t) => t[l]);
+    if (hit && hit[l]) return hit[l]!;
+  }
+  if (m.attributes.title.en) return m.attributes.title.en;
+  const firstAlt = m.attributes.altTitles.find((t) => Object.values(t).some(Boolean));
+  if (firstAlt) {
+    const val = Object.values(firstAlt).find(Boolean);
+    if (val) return val;
+  }
+  const any = Object.values(m.attributes.title).find(Boolean);
+  return any ?? 'Sin título';
+}
+
 function mapSummary(m: MDManga, langs: string[]): MangaSummary {
   const coverFile = findCoverFilename(m.relationships);
   return {
     id: m.id,
     providerId: 'mangadex',
-    title: pickLocalized(m.attributes.title, [...langs, 'en', 'ja-ro', 'ja']),
+    title: pickBestTitle(m, langs),
     coverUrl: coverFile ? proxy(`${COVERS}/${m.id}/${coverFile}.512.jpg`) : null,
     year: m.attributes.year ?? null,
     status: (m.attributes.status as MangaSummary['status']) ?? 'unknown',
@@ -231,6 +250,36 @@ export class MangaDexProvider implements MangaProvider {
         hasAvailableChapters: 'true',
         'order[latestUploadedChapter]': 'desc',
       });
+      return data.data.map((m) => mapSummary(m, langs));
+    });
+  }
+
+  async browse({
+    limit = 24,
+    offset = 0,
+    contentRating,
+    tagIds,
+    demographic,
+    order = 'popular',
+  }: import('./types').BrowseParams): Promise<MangaSummary[]> {
+    const langs = this.preferredLanguages;
+    const ratings = contentRating ?? DEFAULT_RATINGS;
+    const key = `md:browse:${limit}:${offset}:${langs.join(',')}:${ratings.join(',')}:${(tagIds ?? []).join(',')}:${demographic ?? ''}:${order}`;
+    return cached(key, 3 * 60_000, async () => {
+      const params: Record<string, string | string[] | number> = {
+        limit,
+        offset,
+        'includes[]': ['cover_art', 'author', 'artist'],
+        'availableTranslatedLanguage[]': langs,
+        'contentRating[]': ratings,
+        hasAvailableChapters: 'true',
+      };
+      if (tagIds && tagIds.length > 0) params['includedTags[]'] = tagIds;
+      if (demographic) params['publicationDemographic[]'] = [demographic];
+      if (order === 'popular') params['order[followedCount]'] = 'desc';
+      else if (order === 'latest') params['order[latestUploadedChapter]'] = 'desc';
+      else params['order[relevance]'] = 'desc';
+      const data = await mdFetch<{ data: MDManga[] }>('/manga', params);
       return data.data.map((m) => mapSummary(m, langs));
     });
   }

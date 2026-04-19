@@ -46,7 +46,19 @@ const q = Astro.url.searchParams.get('q') ?? '';
       </label>
     </form>
 
-    <div class="ml-auto md:ml-0">
+    <div class="ml-auto md:ml-0 flex items-center gap-2">
+      <a
+        href="/history"
+        aria-label="Historial de lectura"
+        title="Historial"
+        class={`inline-flex h-9 w-9 items-center justify-center rounded-full bg-bg-card ring-1 ring-border transition hover:ring-brand-500/40 ${pathname === '/history' ? 'text-brand-400 ring-brand-500/50' : 'text-fg-muted hover:text-fg'}`}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 3v5h5"/>
+          <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/>
+          <path d="M12 7v5l4 2"/>
+        </svg>
+      </a>
       <UserMenu client:only="react" />
     </div>
   </div>

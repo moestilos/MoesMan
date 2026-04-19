@@ -13,6 +13,7 @@ export interface AuthUser {
   id: string;
   email: string;
   username: string;
+  avatarUrl?: string | null;
 }
 
 export async function signToken(user: DbUser): Promise<string> {
@@ -31,7 +32,7 @@ export async function verifyToken(token: string): Promise<AuthUser | null> {
     const db = await getDb();
     const u = db.users.find((x) => x.id === payload.sub);
     if (!u) return null;
-    return { id: u.id, email: u.email, username: u.username };
+    return { id: u.id, email: u.email, username: u.username, avatarUrl: u.avatarUrl ?? null };
   } catch {
     return null;
   }
@@ -97,7 +98,10 @@ export async function registerUser(input: {
   db.users.push(user);
   await commit();
   const token = await signToken(user);
-  return { user: { id: user.id, email: user.email, username: user.username }, token };
+  return {
+    user: { id: user.id, email: user.email, username: user.username, avatarUrl: user.avatarUrl ?? null },
+    token,
+  };
 }
 
 export async function loginUser(input: {
@@ -112,5 +116,8 @@ export async function loginUser(input: {
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) return { error: 'Credenciales inválidas', status: 401 };
   const token = await signToken(user);
-  return { user: { id: user.id, email: user.email, username: user.username }, token };
+  return {
+    user: { id: user.id, email: user.email, username: user.username, avatarUrl: user.avatarUrl ?? null },
+    token,
+  };
 }

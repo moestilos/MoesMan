@@ -54,6 +54,9 @@ export interface BrowseParams {
   limit?: number;
   offset?: number;
   contentRating?: ContentRating[];
+  tagIds?: string[];
+  demographic?: 'shounen' | 'shoujo' | 'seinen' | 'josei';
+  order?: 'popular' | 'latest' | 'relevance';
 }
 
 export interface ChaptersParams {
@@ -72,6 +75,7 @@ export interface MangaProvider {
   search(params: SearchParams): Promise<MangaSummary[]>;
   popular(params?: BrowseParams): Promise<MangaSummary[]>;
   latest(params?: BrowseParams): Promise<MangaSummary[]>;
+  browse(params: BrowseParams): Promise<MangaSummary[]>;
   getManga(id: string): Promise<MangaDetail>;
   listChapters(params: ChaptersParams): Promise<Chapter[]>;
   getChapterPages(chapterId: string): Promise<ChapterPages>;

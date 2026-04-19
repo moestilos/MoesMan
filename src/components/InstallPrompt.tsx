@@ -52,23 +52,32 @@ export default function InstallPrompt() {
     <div
       role="dialog"
       aria-label="Instalar MoesMan"
-      className="fixed bottom-4 left-1/2 z-50 w-[min(92vw,420px)] -translate-x-1/2 animate-slide-up rounded-2xl bg-bg-card p-4 ring-1 ring-border shadow-card backdrop-blur"
+      className="fixed left-4 top-4 z-50 hidden animate-fade-in md:block"
     >
-      <div className="flex items-center gap-3">
-        <span className="inline-flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-lg font-black text-white shadow-glow">
-          M
+      <button
+        type="button"
+        onClick={install}
+        className="group inline-flex items-center gap-2 rounded-full bg-bg-card/90 pl-2 pr-3.5 py-1.5 text-xs font-medium text-fg-muted ring-1 ring-border backdrop-blur transition hover:text-fg hover:ring-brand-500/50 hover:shadow-glow"
+        title="Instalar MoesMan como app"
+      >
+        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-brand-600 text-white">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 5v14M5 12l7 7 7-7"/>
+          </svg>
         </span>
-        <div className="min-w-0 flex-1">
-          <div className="text-sm font-semibold">Instala MoesMan</div>
-          <div className="text-xs text-fg-muted">
-            Añádela a tu pantalla de inicio para acceso rápido y lectura offline.
-          </div>
-        </div>
-      </div>
-      <div className="mt-3 flex gap-2">
-        <button onClick={install} className="btn-primary flex-1">Instalar</button>
-        <button onClick={dismiss} className="btn-ghost">Ahora no</button>
-      </div>
+        <span>Instalar app</span>
+        <span
+          onClick={(e) => {
+            e.stopPropagation();
+            dismiss();
+          }}
+          role="button"
+          aria-label="Ocultar aviso"
+          className="ml-1 text-fg-subtle hover:text-fg cursor-pointer"
+        >
+          ×
+        </span>
+      </button>
     </div>
   );
 }

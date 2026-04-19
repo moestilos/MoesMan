@@ -9,6 +9,15 @@ export interface AuthUser {
   id: string;
   email: string;
   username: string;
+  avatarUrl?: string | null;
+}
+
+export function updateUser(partial: Partial<AuthUser>) {
+  const current = getUser();
+  if (!current) return;
+  const next = { ...current, ...partial };
+  localStorage.setItem(USER_KEY, JSON.stringify(next));
+  window.dispatchEvent(new CustomEvent('moesman:auth-changed'));
 }
 
 export function getToken(): string | null {

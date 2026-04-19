@@ -6,6 +6,7 @@ export interface AuthUser {
   id: string;
   email: string;
   username: string;
+  avatarUrl?: string | null;
 }
 
 export interface AuthResponse {
@@ -76,6 +77,13 @@ export const api = {
   },
   me(token: string) {
     return request<{ user: AuthUser }>('/auth/me', { token });
+  },
+  setAvatar(token: string, avatarUrl: string | null) {
+    return request<{ avatarUrl: string | null }>('/auth/avatar', {
+      method: 'POST',
+      token,
+      body: JSON.stringify({ avatarUrl }),
+    });
   },
 
   library: {

@@ -1,24 +1,75 @@
 ---
 import Base from '@/layouts/Base.astro';
 import SearchResults from '@/components/SearchResults';
+import MangaGrid from '@/components/MangaGrid.astro';
 import GridSkeleton from '@/components/GridSkeleton.astro';
+import GenreTabs from '@/components/GenreTabs.astro';
+import { getProvider } from '@/lib/providers';
+import { findCategory } from '@/lib/providers/categories';
+import { readNsfwCookie, contentRatingsFor } from '@/lib/ssr-prefs';
 
 const q = (Astro.url.searchParams.get('q') ?? '').trim();
+const genreSlug = Astro.url.searchParams.get('genre') ?? '';
+const orderParam = Astro.url.searchParams.get('c') ?? '';
+
+const provider = getProvider('mangadex');
+const nsfw = readNsfwCookie(Astro.request.headers.get('cookie'));
+const ratings = contentRatingsFor(nsfw);
+
+const cat = genreSlug ? findCategory(genreSlug) : null;
+const ratingsForCat = cat?.ratingOverride ?? ratings;
+
+let items: Awaited<ReturnType<typeof provider.browse>> = [];
+let error: string | null = null;
+
+if (!q) {
+  try {
+    items = await provider.browse({
+      limit: 48,
+      tagIds: cat?.tagIds,
+      demographic: cat?.demographic,
+      contentRating: ratingsForCat,
+      order: orderParam === 'latest' ? 'latest' : 'popular',
+    });
+  } catch (e) {
+    error = e instanceof Error ? e.message : 'Error';
+  }
+}
+
+const title = q
+  ? `Buscar: ${q}`
+  : cat
+    ? cat.label
+    : 'Explorar manga';
 ---
 
-<Base title={q ? `Buscar: ${q} — MoesMan` : 'Explorar — MoesMan'}>
-  <section class="mb-8">
+<Base title={`${title} — MoesMan`}>
+  <section class="mb-6">
     <h1 class="text-2xl sm:text-3xl font-bold">
-      {q ? <>Resultados para <span class="text-brand-400">“{q}”</span></> : 'Explorar manga'}
+      {q ? <>Resultados para <span class="text-brand-400">“{q}”</span></> : title}
     </h1>
     <p class="mt-1 text-sm text-fg-muted">
-      {q ? 'Scroll para cargar más.' : 'Escribe en la barra superior para buscar.'}
+      {q
+        ? 'Scroll para cargar más.'
+        : cat
+          ? `Los más populares de ${cat.label}.`
+          : 'Explora por géneros o usa la barra de búsqueda.'}
     </p>
   </section>
 
+  {!q && <GenreTabs />}
+
+  {error && (
+    <div class="mb-6 rounded-xl border border-brand-500/40 bg-brand-500/10 p-4 text-sm text-brand-200">
+      {error}
+    </div>
+  )}
+
   {q ? (
     <SearchResults client:load query={q} />
-  ) : (
+  ) : items.length > 0 ? (
+    <MangaGrid items={items} />
+  ) : !error ? (
     <GridSkeleton count={18} />
-  )}
+  ) : null}
 </Base>
