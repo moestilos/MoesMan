@@ -27,6 +27,8 @@ export interface ProgressRow {
   id: string;
   providerId: string;
   mangaId: string;
+  mangaTitle?: string | null;
+  mangaCoverUrl?: string | null;
   chapterId: string;
   chapterNumber: string | null;
   page: number;
@@ -131,6 +133,8 @@ export const api = {
         chapterNumber?: string | null;
         page: number;
         totalPages?: number;
+        mangaTitle?: string | null;
+        mangaCoverUrl?: string | null;
       },
     ) =>
       request<ProgressRow>('/progress', {

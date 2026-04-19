@@ -39,6 +39,8 @@ export interface DbProgress {
   userId: string;
   providerId: string;
   mangaId: string;
+  mangaTitle?: string | null;
+  mangaCoverUrl?: string | null;
   chapterId: string;
   chapterNumber: string | null;
   page: number;

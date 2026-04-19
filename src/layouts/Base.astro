@@ -44,6 +44,7 @@ const {
       rel="stylesheet"
     />
     <title>{title}</title>
+    <slot name="head" />
   </head>
   <body class:list={[hideChrome && 'reader-mode']}>
     {!hideChrome && <BgStarfield />}

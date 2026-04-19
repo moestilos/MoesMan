@@ -13,6 +13,8 @@ interface ChapterLite {
 
 interface Props {
   mangaId: string;
+  mangaTitle?: string | null;
+  mangaCoverUrl?: string | null;
   chapterId: string;
   pages: string[];
   chapters: ChapterLite[];
@@ -23,7 +25,7 @@ const progressKey = (mangaId: string, chapterId: string) =>
   `moesman:progress:${mangaId}:${chapterId}`;
 const lastReadKey = (mangaId: string) => `moesman:lastRead:${mangaId}`;
 
-export default function Reader({ mangaId, chapterId, pages, chapters }: Props) {
+export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, pages, chapters }: Props) {
   const [mode, setMode] = useState<Mode>('vertical');
   const [pageIndex, setPageIndex] = useState(0);
   const [loaded, setLoaded] = useState<Set<number>>(new Set());
@@ -63,6 +65,8 @@ export default function Reader({ mangaId, chapterId, pages, chapters }: Props) {
         .upsert(token, {
           providerId: 'mangadex',
           mangaId,
+          mangaTitle,
+          mangaCoverUrl,
           chapterId,
           chapterNumber,
           page: pageIndex,
@@ -179,8 +183,9 @@ export default function Reader({ mangaId, chapterId, pages, chapters }: Props) {
               <img
                 src={src}
                 alt={`Página ${i + 1}`}
-                loading={i < 3 ? 'eager' : 'lazy'}
-                decoding="async"
+                loading={i < 5 ? 'eager' : 'lazy'}
+                fetchPriority={i < 3 ? 'high' : i < 8 ? 'auto' : 'low'}
+                decoding={i < 5 ? 'sync' : 'async'}
                 onLoad={() => markLoaded(i)}
                 onError={() => markLoaded(i)}
                 className="mx-auto block h-auto w-full max-w-full"

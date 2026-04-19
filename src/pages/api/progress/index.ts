@@ -19,6 +19,8 @@ export const POST: APIRoute = async (ctx) => {
   const chapterNumber = body.chapterNumber == null ? null : String(body.chapterNumber);
   const page = Math.max(0, Number(body.page ?? 0));
   const totalPages = body.totalPages == null ? null : Number(body.totalPages);
+  const mangaTitle = body.mangaTitle == null ? null : String(body.mangaTitle).slice(0, 512);
+  const mangaCoverUrl = body.mangaCoverUrl == null ? null : String(body.mangaCoverUrl).slice(0, 1024);
   if (!providerId || !mangaId || !chapterId) return jsonError(400, 'Missing fields');
 
   const db = await getDb();
@@ -32,6 +34,8 @@ export const POST: APIRoute = async (ctx) => {
     existing.page = page;
     existing.totalPages = totalPages;
     existing.chapterNumber = chapterNumber;
+    if (mangaTitle) existing.mangaTitle = mangaTitle;
+    if (mangaCoverUrl) existing.mangaCoverUrl = mangaCoverUrl;
     existing.updatedAt = nowIso();
     await commit();
     return json(existing);
@@ -41,6 +45,8 @@ export const POST: APIRoute = async (ctx) => {
     userId: user.id,
     providerId,
     mangaId,
+    mangaTitle,
+    mangaCoverUrl,
     chapterId,
     chapterNumber,
     page,

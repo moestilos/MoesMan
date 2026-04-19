@@ -34,8 +34,8 @@ export default function ContinueReading() {
           const lib = libIndex.get(`${p.providerId}:${p.mangaId}`);
           return {
             progress: p,
-            title: lib?.title ?? `Manga ${p.mangaId.slice(0, 6)}`,
-            coverUrl: lib?.coverUrl ?? null,
+            title: lib?.title ?? p.mangaTitle ?? `Manga ${p.mangaId.slice(0, 6)}`,
+            coverUrl: lib?.coverUrl ?? p.mangaCoverUrl ?? null,
           };
         });
         setEntries(items);
