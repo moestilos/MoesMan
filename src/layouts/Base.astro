@@ -49,11 +49,11 @@ const {
   <body class:list={[hideChrome && 'reader-mode']}>
     {!hideChrome && <BgStarfield />}
     {!hideChrome && <Header />}
-    <main class:list={[!fullBleed && 'container-app pt-4 pb-20 sm:pt-6 sm:pb-24 lg:pt-8', 'relative z-10']}>
+    <main class:list={[!fullBleed && 'container-app pt-3 pb-16 sm:pt-6 sm:pb-24 lg:pt-8', 'relative z-10']}>
       <slot />
     </main>
     {!hideChrome && (
-      <footer class="relative z-10 mt-16 pb-8 pt-10">
+      <footer class="relative z-10 mt-10 sm:mt-16 pb-6 pt-8 sm:pb-8 sm:pt-10">
         <div class="container-app">
           <div class="divider mb-8"></div>
           <div class="flex flex-col items-center gap-5 text-center sm:flex-row sm:justify-between sm:text-left">

@@ -135,10 +135,10 @@ export default function ProfileForm() {
       )}
 
       {/* Avatar card */}
-      <section className="mb-6 surface p-6">
+      <section className="mb-6 surface p-4 sm:p-6">
         <h2 className="font-display text-lg font-bold">Foto de perfil</h2>
         <p className="mt-1 text-sm text-fg-muted">PNG o JPG, se redimensiona automáticamente.</p>
-        <div className="mt-5 flex items-center gap-5">
+        <div className="mt-5 flex flex-col xs:flex-row xs:items-center gap-4 xs:gap-5">
           <div className="relative">
             {user.avatarUrl ? (
               <img
@@ -172,7 +172,7 @@ export default function ProfileForm() {
       </section>
 
       {/* Profile form */}
-      <form onSubmit={onSubmit} className="surface p-6">
+      <form onSubmit={onSubmit} className="surface p-4 sm:p-6">
         <h2 className="font-display text-lg font-bold">Datos personales</h2>
         <p className="mt-1 text-sm text-fg-muted">Tu nombre de usuario y email. Los cambios requieren tu contraseña actual.</p>
 
