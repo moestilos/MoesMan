@@ -17,6 +17,10 @@ const COVERS = 'https://uploads.mangadex.org/covers';
 const USER_AGENT = 'MoesMan/0.1 (personal manga library)';
 const DEFAULT_RATINGS: import('./types').ContentRating[] = ['safe', 'suggestive', 'erotica'];
 
+function proxy(url: string): string {
+  return `/api/img?u=${encodeURIComponent(url)}`;
+}
+
 type MDRelationship = {
   id: string;
   type: string;
@@ -95,7 +99,7 @@ function mapSummary(m: MDManga, langs: string[]): MangaSummary {
     id: m.id,
     providerId: 'mangadex',
     title: pickLocalized(m.attributes.title, [...langs, 'en', 'ja-ro', 'ja']),
-    coverUrl: coverFile ? `${COVERS}/${m.id}/${coverFile}.512.jpg` : null,
+    coverUrl: coverFile ? proxy(`${COVERS}/${m.id}/${coverFile}.512.jpg`) : null,
     year: m.attributes.year ?? null,
     status: (m.attributes.status as MangaSummary['status']) ?? 'unknown',
     contentRating: (m.attributes.contentRating as MangaSummary['contentRating']) ?? 'unknown',
@@ -249,7 +253,7 @@ export class MangaDexProvider implements MangaProvider {
         chapter: { hash: string; data: string[]; dataSaver: string[] };
       }>(`/at-home/server/${chapterId}`);
       const pages = data.chapter.data.map(
-        (file) => `${data.baseUrl}/data/${data.chapter.hash}/${file}`,
+        (file) => proxy(`${data.baseUrl}/data/${data.chapter.hash}/${file}`),
       );
       return { chapterId, providerId: 'mangadex', pages };
     });

@@ -107,6 +107,12 @@ self.addEventListener('fetch', (event) => {
 
   if (!isSameOrigin) return;
 
+  // Proxy de imágenes /api/img: cache-first (LRU covers cache)
+  if (url.pathname === '/api/img') {
+    event.respondWith(cacheFirst(req, COVERS_CACHE, COVERS_MAX + PAGES_MAX));
+    return;
+  }
+
   // Proxy API local (Astro): network-first con fallback
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(networkFirstApi(req));
