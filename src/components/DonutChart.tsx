@@ -88,12 +88,12 @@ export default function DonutChart({
   }
 
   return (
-    <div className={`surface p-5 sm:p-6 ${className}`}>
+    <div className={`surface p-4 sm:p-6 ${className}`}>
       {(title || subtitle) && (
-        <div className="mb-5">
+        <div className="mb-4 sm:mb-5">
           {subtitle && <span className="section-kicker">{subtitle}</span>}
           {title && (
-            <h3 className="mt-2 font-display text-xl font-bold tracking-tight">{title}</h3>
+            <h3 className="mt-2 font-display text-lg sm:text-xl font-bold tracking-tight">{title}</h3>
           )}
         </div>
       )}

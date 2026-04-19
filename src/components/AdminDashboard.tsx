@@ -69,7 +69,7 @@ export default function AdminDashboard() {
       {/* Totales */}
       <section>
         <h2 className="mb-4 section-kicker">Totales</h2>
-        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid gap-2 xs:gap-3 grid-cols-2 xs:grid-cols-3 lg:grid-cols-6">
           <StatCard label="Visitas únicas" value={stats.totals.uniqueIps} highlight />
           <StatCard label="Visitas totales" value={stats.totals.visits} />
           <StatCard label="Usuarios" value={stats.totals.users} />
@@ -115,9 +115,9 @@ export default function AdminDashboard() {
 
       {/* Top paths */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="surface p-6">
+        <section className="surface p-4 sm:p-6">
           <span className="section-kicker">Rutas</span>
-          <h3 className="mt-2 mb-4 font-display text-xl font-bold">Top páginas (7 días)</h3>
+          <h3 className="mt-2 mb-4 font-display text-lg sm:text-xl font-bold">Top páginas (7 días)</h3>
           {stats.topPaths.length === 0 ? (
             <p className="py-4 text-sm text-fg-muted">Sin datos.</p>
           ) : (
@@ -132,9 +132,9 @@ export default function AdminDashboard() {
           )}
         </section>
 
-        <section className="surface p-6">
+        <section className="surface p-4 sm:p-6">
           <span className="section-kicker">Cuentas</span>
-          <h3 className="mt-2 mb-4 font-display text-xl font-bold">Usuarios recientes</h3>
+          <h3 className="mt-2 mb-4 font-display text-lg sm:text-xl font-bold">Usuarios recientes</h3>
           {stats.recentUsers.length === 0 ? (
             <p className="py-4 text-sm text-fg-muted">Ningún usuario registrado.</p>
           ) : (
@@ -172,12 +172,12 @@ function StatCard({
 }) {
   return (
     <div
-      className={`surface p-4 ${
+      className={`surface p-3 sm:p-4 ${
         highlight ? 'ring-brand-500/30 bg-gradient-to-br from-brand-500/5 to-transparent' : ''
       }`}
     >
-      <div className="text-2xs font-bold uppercase tracking-[0.16em] text-fg-subtle">{label}</div>
-      <div className="mt-2 font-display text-3xl font-black tabular-nums">
+      <div className="text-[9px] xs:text-2xs font-bold uppercase tracking-[0.14em] text-fg-subtle truncate">{label}</div>
+      <div className="mt-1.5 sm:mt-2 font-display text-2xl xs:text-3xl font-black tabular-nums">
         {value.toLocaleString('es-ES')}
       </div>
     </div>
