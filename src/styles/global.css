@@ -6,6 +6,10 @@
   :root, [data-theme="sakura"] {
     --header-h: 64px;
     --bottomnav-h: 56px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
 
     /* Motion tokens — un solo lenguaje de movimiento */
     --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -114,6 +118,14 @@
   * {
     -webkit-tap-highlight-color: transparent;
   }
+  /* iOS PWA: tap responsivo, sin 300ms delay */
+  a, button, [role="button"], input, select, textarea, label {
+    touch-action: manipulation;
+  }
+  /* Reader body: desactivar rubber-band vertical en iOS standalone */
+  body.reader-mode {
+    overscroll-behavior: none;
+  }
   /* Mejor renderizado de texto en todo */
   html, body, button, input, select, textarea {
     -webkit-font-smoothing: antialiased;
@@ -133,6 +145,21 @@
     color-scheme: dark;
     scroll-behavior: smooth;
     font-feature-settings: 'palt';
+    /* iOS: prevenir rubber-band horizontal */
+    overscroll-behavior-x: none;
+  }
+  /* Header spacer con safe-area top (iPhone notch/Dynamic Island) */
+  .header-spacer {
+    height: calc(var(--safe-top) + 4rem);
+  }
+  @media (min-width: 640px) {
+    .header-spacer {
+      height: calc(var(--safe-top) + 5rem);
+    }
+  }
+  /* Scroll state del header-float (JS toggla 'scrolled') */
+  .header-float.scrolled {
+    top: calc(var(--safe-top) + 0.5rem) !important;
   }
   body {
     @apply min-h-screen bg-bg font-sans text-base;
@@ -179,7 +206,27 @@
 
 @layer components {
   .container-app {
-    @apply mx-auto w-full max-w-[1440px] px-3 sm:px-6 lg:px-10 xl:px-14;
+    @apply mx-auto w-full max-w-[1440px];
+    padding-left: max(0.75rem, var(--safe-left));
+    padding-right: max(0.75rem, var(--safe-right));
+  }
+  @media (min-width: 640px) {
+    .container-app {
+      padding-left: max(1.5rem, var(--safe-left));
+      padding-right: max(1.5rem, var(--safe-right));
+    }
+  }
+  @media (min-width: 1024px) {
+    .container-app {
+      padding-left: max(2.5rem, var(--safe-left));
+      padding-right: max(2.5rem, var(--safe-right));
+    }
+  }
+  @media (min-width: 1280px) {
+    .container-app {
+      padding-left: max(3.5rem, var(--safe-left));
+      padding-right: max(3.5rem, var(--safe-right));
+    }
   }
 
   /* ---------- Buttons (mobile-first, touch target 44px minimo) ---------- */

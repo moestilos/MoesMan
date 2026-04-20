@@ -247,8 +247,13 @@ function ReaderChrome({
   const pct = total > 0 ? Math.round(((pageIndex + 1) / total) * 100) : 0;
   const currentChap = current >= 0 ? chapters[current] : null;
   return (
-    <div className="sticky top-0 z-30 border-b border-white/10 bg-black/60 backdrop-blur-xl">
-      <div className="flex h-14 items-center gap-2 px-3 sm:px-6">
+    <div
+      className="sticky top-0 z-30 border-b border-white/10 bg-black/60 backdrop-blur-xl"
+      style={{ paddingTop: 'var(--safe-top)' }}
+    >
+      <div className="flex h-14 items-center gap-2 px-3 sm:px-6"
+        style={{ paddingLeft: 'max(0.75rem, var(--safe-left))', paddingRight: 'max(0.75rem, var(--safe-right))' }}
+      >
         <a
           href={`/manga/${mangaId}`}
           className="btn-ghost text-white ring-white/10 hover:ring-white/20"
