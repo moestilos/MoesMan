@@ -29,7 +29,8 @@ const items = [
 
 <nav
   aria-label="Navegación móvil"
-  class="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-bg/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
+  class="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-bg/85 backdrop-blur-xl md:hidden"
+  style="padding-bottom: var(--safe-bottom); padding-left: var(--safe-left); padding-right: var(--safe-right);"
 >
   <ul class="grid grid-cols-4">
     {items.map((it) => {
@@ -68,4 +69,4 @@ const items = [
     })}
   </ul>
 </nav>
-<div class="h-[var(--bottomnav-h)] md:hidden" aria-hidden="true"></div>
+<div class="md:hidden" aria-hidden="true" style="height: calc(var(--bottomnav-h) + var(--safe-bottom));"></div>
