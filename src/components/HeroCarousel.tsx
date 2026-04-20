@@ -72,54 +72,67 @@ export default function HeroCarousel({ items, intervalMs = 7000 }: Props) {
         <div className="absolute inset-0 bg-gradient-to-t from-[#08080b] via-[#08080b]/30 to-transparent"></div>
       </div>
 
-      {/* Contenido mobile-first: thumbnail + info en fila, CTAs abajo */}
-      <div className="relative z-10 flex flex-col gap-4 p-4 sm:hidden">
-        <div className="flex gap-3 items-start">
+      {/* Contenido mobile-first: cover grande + info rica + CTA prominente */}
+      <div className="relative z-10 flex flex-col gap-4 p-4 xs:p-5 sm:hidden">
+        <div className="flex gap-4 items-stretch">
           {item.coverUrl && (
             <a
               href={`/manga/${item.id}`}
-              className="relative block flex-none w-24 overflow-hidden rounded-lg ring-1 ring-white/10 shadow-card-lg"
+              className="group relative block flex-none w-[38%] max-w-[140px]"
               aria-label={item.title}
             >
-              <img
-                src={item.coverUrl}
-                alt={item.title}
-                className="block aspect-[2/3] w-full object-cover"
+              {/* Glow halo */}
+              <div
+                aria-hidden="true"
+                className="absolute -inset-2 rounded-2xl blur-xl opacity-60 transition-opacity group-active:opacity-80"
+                style={{ background: 'radial-gradient(ellipse at center, rgb(var(--brand-500) / 0.45), transparent 70%)' }}
               />
-              <span
-                className={`absolute top-1 left-1 inline-flex items-center rounded px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white ring-1 backdrop-blur-sm ${typeTone}`}
-              >
-                {typeLabel}
-              </span>
+              <div className="relative overflow-hidden rounded-xl ring-1 ring-white/15 shadow-card-lg">
+                <img
+                  src={item.coverUrl}
+                  alt={item.title}
+                  className="block aspect-[2/3] w-full object-cover transition-transform duration-500 group-active:scale-[1.03]"
+                />
+                {/* Inner glass highlight */}
+                <div className="pointer-events-none absolute inset-0 rounded-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]" />
+                {/* Type chip top-left */}
+                <span
+                  className={`absolute top-1.5 left-1.5 inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white ring-1 backdrop-blur-sm ${typeTone}`}
+                >
+                  {typeLabel}
+                </span>
+              </div>
             </a>
           )}
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-1.5">
-              {item.status === 'ongoing' && (
-                <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300 ring-1 ring-inset ring-emerald-500/30">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                  En curso
-                </span>
-              )}
-              {item.status === 'completed' && (
-                <span className="inline-flex items-center gap-1 rounded-md bg-sky-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-sky-300 ring-1 ring-inset ring-sky-500/30">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-sky-400" />
-                  Completo
-                </span>
-              )}
-              {item.year && (
-                <span className="text-[10px] font-semibold text-fg-subtle tabular-nums">{item.year}</span>
-              )}
+          <div className="min-w-0 flex-1 flex flex-col justify-between py-0.5">
+            <div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {item.status === 'ongoing' && (
+                  <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-bold text-emerald-300 ring-1 ring-inset ring-emerald-500/30">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
+                    En curso
+                  </span>
+                )}
+                {item.status === 'completed' && (
+                  <span className="inline-flex items-center gap-1 rounded-md bg-sky-500/15 px-1.5 py-0.5 text-[10px] font-bold text-sky-300 ring-1 ring-inset ring-sky-500/30">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-sky-400" />
+                    Completo
+                  </span>
+                )}
+                {item.year && (
+                  <span className="text-[10px] font-bold text-fg-subtle tabular-nums">{item.year}</span>
+                )}
+              </div>
+              <h1 className="mt-2 font-display text-[20px] xs:text-[22px] font-black leading-[1.08] tracking-tight line-clamp-3 break-words text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.8)]">
+                {item.title}
+              </h1>
             </div>
-            <h1 className="mt-1.5 font-display text-[19px] font-black leading-[1.1] tracking-tight line-clamp-3 break-words">
-              {item.title}
-            </h1>
             {item.tags.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1">
                 {item.tags.slice(0, 3).map((t) => (
                   <span
                     key={t}
-                    className="inline-flex items-center rounded-full bg-white/[0.05] px-2 py-0.5 text-[10px] font-semibold text-fg-muted ring-1 ring-inset ring-white/[0.08]"
+                    className="inline-flex items-center rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold text-fg-muted ring-1 ring-inset ring-white/[0.1]"
                   >
                     {t}
                   </span>
@@ -129,30 +142,47 @@ export default function HeroCarousel({ items, intervalMs = 7000 }: Props) {
           </div>
         </div>
 
-        {/* CTAs mobile */}
-        <div className="grid grid-cols-2 gap-2">
-          <a href={`/manga/${item.id}`} className="btn btn-primary justify-center">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        {/* CTA principal full-width + secundario */}
+        <div className="flex flex-col gap-2">
+          <a
+            href={`/manga/${item.id}`}
+            className="btn btn-primary justify-center w-full text-[15px] h-12"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M8 5v14l11-7z" />
             </svg>
-            Ver
+            Ver detalles
           </a>
-          <a href="/search" className="btn btn-secondary justify-center">Explorar</a>
+          <a
+            href="/search"
+            className="inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-fg-muted hover:text-fg transition-colors py-1"
+          >
+            <span>Explorar catálogo</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+          </a>
         </div>
 
-        {/* Indicators mobile (debajo CTAs) */}
+        {/* Indicators con hit area generoso */}
         {items.length > 1 && (
-          <div className="flex items-center justify-center gap-1.5">
+          <div className="flex items-center justify-center -my-1">
             {items.map((_, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => go(i)}
                 aria-label={`Ir al slide ${i + 1}`}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  i === idx ? 'w-6 bg-white' : 'w-1.5 bg-white/30 hover:bg-white/60'
-                }`}
-              />
+                className="group relative px-1.5 py-2"
+              >
+                <span
+                  className={`block h-1.5 rounded-full transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    i === idx
+                      ? 'w-7 bg-gradient-to-r from-brand-400 to-brand-600 shadow-[0_0_12px_rgb(var(--brand-500)/0.6)]'
+                      : 'w-1.5 bg-white/25 group-active:bg-white/60'
+                  }`}
+                />
+              </button>
             ))}
           </div>
         )}
