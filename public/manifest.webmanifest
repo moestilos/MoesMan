@@ -15,15 +15,17 @@
   "prefer_related_applications": false,
   "icons": [
     { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "categories": ["books", "entertainment", "comics"],
   "shortcuts": [
     { "name": "Mi biblioteca", "short_name": "Biblioteca", "url": "/library", "description": "Tus mangas guardados",
-      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }] },
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
     { "name": "Explorar", "short_name": "Explorar", "url": "/search",
-      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }] },
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
     { "name": "Historial", "short_name": "Historial", "url": "/history",
-      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }] }
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }] }
   ]
 }
