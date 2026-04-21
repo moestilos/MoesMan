@@ -39,6 +39,7 @@ export const GET: APIRoute = async (ctx) => {
         id: schema.users.id,
         username: schema.users.username,
         email: schema.users.email,
+        avatarUrl: schema.users.avatarUrl,
         createdAt: schema.users.createdAt,
       })
       .from(schema.users)
@@ -114,6 +115,7 @@ export const GET: APIRoute = async (ctx) => {
       id: u.id,
       username: u.username,
       email: u.email,
+      avatarUrl: u.avatarUrl ?? null,
       createdAt: u.createdAt instanceof Date ? u.createdAt.toISOString() : String(u.createdAt),
     })),
     byDevice,

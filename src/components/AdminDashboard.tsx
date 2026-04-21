@@ -3,6 +3,7 @@ import { getToken, isAuthed, getUser } from '@/lib/auth-client';
 import DonutChart, { type DonutSegment } from './DonutChart';
 import BarChart3D from './BarChart3D';
 import AdminMangaList from './AdminMangaList';
+import AdminUserDetail from './AdminUserDetail';
 
 interface Stats {
   totals: {
@@ -15,7 +16,7 @@ interface Stats {
   };
   last30Days: Array<[string, number]>;
   topPaths: Array<{ path: string; count: number }>;
-  recentUsers: Array<{ id: string; username: string; email: string; createdAt: string }>;
+  recentUsers: Array<{ id: string; username: string; email: string; avatarUrl: string | null; createdAt: string }>;
   byDevice?: Array<{ key: string; label: string; count: number }>;
   byBrowser?: Array<{ label: string; count: number }>;
 }
@@ -25,6 +26,7 @@ const ADMIN_EMAIL = 'gmateosoficial@gmail.com';
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [openUserId, setOpenUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthed()) {
@@ -140,23 +142,41 @@ export default function AdminDashboard() {
           ) : (
             <ul className="divide-y divide-border">
               {stats.recentUsers.map((u) => (
-                <li key={u.id} className="flex items-center gap-3 py-2.5 text-sm">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gradient-brand text-[11px] font-black text-white">
-                    {u.username[0]?.toUpperCase() ?? '?'}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate font-semibold">{u.username}</div>
-                    <div className="truncate text-xs text-fg-subtle">{u.email}</div>
-                  </div>
-                  <span className="text-xs text-fg-subtle tabular-nums">
-                    {new Date(u.createdAt).toLocaleDateString('es-ES')}
-                  </span>
+                <li key={u.id}>
+                  <button
+                    type="button"
+                    onClick={() => setOpenUserId(u.id)}
+                    className="w-full flex items-center gap-3 py-2.5 text-sm text-left rounded-lg px-2 -mx-2 transition hover:bg-bg-hover/60"
+                  >
+                    {u.avatarUrl ? (
+                      <img
+                        src={u.avatarUrl}
+                        alt={u.username}
+                        className="h-9 w-9 flex-none rounded-full object-cover ring-1 ring-border"
+                        onError={(e) => ((e.currentTarget as HTMLImageElement).style.visibility = 'hidden')}
+                      />
+                    ) : (
+                      <span className="inline-flex h-9 w-9 flex-none items-center justify-center rounded-full bg-gradient-brand text-xs font-black text-white">
+                        {u.username[0]?.toUpperCase() ?? '?'}
+                      </span>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-semibold">{u.username}</div>
+                      <div className="truncate text-xs text-fg-subtle">{u.email}</div>
+                    </div>
+                    <span className="text-xs text-fg-subtle tabular-nums">
+                      {new Date(u.createdAt).toLocaleDateString('es-ES')}
+                    </span>
+                  </button>
                 </li>
               ))}
             </ul>
           )}
         </section>
       </div>
+      {openUserId && (
+        <AdminUserDetail userId={openUserId} onClose={() => setOpenUserId(null)} />
+      )}
     </div>
   );
 }
