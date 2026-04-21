@@ -25,24 +25,24 @@ export const GET: APIRoute = async ({ url }) => {
   }
 
   try {
-    const headers: Record<string, string> = {
+    const reqHeaders: Record<string, string> = {
       'User-Agent': 'MoesMan/0.1 (personal manga library)',
       Accept: 'image/*',
     };
-    if (ref && REFERERS[ref]) headers.Referer = REFERERS[ref];
-    const upstream = await fetch(target, { headers });
+    if (ref && REFERERS[ref]) reqHeaders.Referer = REFERERS[ref];
+    const upstream = await fetch(target, { headers: reqHeaders });
     if (!upstream.ok || !upstream.body) {
       return new Response('Upstream error', { status: upstream.status || 502 });
     }
-    const headers = new Headers();
+    const resHeaders = new Headers();
     const ct = upstream.headers.get('content-type');
-    if (ct) headers.set('Content-Type', ct);
+    if (ct) resHeaders.set('Content-Type', ct);
     const cl = upstream.headers.get('content-length');
-    if (cl) headers.set('Content-Length', cl);
-    headers.set('Cache-Control', 'public, max-age=604800, immutable');
-    headers.set('Cross-Origin-Resource-Policy', 'same-origin');
-    return new Response(upstream.body, { status: 200, headers });
-  } catch (e) {
+    if (cl) resHeaders.set('Content-Length', cl);
+    resHeaders.set('Cache-Control', 'public, max-age=604800, immutable');
+    resHeaders.set('Cross-Origin-Resource-Policy', 'same-origin');
+    return new Response(upstream.body, { status: 200, headers: resHeaders });
+  } catch {
     return new Response('Fetch failed', { status: 502 });
   }
 };
