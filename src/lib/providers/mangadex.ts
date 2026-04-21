@@ -409,11 +409,12 @@ export class MangaDexProvider implements MangaProvider {
   }
 
   async getChapterPages(chapterId: string): Promise<ChapterPages> {
-    return cached(`md:pages:${chapterId}`, 30 * 60_000, async () => {
+    // Cache corto (5 min): los tokens at-home caducan en ~15 min.
+    return cached(`md:pages:${chapterId}`, 5 * 60_000, async () => {
       const data = await mdFetch<{
         baseUrl: string;
         chapter: { hash: string; data: string[]; dataSaver: string[] };
-      }>(`/at-home/server/${chapterId}`);
+      }>(`/at-home/server/${chapterId}`, { forcePort443: 'true' });
       const pages = data.chapter.data.map(
         (file) => proxy(`${data.baseUrl}/data/${data.chapter.hash}/${file}`),
       );

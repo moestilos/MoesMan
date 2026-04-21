@@ -30,7 +30,15 @@ export const GET: APIRoute = async ({ url }) => {
       Accept: 'image/*',
     };
     if (ref && REFERERS[ref]) reqHeaders.Referer = REFERERS[ref];
-    const upstream = await fetch(target, { headers: reqHeaders });
+    // Timeout 25s: evita servidores MangaDex@Home caídos que cuelgan el stream
+    const ac = new AbortController();
+    const timer = setTimeout(() => ac.abort(), 25_000);
+    let upstream: Response;
+    try {
+      upstream = await fetch(target, { headers: reqHeaders, signal: ac.signal });
+    } finally {
+      clearTimeout(timer);
+    }
     if (!upstream.ok || !upstream.body) {
       return new Response('Upstream error', { status: upstream.status || 502 });
     }

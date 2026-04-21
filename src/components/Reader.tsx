@@ -174,36 +174,15 @@ export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, 
       {mode === 'vertical' ? (
         <div className="mx-auto flex max-w-3xl lg:max-w-4xl flex-col items-center gap-0 py-4 sm:gap-1 sm:py-8 lg:py-12">
           {pages.map((src, i) => (
-            <div
+            <PageImg
               key={src}
-              data-idx={i}
-              ref={(el) => {
-                pageRefs.current[i] = el;
-              }}
-              className={`relative w-full ${loaded.has(i) ? '' : 'aspect-[2/3] min-h-[420px]'}`}
-            >
-              {!loaded.has(i) && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-sm bg-[#17171a]">
-                  <div className="skeleton absolute inset-0" />
-                  <div className="relative z-10 flex flex-col items-center gap-2 text-white/40">
-                    <svg className="h-8 w-8 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" d="M21 12a9 9 0 1 1-6.22-8.56" />
-                    </svg>
-                    <span className="text-xs font-medium">Página {i + 1}</span>
-                  </div>
-                </div>
-              )}
-              <img
-                src={src}
-                alt={`Página ${i + 1}`}
-                loading={i < 5 ? 'eager' : 'lazy'}
-                fetchPriority={i < 3 ? 'high' : i < 8 ? 'auto' : 'low'}
-                decoding={i < 5 ? 'sync' : 'async'}
-                onLoad={() => markLoaded(i)}
-                onError={() => markLoaded(i)}
-                className="mx-auto block h-auto w-full max-w-full"
-              />
-            </div>
+              src={src}
+              index={i}
+              loaded={loaded.has(i)}
+              onLoaded={() => markLoaded(i)}
+              pageRef={(el) => (pageRefs.current[i] = el)}
+              priority={i < 5}
+            />
           ))}
           <ChapterEnd prev={prevChapter} next={nextChapter} mangaId={mangaId} ckHid={ckHid} />
         </div>
@@ -218,12 +197,10 @@ export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, 
           }}
         >
           {!loaded.has(pageIndex) && <div className="skeleton absolute inset-10 rounded" />}
-          <img
-            key={pages[pageIndex]}
+          <PagedImg
             src={pages[pageIndex]}
-            alt={`Página ${pageIndex + 1}`}
-            onLoad={() => markLoaded(pageIndex)}
-            className="max-h-[calc(100vh-80px)] w-auto max-w-full animate-fade-in object-contain"
+            index={pageIndex}
+            onLoaded={() => markLoaded(pageIndex)}
           />
           <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-white/90 ring-1 ring-white/10">
             {pageIndex + 1} / {pages.length}
@@ -336,6 +313,151 @@ function ReaderChrome({
         </div>
       </div>
     </div>
+  );
+}
+
+function PageImg({
+  src,
+  index,
+  loaded,
+  onLoaded,
+  pageRef,
+  priority,
+}: {
+  src: string;
+  index: number;
+  loaded: boolean;
+  onLoaded: () => void;
+  pageRef: (el: HTMLDivElement | null) => void;
+  priority: boolean;
+}) {
+  const [attempt, setAttempt] = useState(0);
+  const [failed, setFailed] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (loaded) {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      return;
+    }
+    // Watchdog: si no carga en 30s, marcar fallo para poder reintentar
+    timerRef.current = setTimeout(() => {
+      setFailed(true);
+    }, 30_000);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [loaded, attempt]);
+
+  function retry() {
+    setFailed(false);
+    setAttempt((a) => a + 1);
+  }
+
+  const finalSrc = attempt === 0 ? src : `${src}${src.includes('?') ? '&' : '?'}r=${attempt}`;
+
+  return (
+    <div
+      data-idx={index}
+      ref={pageRef}
+      className={`relative w-full ${loaded ? '' : 'aspect-[2/3] min-h-[420px]'}`}
+    >
+      {!loaded && !failed && (
+        <div className="absolute inset-0 flex items-center justify-center rounded-sm bg-[#17171a]">
+          <div className="skeleton absolute inset-0" />
+          <div className="relative z-10 flex flex-col items-center gap-2 text-white/40">
+            <svg className="h-8 w-8 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" d="M21 12a9 9 0 1 1-6.22-8.56" />
+            </svg>
+            <span className="text-xs font-medium">Página {index + 1}</span>
+          </div>
+        </div>
+      )}
+      {failed && !loaded && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-sm bg-[#17171a] ring-1 ring-white/10">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="text-white/40">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v5"/><path d="M12 16h.01"/>
+          </svg>
+          <p className="text-xs text-white/60">No se pudo cargar la página {index + 1}</p>
+          <button
+            type="button"
+            onClick={retry}
+            className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white hover:bg-white/20 ring-1 ring-white/15"
+          >
+            Reintentar
+          </button>
+        </div>
+      )}
+      <img
+        key={finalSrc}
+        src={finalSrc}
+        alt={`Página ${index + 1}`}
+        loading={priority ? 'eager' : 'lazy'}
+        fetchPriority={index < 3 ? 'high' : index < 8 ? 'auto' : 'low'}
+        decoding={priority ? 'sync' : 'async'}
+        onLoad={() => {
+          setFailed(false);
+          onLoaded();
+        }}
+        onError={() => {
+          if (attempt < 2) {
+            // Reintentar automático con cache-bust
+            setAttempt((a) => a + 1);
+          } else {
+            setFailed(true);
+          }
+        }}
+        className="mx-auto block h-auto w-full max-w-full"
+      />
+    </div>
+  );
+}
+
+function PagedImg({ src, index, onLoaded }: { src: string; index: number; onLoaded: () => void }) {
+  const [attempt, setAttempt] = useState(0);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setAttempt(0);
+    setFailed(false);
+  }, [src]);
+
+  const finalSrc = attempt === 0 ? src : `${src}${src.includes('?') ? '&' : '?'}r=${attempt}`;
+
+  if (failed) {
+    return (
+      <div className="flex flex-col items-center gap-3 text-white/70">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <circle cx="12" cy="12" r="10"/><path d="M12 8v5"/><path d="M12 16h.01"/>
+        </svg>
+        <p className="text-sm">No se pudo cargar la página {index + 1}</p>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setFailed(false);
+            setAttempt((a) => a + 1);
+          }}
+          className="rounded-full bg-white/10 px-4 py-1.5 text-sm font-semibold ring-1 ring-white/15 hover:bg-white/20"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      key={finalSrc}
+      src={finalSrc}
+      alt={`Página ${index + 1}`}
+      onLoad={onLoaded}
+      onError={() => {
+        if (attempt < 2) setAttempt((a) => a + 1);
+        else setFailed(true);
+      }}
+      className="max-h-[calc(100vh-80px)] w-auto max-w-full animate-fade-in object-contain"
+    />
   );
 }
 
