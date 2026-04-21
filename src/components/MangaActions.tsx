@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { getToken, isAuthed } from '@/lib/auth-client';
+import { showAlert } from '@/lib/dialog';
 
 interface Props {
   providerId: string;
@@ -44,7 +45,7 @@ export default function MangaActions({ providerId, mangaId, title, coverUrl }: P
         setInLibrary(true);
       }
     } catch (e) {
-      alert((e as Error).message);
+      showAlert({ title: 'Error', message: (e as Error).message, tone: 'danger' });
     } finally {
       setBusy(false);
     }
@@ -61,7 +62,7 @@ export default function MangaActions({ providerId, mangaId, title, coverUrl }: P
       const r = await api.favorites.toggle(token, providerId, mangaId);
       setFavorite(r.favorite);
     } catch (e) {
-      alert((e as Error).message);
+      showAlert({ title: 'Error', message: (e as Error).message, tone: 'danger' });
     } finally {
       setBusy(false);
     }

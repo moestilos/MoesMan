@@ -4,6 +4,7 @@ import Header from '@/components/Header.astro';
 import BottomNav from '@/components/BottomNav.astro';
 import BgStarfield from '@/components/BgStarfield.astro';
 import InstallPrompt from '@/components/InstallPrompt';
+import DialogRoot from '@/components/DialogRoot';
 import { readThemeCookie } from '@/lib/theme';
 
 const themeId = readThemeCookie(Astro.request.headers.get('cookie'));
@@ -57,6 +58,7 @@ const {
     <slot name="head" />
   </head>
   <body class:list={[hideChrome && 'reader-mode']}>
+    <DialogRoot client:idle />
     {!hideChrome && <BgStarfield />}
     {!hideChrome && <Header />}
     <main class:list={[!fullBleed && 'container-app pt-3 pb-16 sm:pt-6 sm:pb-24 lg:pt-8', 'relative z-10']}>

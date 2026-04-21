@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api, type LibraryEntry } from '@/lib/api';
 import { getToken, isAuthed } from '@/lib/auth-client';
+import { showAlert, showConfirm } from '@/lib/dialog';
 
 export default function LibraryView() {
   const [items, setItems] = useState<LibraryEntry[] | null>(null);
@@ -21,12 +22,18 @@ export default function LibraryView() {
   async function remove(entry: LibraryEntry) {
     const token = getToken();
     if (!token) return;
-    if (!confirm(`Quitar "${entry.title}" de tu biblioteca?`)) return;
+    const ok = await showConfirm({
+      title: 'Quitar de biblioteca',
+      message: `¿Quitar "${entry.title}" de tu biblioteca? Esto no borra tu progreso de lectura.`,
+      confirmText: 'Quitar',
+      tone: 'danger',
+    });
+    if (!ok) return;
     try {
       await api.library.remove(token, entry.providerId, entry.mangaId);
       setItems((prev) => prev?.filter((i) => i.id !== entry.id) ?? null);
     } catch (e) {
-      alert((e as Error).message);
+      showAlert({ title: 'Error', message: (e as Error).message, tone: 'danger' });
     }
   }
 

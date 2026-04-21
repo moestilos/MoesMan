@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { downloadMangaZip, type ZipProgress, type ChapterMeta } from '@/lib/zip-download';
+import { showConfirm } from '@/lib/dialog';
 
 interface Props {
   mangaTitle: string;
@@ -13,8 +14,13 @@ export default function DownloadMangaZip({ mangaTitle, chapters }: Props) {
   async function onClick() {
     if (busy) return;
     if (chapters.length === 0) return;
-    const msg = `Descargar ${chapters.length} capítulos como ZIP único?\n\nPuede tardar varios minutos y consumir bastante memoria.`;
-    if (!confirm(msg)) return;
+    const ok = await showConfirm({
+      title: 'Descargar manga completo',
+      message: `¿Descargar ${chapters.length} capítulos como ZIP único? Puede tardar varios minutos y consumir memoria del dispositivo.`,
+      confirmText: 'Descargar',
+      tone: 'brand',
+    });
+    if (!ok) return;
     try {
       await downloadMangaZip(mangaTitle, chapters, setProgress);
       setTimeout(() => setProgress(null), 3000);

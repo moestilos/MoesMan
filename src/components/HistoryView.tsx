@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api, type ProgressRow } from '@/lib/api';
 import { getToken, isAuthed } from '@/lib/auth-client';
+import { showAlert, showConfirm } from '@/lib/dialog';
 
 type ProviderFilter = 'all' | 'mangadex' | 'comick' | 'webtoons';
 
@@ -68,7 +69,7 @@ export default function HistoryView() {
       await api.progress.remove(token, p.providerId, p.chapterId);
       setItems((prev) => prev?.filter((r) => r.id !== p.id) ?? null);
     } catch (e) {
-      alert((e as Error).message);
+      showAlert({ title: 'Error', message: (e as Error).message, tone: 'danger' });
     } finally {
       setBusyId(null);
     }
@@ -77,13 +78,19 @@ export default function HistoryView() {
   async function clearAll() {
     const token = getToken();
     if (!token) return;
-    if (!confirm('¿Borrar TODO tu historial de lectura? Esta acción no se puede deshacer.')) return;
+    const ok = await showConfirm({
+      title: 'Borrar historial',
+      message: '¿Seguro que quieres borrar TODO tu historial de lectura? Esta acción no se puede deshacer.',
+      confirmText: 'Borrar todo',
+      tone: 'danger',
+    });
+    if (!ok) return;
     setBusyId('all');
     try {
       await api.progress.clearAll(token);
       setItems([]);
     } catch (e) {
-      alert((e as Error).message);
+      showAlert({ title: 'Error', message: (e as Error).message, tone: 'danger' });
     } finally {
       setBusyId(null);
     }

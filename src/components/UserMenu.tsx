@@ -3,6 +3,7 @@ import { clearAuth, getToken, getUser, updateUser, type AuthUser } from '@/lib/a
 import { api } from '@/lib/api';
 import NsfwToggle from './NsfwToggle';
 import ThemePicker from './ThemePicker';
+import { showAlert, showConfirm } from '@/lib/dialog';
 
 export default function UserMenu() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -26,7 +27,7 @@ export default function UserMenu() {
     e.target.value = '';
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      alert('Selecciona un archivo de imagen.');
+      showAlert({ title: 'Formato no válido', message: 'Selecciona un archivo de imagen (PNG, JPG, WebP).' });
       return;
     }
     setUploading(true);
@@ -37,7 +38,7 @@ export default function UserMenu() {
       await api.setAvatar(token, dataUrl);
       updateUser({ avatarUrl: dataUrl });
     } catch (err) {
-      alert((err as Error).message);
+      showAlert({ title: 'Error', message: (err as Error).message, tone: 'danger' });
     } finally {
       setUploading(false);
     }
@@ -45,7 +46,13 @@ export default function UserMenu() {
 
   async function removeAvatar() {
     if (!user?.avatarUrl) return;
-    if (!confirm('¿Quitar foto de perfil?')) return;
+    const ok = await showConfirm({
+      title: 'Quitar foto',
+      message: '¿Quitar tu foto de perfil? Podrás subir otra cuando quieras.',
+      confirmText: 'Quitar',
+      tone: 'danger',
+    });
+    if (!ok) return;
     const token = getToken();
     if (!token) return;
     setUploading(true);
@@ -110,11 +117,15 @@ export default function UserMenu() {
 
       {open && (
         <>
-          <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
+          <div
+            className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-0"
+            onClick={() => setOpen(false)}
+          />
           <div
             role="menu"
-            className="absolute right-0 z-40 mt-2 w-[min(18rem,calc(100vw-1.5rem))] animate-fade-in rounded-2xl bg-bg-card p-2 ring-1 ring-border shadow-card-lg"
+            className="fixed inset-x-0 bottom-0 z-40 animate-slide-up rounded-t-3xl bg-bg-card p-2 ring-1 ring-border shadow-card-lg pb-[max(env(safe-area-inset-bottom),0.5rem)] sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:mt-2 sm:w-[20rem] sm:rounded-2xl sm:pb-2 sm:animate-fade-in max-h-[85vh] overflow-y-auto"
           >
+            <div className="mx-auto mb-1 h-1 w-10 rounded-full bg-border sm:hidden" />
             <div className="flex items-center gap-3 border-b border-border px-3 py-3">
               <div className="relative">
                 <Avatar user={user} size={48} className="text-lg" />

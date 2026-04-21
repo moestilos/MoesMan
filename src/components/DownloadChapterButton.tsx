@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { showAlert } from '@/lib/dialog';
 
 interface Props {
   chapterId: string;
@@ -44,7 +45,10 @@ export default function DownloadChapterButton({ chapterId, chapterNumber, label,
     e.stopPropagation();
     if (state !== 'idle') return;
     if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) {
-      alert('Descarga offline requiere HTTPS o servidor local con Service Worker activo.');
+      showAlert({
+        title: 'Descarga offline no disponible',
+        message: 'Para guardar capítulos sin conexión necesitas acceder por HTTPS o ejecutar la app en local con el Service Worker activo.',
+      });
       return;
     }
     setState('fetching');

@@ -8,6 +8,7 @@ import {
   setAuth,
   type AuthUser,
 } from '@/lib/auth-client';
+import { showConfirm } from '@/lib/dialog';
 
 export default function ProfileForm() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -138,32 +139,32 @@ export default function ProfileForm() {
       <section className="mb-6 surface p-4 sm:p-6">
         <h2 className="font-display text-lg font-bold">Foto de perfil</h2>
         <p className="mt-1 text-sm text-fg-muted">PNG o JPG, se redimensiona automáticamente.</p>
-        <div className="mt-5 flex flex-col xs:flex-row xs:items-center gap-4 xs:gap-5">
-          <div className="relative">
+        <div className="mt-5 flex flex-col items-center text-center gap-4 sm:flex-row sm:items-center sm:text-left sm:gap-5">
+          <div className="relative flex-none">
             {user.avatarUrl ? (
               <img
                 src={user.avatarUrl}
                 alt={user.username}
-                className="h-20 w-20 rounded-2xl object-cover ring-1 ring-border-strong"
+                className="h-24 w-24 sm:h-20 sm:w-20 rounded-2xl object-cover ring-1 ring-border-strong"
               />
             ) : (
-              <span className="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-brand text-2xl font-black text-white ring-1 ring-brand-400/30">
+              <span className="inline-flex h-24 w-24 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-gradient-brand text-3xl sm:text-2xl font-black text-white ring-1 ring-brand-400/30">
                 {initial}
               </span>
             )}
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex w-full sm:w-auto flex-col sm:flex-row flex-wrap gap-2">
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="btn-secondary"
+              className="btn-secondary w-full sm:w-auto"
             >
               {uploading ? 'Subiendo…' : 'Cambiar foto'}
             </button>
             {user.avatarUrl && (
-              <button type="button" onClick={removeAvatar} disabled={uploading} className="btn-ghost">
-                Quitar
+              <button type="button" onClick={removeAvatar} disabled={uploading} className="btn-ghost w-full sm:w-auto">
+                Quitar foto
               </button>
             )}
             <input ref={fileRef} type="file" accept="image/*" onChange={pickAvatar} className="hidden" />
@@ -230,20 +231,26 @@ export default function ProfileForm() {
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-between border-t border-border pt-5">
+        <div className="mt-6 flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
           <button
             type="button"
-            onClick={() => {
-              if (confirm('¿Cerrar sesión?')) {
+            onClick={async () => {
+              const ok = await showConfirm({
+                title: 'Cerrar sesión',
+                message: '¿Seguro que quieres cerrar sesión? Tendrás que volver a iniciar sesión para ver tu biblioteca e historial.',
+                confirmText: 'Cerrar sesión',
+                tone: 'danger',
+              });
+              if (ok) {
                 clearAuth();
                 window.location.href = '/';
               }
             }}
-            className="text-sm font-medium text-fg-subtle hover:text-brand-400 transition"
+            className="btn-ghost text-sm w-full sm:w-auto"
           >
             Cerrar sesión
           </button>
-          <button type="submit" disabled={saving} className="btn-primary">
+          <button type="submit" disabled={saving} className="btn-primary w-full sm:w-auto">
             {saving ? 'Guardando…' : 'Guardar cambios'}
           </button>
         </div>
