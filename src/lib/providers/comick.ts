@@ -70,8 +70,9 @@ function statusOf(s?: number): MangaSummary['status'] {
   return s === 2 ? 'completed' : s === 3 ? 'cancelled' : s === 4 ? 'hiatus' : s === 1 ? 'ongoing' : 'unknown';
 }
 
+import { proxyUrl } from './proxy';
 function proxy(url: string): string {
-  return `/api/img?u=${encodeURIComponent(url)}`;
+  return proxyUrl(url);
 }
 
 function coverUrl(item: { md_covers?: Array<{ b2key?: string }> }): string | null {

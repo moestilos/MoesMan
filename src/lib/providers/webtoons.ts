@@ -22,8 +22,9 @@ import { cached } from '../cache';
 const ORIGIN = 'https://www.webtoons.com';
 const UA = 'Mozilla/5.0 (compatible; MoesMan/0.1)';
 
+import { proxyUrl } from './proxy';
 function proxy(url: string): string {
-  return `/api/img?u=${encodeURIComponent(url)}&ref=webtoons`;
+  return proxyUrl(url, 'w');
 }
 
 function encodeMangaId(titleNo: string, genre: string, slug: string): string {

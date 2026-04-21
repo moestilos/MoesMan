@@ -17,8 +17,9 @@ const COVERS = 'https://uploads.mangadex.org/covers';
 const USER_AGENT = 'MoesMan/0.1 (personal manga library)';
 const DEFAULT_RATINGS: import('./types').ContentRating[] = ['safe', 'suggestive', 'erotica'];
 
+import { proxyUrl } from './proxy';
 function proxy(url: string): string {
-  return `/api/img?u=${encodeURIComponent(url)}`;
+  return proxyUrl(url);
 }
 
 type MDRelationship = {
