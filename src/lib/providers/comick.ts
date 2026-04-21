@@ -157,7 +157,7 @@ function mapChapter(c: CKChapter, mangaId: string): Chapter {
 export class ComickProvider implements MangaProvider {
   readonly id = 'comick';
   readonly name = 'ComicK';
-  readonly preferredLanguages: Language[] = ['es', 'es-la'];
+  readonly preferredLanguages: Language[] = ['es', 'es-la', 'en'];
 
   async search({ query, limit = 24 }: SearchParams): Promise<MangaSummary[]> {
     if (!query) return [];
@@ -211,13 +211,22 @@ export class ComickProvider implements MangaProvider {
     });
   }
 
-  async listChapters({ mangaId, limit = 200 }: ChaptersParams): Promise<Chapter[]> {
-    return cached(`ck:chapters:${mangaId}`, 60_000, async () => {
-      const data = await ckFetch<{ chapters: CKChapter[] }>(
-        `/comic/${mangaId}/chapters`,
-        { lang: 'es', limit },
+  async listChapters({ mangaId, limit = 200, language }: ChaptersParams): Promise<Chapter[]> {
+    const langs = language ?? this.preferredLanguages;
+    const key = `ck:chapters:${mangaId}:${langs.join(',')}:${limit}`;
+    return cached(key, 60_000, async () => {
+      // ComicK permite 1 lang por call. Hacer calls paralelos y concatenar.
+      const baseLangs = langs.map((l) => (l === 'es-la' ? 'es' : l)); // ComicK usa 'es' para ambos
+      const unique = [...new Set(baseLangs)];
+      const results = await Promise.all(
+        unique.map((lang) =>
+          ckFetch<{ chapters: CKChapter[] }>(`/comic/${mangaId}/chapters`, { lang, limit }).catch(
+            () => ({ chapters: [] as CKChapter[] }),
+          ),
+        ),
       );
-      return data.chapters.map((c) => mapChapter(c, mangaId));
+      const all = results.flatMap((r) => r.chapters);
+      return all.map((c) => mapChapter(c, mangaId));
     });
   }
 

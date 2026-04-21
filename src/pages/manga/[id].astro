@@ -5,7 +5,7 @@ import DownloadChapterButton from '@/components/DownloadChapterButton';
 import DownloadChapterZip from '@/components/DownloadChapterZip';
 import DownloadMangaZip from '@/components/DownloadMangaZip';
 import TranslatableDesc from '@/components/TranslatableDesc';
-import { getProvider } from '@/lib/providers';
+import { getProvider, fetchMergedChapters } from '@/lib/providers';
 
 const { id } = Astro.params;
 if (!id) return Astro.redirect('/');
@@ -20,20 +20,26 @@ const langFilter: string[] | undefined =
 
 let manga: Awaited<ReturnType<typeof provider.getManga>> | null = null;
 let chapters: Awaited<ReturnType<typeof provider.listChapters>> = [];
+let ckHid: string | null = null;
 let error: string | null = null;
 
 try {
-  [manga, chapters] = await Promise.all([
-    provider.getManga(id),
-    provider.listChapters({ mangaId: id, limit: 300, order: 'asc', language: langFilter }),
-  ]);
+  manga = await provider.getManga(id);
+  const merged = await fetchMergedChapters({
+    mdMangaId: id,
+    title: manga.title,
+    altTitles: manga.altTitles,
+    language: langFilter,
+  });
+  chapters = merged.chapters;
+  ckHid = merged.ckHid;
 } catch (e) {
   error = e instanceof Error ? e.message : 'Error';
 }
 
 const avail = manga?.availableLanguages ?? [];
 const hasEs = avail.includes('es') || avail.includes('es-la');
-const hasEn = avail.includes('en');
+const hasEn = avail.includes('en') || !!ckHid;
 
 const cover = manga?.coverUrl ?? '/placeholder-cover.svg';
 const statusLabel: Record<string, { label: string; tone: string; dot: string }> = {
@@ -181,13 +187,13 @@ const lastChapter = chapters[chapters.length - 1];
               <!-- CTAs mobile-first: stack full-width en movil, inline en sm+ -->
               <div class="mt-2 grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
                 {firstChapter && (
-                  <a href={`/read/${firstChapter.id}?manga=${manga.id}`} class="btn-primary w-full sm:w-auto">
+                  <a href={`/read/${firstChapter.id}?manga=${manga.id}&p=${firstChapter.providerId}${ckHid ? `&ck=${ckHid}` : ''}`} class="btn-primary w-full sm:w-auto">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                     Empezar desde Cap. {firstChapter.number ?? '1'}
                   </a>
                 )}
                 {lastChapter && lastChapter.id !== firstChapter?.id && (
-                  <a href={`/read/${lastChapter.id}?manga=${manga.id}`} class="btn-secondary w-full sm:w-auto">
+                  <a href={`/read/${lastChapter.id}?manga=${manga.id}&p=${lastChapter.providerId}${ckHid ? `&ck=${ckHid}` : ''}`} class="btn-secondary w-full sm:w-auto">
                     Último · Cap. {lastChapter.number ?? '?'}
                   </a>
                 )}
@@ -268,7 +274,7 @@ const lastChapter = chapters[chapters.length - 1];
             {chapters.map((c, i) => (
               <li class="group flex items-center gap-1 pr-1.5 sm:pr-3 transition-colors hover:bg-bg-hover/50">
                 <a
-                  href={`/read/${c.id}?manga=${manga.id}`}
+                  href={`/read/${c.id}?manga=${manga.id}&p=${c.providerId}${ckHid ? `&ck=${ckHid}` : ''}`}
                   class="flex min-w-0 flex-1 items-center gap-2.5 px-2.5 py-3 sm:gap-4 sm:px-4 sm:py-3.5"
                 >
                   <span class="flex-none flex items-baseline gap-1 w-10 sm:w-14">

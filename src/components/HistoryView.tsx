@@ -101,7 +101,7 @@ export default function HistoryView() {
               className="group flex items-stretch transition hover:bg-bg-hover/60"
             >
               <a
-                href={`/read/${p.chapterId}?manga=${p.mangaId}`}
+                href={`/read/${p.chapterId}?manga=${p.mangaId}&p=${p.providerId ?? 'mangadex'}`}
                 className="flex min-w-0 flex-1 items-center gap-3 px-3 py-3 sm:gap-4 sm:px-4 outline-none focus-visible:bg-bg-hover/60"
               >
                 <div className="relative flex-none h-14 w-10 sm:h-16 sm:w-12 overflow-hidden rounded-md bg-bg-hover ring-1 ring-border">

@@ -69,4 +69,64 @@ export function mergeChaptersAcrossProviders(
   });
 }
 
+/**
+ * Encuentra el hid de ComicK que corresponde a un manga de MangaDex buscándolo
+ * por título normalizado. Devuelve null si no hay match razonable.
+ */
+export async function findComickHidByTitle(
+  title: string,
+  altTitles: string[] = [],
+): Promise<string | null> {
+  const ck = providers.get('comick');
+  if (!ck) return null;
+  const wanted = normalizeTitle(title);
+  if (!wanted) return null;
+  const candidates = [title, ...altTitles].filter(Boolean).slice(0, 3);
+  for (const q of candidates) {
+    try {
+      const results = await ck.search({ query: q, limit: 10 });
+      const match = results.find((r) => {
+        const a = normalizeTitle(r.title);
+        return a === wanted || a.includes(wanted) || wanted.includes(a);
+      });
+      if (match) return match.id;
+    } catch {
+      // swallow; probar siguiente candidato
+    }
+  }
+  return null;
+}
+
+/**
+ * Obtiene capítulos combinados de MangaDex (primary) + ComicK (fallback)
+ * para un manga, mergeados por número. MangaDex prioritario.
+ */
+export async function fetchMergedChapters(params: {
+  mdMangaId: string;
+  ckHid?: string | null;
+  title?: string;
+  altTitles?: string[];
+  language?: string[];
+}): Promise<{ chapters: Chapter[]; ckHid: string | null }> {
+  const md = getProvider('mangadex');
+  const ck = getProvider('comick');
+
+  let resolvedCkHid: string | null = params.ckHid ?? null;
+  if (!resolvedCkHid && params.title) {
+    resolvedCkHid = await findComickHidByTitle(params.title, params.altTitles ?? []);
+  }
+
+  const [mdChapters, ckChapters] = await Promise.all([
+    md.listChapters({ mangaId: params.mdMangaId, limit: 500, order: 'asc', language: params.language }).catch(() => []),
+    resolvedCkHid
+      ? ck.listChapters({ mangaId: resolvedCkHid, limit: 500, order: 'asc', language: params.language }).catch(() => [])
+      : Promise.resolve([] as Chapter[]),
+  ]);
+
+  return {
+    chapters: mergeChaptersAcrossProviders(mdChapters, ckChapters),
+    ckHid: resolvedCkHid,
+  };
+}
+
 export * from './types';

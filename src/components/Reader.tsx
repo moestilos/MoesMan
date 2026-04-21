@@ -9,6 +9,7 @@ interface ChapterLite {
   number: string | null;
   title: string | null;
   language: string;
+  providerId: string;
 }
 
 interface Props {
@@ -18,6 +19,15 @@ interface Props {
   chapterId: string;
   pages: string[];
   chapters: ChapterLite[];
+  ckHid?: string | null;
+}
+
+function buildReadHref(c: ChapterLite, mangaId: string, ckHid?: string | null): string {
+  const qp = new URLSearchParams();
+  qp.set('manga', mangaId);
+  qp.set('p', c.providerId);
+  if (ckHid) qp.set('ck', ckHid);
+  return `/read/${c.id}?${qp.toString()}`;
 }
 
 const LS_MODE = 'moesman:readerMode';
@@ -25,7 +35,7 @@ const progressKey = (mangaId: string, chapterId: string) =>
   `moesman:progress:${mangaId}:${chapterId}`;
 const lastReadKey = (mangaId: string) => `moesman:lastRead:${mangaId}`;
 
-export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, pages, chapters }: Props) {
+export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, pages, chapters, ckHid }: Props) {
   const [mode, setMode] = useState<Mode>('vertical');
   const [pageIndex, setPageIndex] = useState(0);
   const [loaded, setLoaded] = useState<Set<number>>(new Set());
@@ -59,11 +69,13 @@ export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, 
     if (!isAuthed() || !mangaId) return;
     const token = getToken();
     if (!token) return;
-    const chapterNumber = chapters.find((c) => c.id === chapterId)?.number ?? null;
+    const current = chapters.find((c) => c.id === chapterId);
+    const chapterNumber = current?.number ?? null;
+    const chapterProviderId = current?.providerId ?? 'mangadex';
     const t = setTimeout(() => {
       api.progress
         .upsert(token, {
-          providerId: 'mangadex',
+          providerId: chapterProviderId,
           mangaId,
           mangaTitle,
           mangaCoverUrl,
@@ -123,12 +135,12 @@ export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, 
 
   const goPrev = useCallback(() => {
     if (pageIndex > 0) setPageIndex((i) => i - 1);
-    else if (prevChapter) window.location.href = `/read/${prevChapter.id}?manga=${mangaId}`;
+    else if (prevChapter) window.location.href = buildReadHref(prevChapter, mangaId, ckHid);
   }, [pageIndex, prevChapter, mangaId]);
 
   const goNext = useCallback(() => {
     if (pageIndex < pages.length - 1) setPageIndex((i) => i + 1);
-    else if (nextChapter) window.location.href = `/read/${nextChapter.id}?manga=${mangaId}`;
+    else if (nextChapter) window.location.href = buildReadHref(nextChapter, mangaId, ckHid);
   }, [pageIndex, pages.length, nextChapter, mangaId]);
 
   useEffect(() => {
@@ -154,6 +166,7 @@ export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, 
         chapters={chapters}
         chapterId={chapterId}
         mangaId={mangaId}
+        ckHid={ckHid}
         prev={prevChapter}
         next={nextChapter}
       />
@@ -192,7 +205,7 @@ export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, 
               />
             </div>
           ))}
-          <ChapterEnd prev={prevChapter} next={nextChapter} mangaId={mangaId} />
+          <ChapterEnd prev={prevChapter} next={nextChapter} mangaId={mangaId} ckHid={ckHid} />
         </div>
       ) : (
         <div
@@ -230,6 +243,7 @@ function ReaderChrome({
   chapters,
   chapterId,
   mangaId,
+  ckHid,
   prev,
   next,
 }: {
@@ -241,6 +255,7 @@ function ReaderChrome({
   chapters: ChapterLite[];
   chapterId: string;
   mangaId: string;
+  ckHid?: string | null;
   prev: ChapterLite | null;
   next: ChapterLite | null;
 }) {
@@ -276,7 +291,8 @@ function ReaderChrome({
         <select
           value={chapterId}
           onChange={(e) => {
-            window.location.href = `/read/${e.target.value}?manga=${mangaId}`;
+            const target = chapters.find((c) => c.id === e.target.value);
+            if (target) window.location.href = buildReadHref(target, mangaId, ckHid);
           }}
           className="hidden sm:block rounded-lg bg-white/10 px-2 py-1.5 text-sm text-white ring-1 ring-white/10 focus:outline-none"
         >
@@ -304,14 +320,14 @@ function ReaderChrome({
         </button>
         <div className="hidden md:flex gap-1">
           <a
-            href={prev ? `/read/${prev.id}?manga=${mangaId}` : '#'}
+            href={prev ? buildReadHref(prev, mangaId, ckHid) : '#'}
             aria-disabled={!prev}
             className={`btn-ghost text-white ring-white/10 ${!prev ? 'pointer-events-none opacity-40' : ''}`}
           >
             ‹ Prev
           </a>
           <a
-            href={next ? `/read/${next.id}?manga=${mangaId}` : '#'}
+            href={next ? buildReadHref(next, mangaId, ckHid) : '#'}
             aria-disabled={!next}
             className={`btn-ghost text-white ring-white/10 ${!next ? 'pointer-events-none opacity-40' : ''}`}
           >
@@ -327,21 +343,23 @@ function ChapterEnd({
   prev,
   next,
   mangaId,
+  ckHid,
 }: {
   prev: ChapterLite | null;
   next: ChapterLite | null;
   mangaId: string;
+  ckHid?: string | null;
 }) {
   return (
     <div className="mt-8 grid w-full grid-cols-2 gap-3 px-2">
       <a
-        href={prev ? `/read/${prev.id}?manga=${mangaId}` : `/manga/${mangaId}`}
+        href={prev ? buildReadHref(prev, mangaId, ckHid) : `/manga/${mangaId}`}
         className="btn-ghost ring-white/10 text-white/90 hover:text-white justify-start"
       >
         ← {prev ? `Cap. ${prev.number ?? '?'}` : 'Volver'}
       </a>
       <a
-        href={next ? `/read/${next.id}?manga=${mangaId}` : `/manga/${mangaId}`}
+        href={next ? buildReadHref(next, mangaId, ckHid) : `/manga/${mangaId}`}
         className="btn-primary justify-end"
       >
         {next ? `Cap. ${next.number ?? '?'} →` : 'Fin'}

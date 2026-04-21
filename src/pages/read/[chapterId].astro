@@ -1,39 +1,48 @@
 ---
 import Base from '@/layouts/Base.astro';
 import Reader from '@/components/Reader';
-import { getProvider } from '@/lib/providers';
+import { getProvider, fetchMergedChapters } from '@/lib/providers';
 
 const { chapterId } = Astro.params;
 if (!chapterId) return Astro.redirect('/');
 
 const mangaIdParam = Astro.url.searchParams.get('manga');
-const provider = getProvider('mangadex');
+const providerParam = (Astro.url.searchParams.get('p') ?? 'mangadex').toLowerCase();
+const ckHidParam = Astro.url.searchParams.get('ck');
+const chapterProvider = getProvider(providerParam === 'comick' ? 'comick' : 'mangadex');
+const mdProvider = getProvider('mangadex');
 
 let pages: string[] = [];
-let chapters: Array<{ id: string; number: string | null; title: string | null; language: string }> = [];
+let chapters: Array<{ id: string; number: string | null; title: string | null; language: string; providerId: string }> = [];
 let error: string | null = null;
-let mangaId = mangaIdParam ?? '';
+const mangaId = mangaIdParam ?? '';
 let mangaTitle: string | null = null;
 let mangaCoverUrl: string | null = null;
 
 try {
-  const [pageData, mangaDetail, chapList] = await Promise.all([
-    provider.getChapterPages(chapterId),
-    mangaId ? provider.getManga(mangaId).catch(() => null) : Promise.resolve(null),
-    mangaId
-      ? provider.listChapters({ mangaId, limit: 300, order: 'asc' })
-      : Promise.resolve([]),
-  ]);
-  pages = pageData.pages;
+  const pageDataP = chapterProvider.getChapterPages(chapterId);
+  const mangaDetailP = mangaId ? mdProvider.getManga(mangaId).catch(() => null) : Promise.resolve(null);
+  const mangaDetail = await mangaDetailP;
   if (mangaDetail) {
     mangaTitle = mangaDetail.title;
     mangaCoverUrl = mangaDetail.coverUrl;
   }
+  const chapListP = mangaId
+    ? fetchMergedChapters({
+        mdMangaId: mangaId,
+        ckHid: ckHidParam,
+        title: mangaDetail?.title,
+        altTitles: mangaDetail?.altTitles,
+      }).then((r) => r.chapters)
+    : Promise.resolve([]);
+  const [pageData, chapList] = await Promise.all([pageDataP, chapListP]);
+  pages = pageData.pages;
   chapters = chapList.map((c) => ({
     id: c.id,
     number: c.number,
     title: c.title,
     language: c.language,
+    providerId: c.providerId,
   }));
 } catch (e) {
   error = e instanceof Error ? e.message : 'Error';
@@ -67,6 +76,7 @@ try {
       chapterId={chapterId}
       pages={pages}
       chapters={chapters}
+      ckHid={ckHidParam}
     />
   )}
 </Base>
