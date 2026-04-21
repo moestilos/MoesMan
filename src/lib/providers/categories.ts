@@ -57,6 +57,22 @@ export const CATEGORIES: Category[] = [
     languageOverride: ['es', 'es-la', 'en'],
   },
   { slug: 'ecchi', label: 'Ecchi', tagIds: ['9ab53f6b-1c80-4479-807c-0e6d73e8a1a5'] },
+  {
+    slug: 'hentai-manhwa',
+    label: 'Hentai Manhwa',
+    nsfwOnly: true,
+    ratingOverride: ['pornographic'],
+    originalLanguage: ['ko'],
+    languageOverride: ['es', 'es-la', 'en'],
+  },
+  {
+    slug: 'hentai-manhua',
+    label: 'Hentai Manhua',
+    nsfwOnly: true,
+    ratingOverride: ['pornographic'],
+    originalLanguage: ['zh', 'zh-hk'],
+    languageOverride: ['es', 'es-la', 'en'],
+  },
 ];
 
 export function findCategory(slug: string): Category | undefined {
