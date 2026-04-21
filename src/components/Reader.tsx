@@ -70,15 +70,23 @@ export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, 
   const prevChapter = currentIdx > 0 ? chapters[currentIdx - 1] : null;
   const nextChapter = currentIdx >= 0 && currentIdx < chapters.length - 1 ? chapters[currentIdx + 1] : null;
 
-  // Auto-recargar desde servidor si primera página no carga en 15s (token at-home muerto)
+  // Si SSR no trajo páginas (timeout), pedirlas cliente inmediato
   useEffect(() => {
-    if (currentProvider !== 'mangadex') return;
-    const t = setTimeout(() => {
-      if (loaded.size === 0) reloadPagesFromServer();
-    }, 15_000);
-    return () => clearTimeout(t);
+    if (pages.length === 0) {
+      reloadPagesFromServer();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chapterId]);
+
+  // Auto-recargar si primera página no carga en 6s (MD@Home muerto)
+  useEffect(() => {
+    if (currentProvider !== 'mangadex' || pages.length === 0) return;
+    const t = setTimeout(() => {
+      if (loaded.size === 0) reloadPagesFromServer();
+    }, 6_000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chapterId, pages]);
 
   useEffect(() => {
     const saved = (localStorage.getItem(LS_MODE) as Mode | null) ?? 'vertical';
@@ -204,6 +212,17 @@ export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, 
         onReloadPages={currentProvider === 'mangadex' ? reloadPagesFromServer : undefined}
         reloading={reloadingPages}
       />
+
+      {pages.length === 0 && (
+        <div className="fixed inset-0 z-30 flex flex-col items-center justify-center gap-3 text-white/60 pointer-events-none">
+          <svg className="h-10 w-10 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" d="M21 12a9 9 0 1 1-6.22-8.56" />
+          </svg>
+          <p className="text-sm font-medium">
+            {reloadingPages ? 'Conectando con servidor de imágenes…' : 'Cargando capítulo…'}
+          </p>
+        </div>
+      )}
 
       {mode === 'vertical' ? (
         <div className="mx-auto flex max-w-3xl lg:max-w-4xl flex-col items-center gap-0 py-4 sm:gap-1 sm:py-8 lg:py-12">
@@ -398,10 +417,10 @@ function PageImg({
       if (timerRef.current) clearTimeout(timerRef.current);
       return;
     }
-    // Watchdog: si no carga en 30s, marcar fallo para poder reintentar
+    // Watchdog 12s: si no carga, marcar fallo para reintento rápido
     timerRef.current = setTimeout(() => {
       setFailed(true);
-    }, 30_000);
+    }, 12_000);
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };

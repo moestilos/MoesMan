@@ -27,23 +27,45 @@ const mangaId = mangaIdParam ?? '';
 let mangaTitle: string | null = null;
 let mangaCoverUrl: string | null = null;
 
+// Timeout helper: evita SSR colgado si MangaDex@Home tarda.
+function withTimeout<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return new Promise<T>((resolve) => {
+    const t = setTimeout(() => resolve(fallback), ms);
+    p.then((v) => {
+      clearTimeout(t);
+      resolve(v);
+    }).catch(() => {
+      clearTimeout(t);
+      resolve(fallback);
+    });
+  });
+}
+
 try {
-  const pageDataP = chapterProvider.getChapterPages(chapterId);
-  const mangaDetail = mangaId ? await mangaProvider.getManga(mangaId).catch(() => null) : null;
+  const pageDataP = withTimeout(
+    chapterProvider.getChapterPages(chapterId),
+    3_500, // 3.5s máximo bloqueando SSR; el cliente rellena si falla
+    { chapterId, providerId: providerId, pages: [] as string[] },
+  );
+  const mangaDetail = mangaId ? await withTimeout(mangaProvider.getManga(mangaId).catch(() => null), 2_000, null) : null;
   if (mangaDetail) {
     mangaTitle = mangaDetail.title;
     mangaCoverUrl = mangaDetail.coverUrl;
   }
   const chapListP: Promise<Array<{ id: string; providerId: string; number: string | null; title: string | null; language: string }>> =
     mangaId
-      ? mangaProviderId === 'mangadex'
-        ? fetchMergedChapters({
-            mdMangaId: mangaId,
-            ckHid: ckHidParam,
-            title: mangaDetail?.title,
-            altTitles: mangaDetail?.altTitles,
-          }).then((r) => r.chapters)
-        : mangaProvider.listChapters({ mangaId, limit: 500, order: 'asc' })
+      ? withTimeout(
+          mangaProviderId === 'mangadex'
+            ? fetchMergedChapters({
+                mdMangaId: mangaId,
+                ckHid: ckHidParam,
+                title: mangaDetail?.title,
+                altTitles: mangaDetail?.altTitles,
+              }).then((r) => r.chapters)
+            : mangaProvider.listChapters({ mangaId, limit: 500, order: 'asc' }),
+          3_000,
+          [] as Array<{ id: string; providerId: string; number: string | null; title: string | null; language: string }>,
+        )
       : Promise.resolve([]);
   const [pageData, chapList] = await Promise.all([pageDataP, chapListP]);
   pages = pageData.pages;
@@ -71,11 +93,6 @@ try {
       <h1 class="text-2xl font-bold mb-2">Error cargando capítulo</h1>
       <p class="text-fg-muted">{error}</p>
       <a href="/" class="btn-primary mt-6">Volver al inicio</a>
-    </div>
-  ) : pages.length === 0 ? (
-    <div class="container-app py-20 text-center">
-      <h1 class="text-2xl font-bold mb-2">Capítulo vacío</h1>
-      <p class="text-fg-muted">Este capítulo no tiene páginas disponibles.</p>
     </div>
   ) : (
     <Reader

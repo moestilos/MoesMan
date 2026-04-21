@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
 
 export const prerender = false;
+// Vercel Edge: cold start ~ms, streaming nativo, mejor para imágenes
+export const config = { runtime: 'edge' };
 
 const ALLOWED = [
   /^https:\/\/uploads\.mangadex\.org\//,
@@ -42,8 +44,9 @@ export const GET: APIRoute = async ({ params, url }) => {
       Accept: 'image/*',
     };
     if (ref && REFERERS[ref]) reqHeaders.Referer = REFERERS[ref];
+    // Timeout agresivo: fallar rápido permite al cliente re-pedir servidor fresco
     const ac = new AbortController();
-    const timer = setTimeout(() => ac.abort(), 25_000);
+    const timer = setTimeout(() => ac.abort(), 8_000);
     let upstream: Response;
     try {
       upstream = await fetch(target, { headers: reqHeaders, signal: ac.signal });
