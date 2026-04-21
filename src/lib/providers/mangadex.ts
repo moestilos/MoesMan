@@ -218,7 +218,7 @@ function mapChapter(c: MDChapter): Chapter {
 export class MangaDexProvider implements MangaProvider {
   readonly id = 'mangadex';
   readonly name = 'MangaDex';
-  readonly preferredLanguages: Language[] = ['es', 'es-la'];
+  readonly preferredLanguages: Language[] = ['es', 'es-la', 'en'];
 
   async search({ query, limit = 24, offset = 0, language, contentRating }: SearchParams): Promise<MangaSummary[]> {
     const langs = language ?? this.preferredLanguages;
