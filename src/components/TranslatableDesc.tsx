@@ -75,6 +75,7 @@ export default function TranslatableDesc({ text, sourceLang, autoTranslate = fal
   const [state, setState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [translated, setTranslated] = useState<string | null>(null);
   const [showOriginal, setShowOriginal] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     if (isSpanish) return;
@@ -109,15 +110,52 @@ export default function TranslatableDesc({ text, sourceLang, autoTranslate = fal
     }
   }
 
+  const LONG_THRESHOLD = 240;
+  const isLongEs = isSpanish && text.length > LONG_THRESHOLD;
+
   if (isSpanish) {
     return (
-      <p className="max-w-3xl text-[15px] leading-relaxed text-fg-muted/95 whitespace-pre-line">
-        {text}
-      </p>
+      <div className="max-w-3xl">
+        <div className="relative">
+          <p
+            className={`text-[15px] leading-relaxed text-fg-muted/95 whitespace-pre-line ${
+              isLongEs && !expanded ? 'line-clamp-4 sm:line-clamp-5' : ''
+            }`}
+          >
+            {text}
+          </p>
+          {isLongEs && !expanded && (
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-bg to-transparent" />
+          )}
+        </div>
+        {isLongEs && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-brand-300 hover:text-brand-200 transition"
+          >
+            {expanded ? 'Mostrar menos' : 'Mostrar más'}
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`transition-transform ${expanded ? 'rotate-180' : ''}`}
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+        )}
+      </div>
     );
   }
 
   const display = state === 'done' && translated && !showOriginal ? translated : text;
+  const isLong = display.length > LONG_THRESHOLD;
 
   return (
     <div className="max-w-3xl">
@@ -162,7 +200,40 @@ export default function TranslatableDesc({ text, sourceLang, autoTranslate = fal
           </button>
         </div>
       )}
-      <p className="text-[15px] leading-relaxed text-fg-muted/95 whitespace-pre-line">{display}</p>
+      <div className="relative">
+        <p
+          className={`text-[15px] leading-relaxed text-fg-muted/95 whitespace-pre-line ${
+            isLong && !expanded ? 'line-clamp-4 sm:line-clamp-5' : ''
+          }`}
+        >
+          {display}
+        </p>
+        {isLong && !expanded && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-bg to-transparent" />
+        )}
+      </div>
+      {isLong && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-brand-300 hover:text-brand-200 transition"
+        >
+          {expanded ? 'Mostrar menos' : 'Mostrar más'}
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={`transition-transform ${expanded ? 'rotate-180' : ''}`}
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }
