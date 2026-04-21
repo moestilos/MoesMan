@@ -5,6 +5,7 @@ import DownloadChapterButton from '@/components/DownloadChapterButton';
 import DownloadChapterZip from '@/components/DownloadChapterZip';
 import DownloadMangaZip from '@/components/DownloadMangaZip';
 import TranslatableDesc from '@/components/TranslatableDesc';
+import ChapterReadMarkers from '@/components/ChapterReadMarkers';
 import { getProvider, fetchMergedChapters } from '@/lib/providers';
 
 const { id: rawId } = Astro.params;
@@ -298,8 +299,12 @@ const lastChapter = chapters[chapters.length - 1];
           </div>
         ) : (
           <ul class="divide-y divide-border/50 overflow-hidden rounded-2xl bg-bg-card/40 ring-1 ring-border">
-            {chapters.map((c, i) => (
-              <li class="group flex items-center gap-1 pr-1.5 sm:pr-3 transition-colors hover:bg-bg-hover/50">
+            {chapters.map((c) => (
+              <li
+                class="group flex items-center gap-1 pr-1.5 sm:pr-3 transition-colors hover:bg-bg-hover/50"
+                data-chapter-id={c.id}
+                data-chapter-number={c.number ?? ''}
+              >
                 <a
                   href={readHref(c.id, c.providerId)}
                   class="flex min-w-0 flex-1 items-center gap-2.5 px-2.5 py-3 sm:gap-4 sm:px-4 sm:py-3.5"
@@ -310,11 +315,11 @@ const lastChapter = chapters[chapters.length - 1];
                       {c.number ?? '?'}
                     </span>
                   </span>
-                  <div class="min-w-0 flex-1">
-                    <div class="truncate text-sm font-semibold">
+                  <div class="min-w-0 flex-1" data-chapter-progress-host>
+                    <div class="truncate text-sm font-semibold chapter-title">
                       {c.title || `Capítulo ${c.number ?? ''}`}
                     </div>
-                    <div class="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-fg-subtle">
+                    <div class="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-fg-subtle" data-chapter-meta>
                       <span class="uppercase tracking-wider font-semibold">{c.language}</span>
                       {c.groupName && <><span class="opacity-40 hidden sm:inline">·</span><span class="hidden sm:inline truncate max-w-[160px]">{c.groupName}</span></>}
                       {c.publishedAt && <><span class="opacity-40">·</span><span>{new Date(c.publishedAt).toLocaleDateString('es-ES')}</span></>}
@@ -338,6 +343,9 @@ const lastChapter = chapters[chapters.length - 1];
           </ul>
         )}
       </section>
+      {chapters.length > 0 && (
+        <ChapterReadMarkers client:idle providerId={providerId} mangaId={manga.id} />
+      )}
     </article>
   )}
 </Base>
