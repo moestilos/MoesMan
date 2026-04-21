@@ -170,6 +170,62 @@ export const api = {
         token,
       }),
   },
+
+  friends: {
+    list: (token: string) =>
+      request<{ friendships: FriendshipRow[] }>('/friends', { token }),
+    request: (token: string, target: { username?: string; email?: string; userId?: string }) =>
+      request<{ result: { status: string }; target?: { id: string; username: string } }>(
+        '/friends/request',
+        { method: 'POST', token, body: JSON.stringify(target) },
+      ),
+    respond: (token: string, friendshipId: string, accept: boolean) =>
+      request<{ ok: boolean }>('/friends/respond', {
+        method: 'POST',
+        token,
+        body: JSON.stringify({ friendshipId, accept }),
+      }),
+    remove: (token: string, friendUserId: string) =>
+      request<{ ok: boolean }>('/friends/remove', {
+        method: 'POST',
+        token,
+        body: JSON.stringify({ friendUserId }),
+      }),
+    search: (token: string, q: string) =>
+      request<{ users: Array<{ id: string; username: string; avatarUrl: string | null }> }>(
+        `/friends/search?q=${encodeURIComponent(q)}`,
+        { token },
+      ),
+    feed: (token: string, limit = 30) =>
+      request<{ feed: FriendFeedItem[] }>(`/friends/feed?limit=${limit}`, { token }),
+  },
 };
+
+export interface FriendshipRow {
+  id: string;
+  status: 'pending' | 'accepted';
+  direction: 'outgoing' | 'incoming';
+  friendId: string;
+  friendUsername: string;
+  friendEmail: string;
+  friendAvatar: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FriendFeedItem {
+  userId: string;
+  username: string;
+  avatarUrl: string | null;
+  providerId: string;
+  mangaId: string;
+  mangaTitle: string | null;
+  mangaCoverUrl: string | null;
+  chapterId: string;
+  chapterNumber: string | null;
+  page: number;
+  totalPages: number | null;
+  updatedAt: string;
+}
 
 export { ApiError };

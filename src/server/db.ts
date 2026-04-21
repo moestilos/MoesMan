@@ -340,3 +340,178 @@ export async function listMangasAggregated(opts: { q?: string; limit?: number })
   `);
   return rows.rows ?? rows;
 }
+
+// ---------- Friendships ----------
+let friendshipsEnsured = false;
+export async function ensureFriendshipsTable() {
+  if (friendshipsEnsured) return;
+  await db.execute(sql`
+    create table if not exists friendships (
+      id text primary key,
+      requester_id text not null references users(id) on delete cascade,
+      addressee_id text not null references users(id) on delete cascade,
+      status text not null,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    )
+  `);
+  await db.execute(sql`create unique index if not exists friendships_pair_uq on friendships(requester_id, addressee_id)`);
+  await db.execute(sql`create index if not exists friendships_requester_idx on friendships(requester_id)`);
+  await db.execute(sql`create index if not exists friendships_addressee_idx on friendships(addressee_id)`);
+  await db.execute(sql`create index if not exists friendships_status_idx on friendships(status)`);
+  friendshipsEnsured = true;
+}
+
+export async function findUserByUsernameLike(q: string, limit = 10) {
+  const like = `%${q.toLowerCase()}%`;
+  const rows = await db
+    .select({
+      id: schema.users.id,
+      username: schema.users.username,
+      email: schema.users.email,
+      avatarUrl: schema.users.avatarUrl,
+    })
+    .from(schema.users)
+    .where(sql`lower(${schema.users.username}) like ${like} or lower(${schema.users.email}) like ${like}`)
+    .limit(limit);
+  return rows;
+}
+
+export async function sendFriendRequest(requesterId: string, addresseeId: string) {
+  await ensureFriendshipsTable();
+  if (requesterId === addresseeId) throw new Error('No puedes agregarte a ti mismo');
+  // ¿Ya existe en cualquier sentido?
+  const existing = await db.execute<{
+    id: string; requester_id: string; addressee_id: string; status: string;
+  }>(sql`
+    select id, requester_id, addressee_id, status from friendships
+    where (requester_id = ${requesterId} and addressee_id = ${addresseeId})
+       or (requester_id = ${addresseeId} and addressee_id = ${requesterId})
+    limit 1
+  `);
+  const rows = (existing.rows ?? existing) as Array<{ id: string; requester_id: string; addressee_id: string; status: string }>;
+  if (rows[0]) {
+    const r = rows[0];
+    if (r.status === 'accepted') return { status: 'already_friends' as const };
+    if (r.requester_id === requesterId) return { status: 'already_pending' as const };
+    // La otra parte pidió antes → aceptar automático
+    await db.execute(sql`update friendships set status = 'accepted', updated_at = now() where id = ${r.id}`);
+    return { status: 'auto_accepted' as const };
+  }
+  const id = uuid();
+  await db.execute(sql`
+    insert into friendships (id, requester_id, addressee_id, status, created_at, updated_at)
+    values (${id}, ${requesterId}, ${addresseeId}, 'pending', now(), now())
+  `);
+  return { status: 'sent' as const, id };
+}
+
+export async function respondToFriendRequest(userId: string, friendshipId: string, accept: boolean) {
+  await ensureFriendshipsTable();
+  const rows = await db.execute<{ id: string; addressee_id: string; status: string }>(sql`
+    select id, addressee_id, status from friendships where id = ${friendshipId} limit 1
+  `);
+  const list = (rows.rows ?? rows) as Array<{ id: string; addressee_id: string; status: string }>;
+  const f = list[0];
+  if (!f) throw new Error('Solicitud no encontrada');
+  if (f.addressee_id !== userId) throw new Error('No autorizado');
+  if (f.status !== 'pending') throw new Error('Ya resuelta');
+  if (accept) {
+    await db.execute(sql`update friendships set status = 'accepted', updated_at = now() where id = ${friendshipId}`);
+  } else {
+    await db.execute(sql`delete from friendships where id = ${friendshipId}`);
+  }
+}
+
+export async function removeFriendship(userId: string, otherUserId: string) {
+  await ensureFriendshipsTable();
+  await db.execute(sql`
+    delete from friendships where
+      (requester_id = ${userId} and addressee_id = ${otherUserId})
+      or (requester_id = ${otherUserId} and addressee_id = ${userId})
+  `);
+}
+
+export async function listFriendships(userId: string) {
+  await ensureFriendshipsTable();
+  const rows = await db.execute<{
+    id: string;
+    status: string;
+    direction: 'outgoing' | 'incoming';
+    friend_id: string;
+    friend_username: string;
+    friend_email: string;
+    friend_avatar: string | null;
+    created_at: string;
+    updated_at: string;
+  }>(sql`
+    select
+      f.id,
+      f.status,
+      case when f.requester_id = ${userId} then 'outgoing' else 'incoming' end as direction,
+      case when f.requester_id = ${userId} then f.addressee_id else f.requester_id end as friend_id,
+      u.username as friend_username,
+      u.email as friend_email,
+      u.avatar_url as friend_avatar,
+      f.created_at,
+      f.updated_at
+    from friendships f
+    join users u on u.id = (case when f.requester_id = ${userId} then f.addressee_id else f.requester_id end)
+    where f.requester_id = ${userId} or f.addressee_id = ${userId}
+    order by f.updated_at desc
+  `);
+  return (rows.rows ?? rows) as Array<{
+    id: string; status: string; direction: 'outgoing' | 'incoming';
+    friend_id: string; friend_username: string; friend_email: string;
+    friend_avatar: string | null; created_at: string; updated_at: string;
+  }>;
+}
+
+export async function friendsFeed(userId: string, limit = 30) {
+  await ensureFriendshipsTable();
+  const rows = await db.execute<{
+    user_id: string;
+    username: string;
+    avatar_url: string | null;
+    provider_id: string;
+    manga_id: string;
+    manga_title: string | null;
+    manga_cover_url: string | null;
+    chapter_number: string | null;
+    chapter_id: string;
+    page: number;
+    total_pages: number | null;
+    updated_at: string;
+  }>(sql`
+    with friend_ids as (
+      select case when requester_id = ${userId} then addressee_id else requester_id end as fid
+      from friendships
+      where status = 'accepted' and (requester_id = ${userId} or addressee_id = ${userId})
+    )
+    select
+      p.user_id,
+      u.username,
+      u.avatar_url,
+      p.provider_id,
+      p.manga_id,
+      p.manga_title,
+      p.manga_cover_url,
+      p.chapter_number,
+      p.chapter_id,
+      p.page,
+      p.total_pages,
+      p.updated_at
+    from progress p
+    join users u on u.id = p.user_id
+    where p.user_id in (select fid from friend_ids)
+    order by p.updated_at desc
+    limit ${limit}
+  `);
+  return (rows.rows ?? rows) as Array<{
+    user_id: string; username: string; avatar_url: string | null;
+    provider_id: string; manga_id: string; manga_title: string | null;
+    manga_cover_url: string | null; chapter_number: string | null;
+    chapter_id: string; page: number; total_pages: number | null;
+    updated_at: string;
+  }>;
+}

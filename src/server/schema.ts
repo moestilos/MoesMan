@@ -90,9 +90,28 @@ export const visits = pgTable(
   }),
 );
 
+export const friendships = pgTable(
+  'friendships',
+  {
+    id: text('id').primaryKey(),
+    requesterId: text('requester_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    addresseeId: text('addressee_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    status: text('status').notNull(), // 'pending' | 'accepted'
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    pairUq: uniqueIndex('friendships_pair_uq').on(t.requesterId, t.addresseeId),
+    requesterIdx: index('friendships_requester_idx').on(t.requesterId),
+    addresseeIdx: index('friendships_addressee_idx').on(t.addresseeId),
+    statusIdx: index('friendships_status_idx').on(t.status),
+  }),
+);
+
 export type DbUser = typeof users.$inferSelect;
 export type DbUserInsert = typeof users.$inferInsert;
 export type DbLibraryEntry = typeof library.$inferSelect;
 export type DbFavorite = typeof favorites.$inferSelect;
 export type DbProgress = typeof progress.$inferSelect;
 export type DbVisit = typeof visits.$inferSelect;
+export type DbFriendship = typeof friendships.$inferSelect;

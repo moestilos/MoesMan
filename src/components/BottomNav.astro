@@ -20,6 +20,11 @@ const items = [
     icon: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
   },
   {
+    href: '/friends',
+    label: 'Amigos',
+    icon: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  },
+  {
     href: '/history',
     label: 'Historial',
     icon: '<path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/>',
@@ -32,7 +37,7 @@ const items = [
   class="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-bg/85 backdrop-blur-xl md:hidden"
   style="padding-bottom: var(--safe-bottom); padding-left: var(--safe-left); padding-right: var(--safe-right);"
 >
-  <ul class="grid grid-cols-4">
+  <ul class="grid grid-cols-5">
     {items.map((it) => {
       const active = isActive(it.href);
       return (
