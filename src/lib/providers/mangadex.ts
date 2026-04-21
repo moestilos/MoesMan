@@ -224,7 +224,7 @@ export class MangaDexProvider implements MangaProvider {
     const langs = language ?? this.preferredLanguages;
     const ratings = contentRating ?? DEFAULT_RATINGS;
     const key = `md:search:${query}:${limit}:${offset}:${langs.join(',')}:${ratings.join(',')}`;
-    return cached(key, 60_000, async () => {
+    return cached(key, 10 * 60_000, async () => {
       const data = await mdFetch<{ data: MDManga[] }>('/manga', {
         title: query,
         limit,
@@ -254,7 +254,7 @@ export class MangaDexProvider implements MangaProvider {
     const langs = this.preferredLanguages;
     const ratings = contentRating ?? DEFAULT_RATINGS;
     const key = `md:popular:${limit}:${offset}:${langs.join(',')}:${ratings.join(',')}`;
-    return cached(key, 5 * 60_000, async () => {
+    return cached(key, 15 * 60_000, async () => {
       const data = await mdFetch<{ data: MDManga[] }>('/manga', {
         limit,
         offset,
@@ -284,7 +284,7 @@ export class MangaDexProvider implements MangaProvider {
     const langs = this.preferredLanguages;
     const ratings = contentRating ?? DEFAULT_RATINGS;
     const key = `md:latest:${limit}:${offset}:${langs.join(',')}:${ratings.join(',')}`;
-    return cached(key, 2 * 60_000, async () => {
+    return cached(key, 10 * 60_000, async () => {
       const data = await mdFetch<{ data: MDManga[] }>('/manga', {
         limit,
         offset,
@@ -324,7 +324,7 @@ export class MangaDexProvider implements MangaProvider {
     const ratings = contentRating ?? DEFAULT_RATINGS;
     const origLang = originalLanguage ?? [];
     const key = `md:browse:${limit}:${offset}:${langs.join(',')}:${ratings.join(',')}:${(tagIds ?? []).join(',')}:${demographic ?? ''}:${order}:${origLang.join(',')}`;
-    return cached(key, 3 * 60_000, async () => {
+    return cached(key, 10 * 60_000, async () => {
       const params: Record<string, string | string[] | number> = {
         limit,
         offset,
@@ -361,7 +361,7 @@ export class MangaDexProvider implements MangaProvider {
 
   async getManga(id: string): Promise<MangaDetail> {
     const langs = this.preferredLanguages;
-    return cached(`md:manga:${id}`, 5 * 60_000, async () => {
+    return cached(`md:manga:${id}`, 30 * 60_000, async () => {
       const data = await mdFetch<{ data: MDManga }>(`/manga/${id}`, {
         'includes[]': ['cover_art', 'author', 'artist'],
       });
@@ -378,7 +378,7 @@ export class MangaDexProvider implements MangaProvider {
   }: ChaptersParams): Promise<Chapter[]> {
     const langs = language ?? this.preferredLanguages;
     const key = `md:chapters:${mangaId}:${limit}:${offset}:${langs.join(',')}:${order}`;
-    return cached(key, 60_000, async () => {
+    return cached(key, 10 * 60_000, async () => {
       const data = await mdFetch<{ data: MDChapter[] }>(`/manga/${mangaId}/feed`, {
         limit,
         offset,
@@ -407,7 +407,7 @@ export class MangaDexProvider implements MangaProvider {
   }
 
   async getChapterPages(chapterId: string): Promise<ChapterPages> {
-    return cached(`md:pages:${chapterId}`, 5 * 60_000, async () => {
+    return cached(`md:pages:${chapterId}`, 30 * 60_000, async () => {
       const data = await mdFetch<{
         baseUrl: string;
         chapter: { hash: string; data: string[]; dataSaver: string[] };

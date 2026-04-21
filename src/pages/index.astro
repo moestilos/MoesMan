@@ -6,21 +6,14 @@ import GridSkeleton from '@/components/GridSkeleton.astro';
 import ContinueReading from '@/components/ContinueReading';
 import GenreTabs from '@/components/GenreTabs.astro';
 import HeroCarousel from '@/components/HeroCarousel';
+import WebtoonsRail from '@/components/WebtoonsRail';
 import { getProvider } from '@/lib/providers';
 import { readNsfwCookie, contentRatingsFor } from '@/lib/ssr-prefs';
 import { CATEGORIES } from '@/lib/providers/categories';
 
 const provider = getProvider('mangadex');
-const webtoons = getProvider('webtoons');
 const nsfw = readNsfwCookie(Astro.request.headers.get('cookie'));
 const ratings = contentRatingsFor(nsfw);
-
-let webtoonsRow: Awaited<ReturnType<typeof webtoons.popular>> = [];
-try {
-  webtoonsRow = await webtoons.popular({ limit: 12 });
-} catch {
-  webtoonsRow = [];
-}
 
 const featured = nsfw
   ? ['manhwa', 'shonen', 'isekai', 'romance', 'hentai']
@@ -57,8 +50,8 @@ try {
   error = e instanceof Error ? e.message : 'Error cargando';
 }
 
-// Fetch detalle de los 5 primeros populares para enriquecer hero (descripcion + lang)
-const heroSource = popular.slice(0, 5);
+// Fetch detalle de los 3 primeros populares (reducido de 5 para menos roundtrips)
+const heroSource = popular.slice(0, 3);
 const heroDetails = await Promise.all(
   heroSource.map((m) => provider.getManga(m.id).catch(() => null)),
 );
@@ -147,24 +140,16 @@ const topRanked = popular.slice(0, 10);
     </section>
   ))}
 
-  {webtoonsRow.length > 0 && (
-    <section class="mb-8 sm:mb-16">
-      <div class="section-header">
-        <div>
-          <span class="section-kicker">Webtoons · Oficial</span>
-          <h2 class="section-title mt-2">Originales de Webtoons</h2>
-        </div>
-        <a href="/webtoons" class="text-xs xs:text-sm font-semibold link-hover text-fg-muted whitespace-nowrap">Ver más →</a>
+  <section class="mb-8 sm:mb-16">
+    <div class="section-header">
+      <div>
+        <span class="section-kicker">Webtoons · Oficial</span>
+        <h2 class="section-title mt-2">Originales de Webtoons</h2>
       </div>
-      <div class="rail">
-        {webtoonsRow.map((m, i) => (
-          <div class="w-[42vw] max-w-[200px] xs:w-[30vw] sm:w-[180px] lg:w-[160px]">
-            <MangaCard manga={m} priority={i < 3} />
-          </div>
-        ))}
-      </div>
-    </section>
-  )}
+      <a href="/webtoons" class="text-xs xs:text-sm font-semibold link-hover text-fg-muted whitespace-nowrap">Ver más →</a>
+    </div>
+    <WebtoonsRail client:visible />
+  </section>
 
   <section class="mb-6">
     <div class="section-header">
