@@ -11,6 +11,8 @@ if (!url) {
 
 const sqlClient = neon(url);
 export const db = drizzle(sqlClient, { schema });
+/** Cliente Neon raw para DDL (drizzle's sql template no funciona con DDL en Neon HTTP). */
+export const rawSql = sqlClient;
 
 export type {
   DbUser,
@@ -345,20 +347,19 @@ export async function listMangasAggregated(opts: { q?: string; limit?: number })
 let friendshipsEnsured = false;
 export async function ensureFriendshipsTable() {
   if (friendshipsEnsured) return;
-  await db.execute(sql`
-    create table if not exists friendships (
-      id text primary key,
-      requester_id text not null references users(id) on delete cascade,
-      addressee_id text not null references users(id) on delete cascade,
-      status text not null,
-      created_at timestamptz not null default now(),
-      updated_at timestamptz not null default now()
-    )
-  `);
-  await db.execute(sql`create unique index if not exists friendships_pair_uq on friendships(requester_id, addressee_id)`);
-  await db.execute(sql`create index if not exists friendships_requester_idx on friendships(requester_id)`);
-  await db.execute(sql`create index if not exists friendships_addressee_idx on friendships(addressee_id)`);
-  await db.execute(sql`create index if not exists friendships_status_idx on friendships(status)`);
+  // Neon HTTP driver requiere DDL vía cliente raw (sin tagged template con params)
+  await rawSql(`create table if not exists friendships (
+    id text primary key,
+    requester_id text not null references users(id) on delete cascade,
+    addressee_id text not null references users(id) on delete cascade,
+    status text not null,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+  )`);
+  await rawSql(`create unique index if not exists friendships_pair_uq on friendships(requester_id, addressee_id)`);
+  await rawSql(`create index if not exists friendships_requester_idx on friendships(requester_id)`);
+  await rawSql(`create index if not exists friendships_addressee_idx on friendships(addressee_id)`);
+  await rawSql(`create index if not exists friendships_status_idx on friendships(status)`);
   friendshipsEnsured = true;
 }
 
