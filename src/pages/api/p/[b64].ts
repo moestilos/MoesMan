@@ -44,9 +44,10 @@ export const GET: APIRoute = async ({ params, url }) => {
       Accept: 'image/*',
     };
     if (ref && REFERERS[ref]) reqHeaders.Referer = REFERERS[ref];
-    // Timeout agresivo: fallar rápido permite al cliente re-pedir servidor fresco
+    // Timeout razonable: fallar rápido en upstream muerto pero permitir
+    // descargas grandes en conexiones lentas (móvil 3G/4G).
     const ac = new AbortController();
-    const timer = setTimeout(() => ac.abort(), 8_000);
+    const timer = setTimeout(() => ac.abort(), 20_000);
     let upstream: Response;
     try {
       upstream = await fetch(target, { headers: reqHeaders, signal: ac.signal });

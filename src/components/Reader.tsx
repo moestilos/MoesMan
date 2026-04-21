@@ -70,23 +70,18 @@ export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, 
   const prevChapter = currentIdx > 0 ? chapters[currentIdx - 1] : null;
   const nextChapter = currentIdx >= 0 && currentIdx < chapters.length - 1 ? chapters[currentIdx + 1] : null;
 
-  // Si SSR no trajo páginas (timeout), pedirlas cliente inmediato
+  // Única auto-carga: si SSR no trajo páginas (timeout), pedirlas al montar.
+  // Nada de timers periódicos que interrumpan la lectura. El botón manual
+  // del chrome cubre casos de servidor muerto detectado por el usuario.
+  const didInitialFetchRef = useRef(false);
   useEffect(() => {
+    if (didInitialFetchRef.current) return;
     if (pages.length === 0) {
+      didInitialFetchRef.current = true;
       reloadPagesFromServer();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chapterId]);
-
-  // Auto-recargar si primera página no carga en 6s (MD@Home muerto)
-  useEffect(() => {
-    if (currentProvider !== 'mangadex' || pages.length === 0) return;
-    const t = setTimeout(() => {
-      if (loaded.size === 0) reloadPagesFromServer();
-    }, 6_000);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chapterId, pages]);
+  }, []);
 
   useEffect(() => {
     const saved = (localStorage.getItem(LS_MODE) as Mode | null) ?? 'vertical';
@@ -417,10 +412,11 @@ function PageImg({
       if (timerRef.current) clearTimeout(timerRef.current);
       return;
     }
-    // Watchdog 12s: si no carga, marcar fallo para reintento rápido
+    // Watchdog 35s: solo marcar fallo si la imagen realmente está colgada.
+    // Suficiente margen para conexiones lentas sin interrumpir lectura.
     timerRef.current = setTimeout(() => {
       setFailed(true);
-    }, 12_000);
+    }, 35_000);
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
