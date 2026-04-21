@@ -35,11 +35,33 @@ const progressKey = (mangaId: string, chapterId: string) =>
   `moesman:progress:${mangaId}:${chapterId}`;
 const lastReadKey = (mangaId: string) => `moesman:lastRead:${mangaId}`;
 
-export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, pages, chapters, ckHid }: Props) {
+export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, pages: initialPages, chapters, ckHid }: Props) {
   const [mode, setMode] = useState<Mode>('vertical');
   const [pageIndex, setPageIndex] = useState(0);
   const [loaded, setLoaded] = useState<Set<number>>(new Set());
+  const [pages, setPages] = useState<string[]>(initialPages);
+  const [reloadingPages, setReloadingPages] = useState(false);
   const pageRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const currentChap = chapters.find((c) => c.id === chapterId);
+  const currentProvider = currentChap?.providerId ?? 'mangadex';
+
+  async function reloadPagesFromServer() {
+    if (reloadingPages) return;
+    setReloadingPages(true);
+    try {
+      const res = await fetch(`/api/chapter-pages/${encodeURIComponent(chapterId)}?p=${currentProvider}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const body = await res.json();
+      if (Array.isArray(body.pages) && body.pages.length > 0) {
+        setPages(body.pages);
+        setLoaded(new Set());
+      }
+    } catch {
+      // silencioso
+    } finally {
+      setReloadingPages(false);
+    }
+  }
 
   const currentIdx = useMemo(
     () => chapters.findIndex((c) => c.id === chapterId),
@@ -47,6 +69,16 @@ export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, 
   );
   const prevChapter = currentIdx > 0 ? chapters[currentIdx - 1] : null;
   const nextChapter = currentIdx >= 0 && currentIdx < chapters.length - 1 ? chapters[currentIdx + 1] : null;
+
+  // Auto-recargar desde servidor si primera página no carga en 15s (token at-home muerto)
+  useEffect(() => {
+    if (currentProvider !== 'mangadex') return;
+    const t = setTimeout(() => {
+      if (loaded.size === 0) reloadPagesFromServer();
+    }, 15_000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chapterId]);
 
   useEffect(() => {
     const saved = (localStorage.getItem(LS_MODE) as Mode | null) ?? 'vertical';
@@ -169,6 +201,8 @@ export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, 
         ckHid={ckHid}
         prev={prevChapter}
         next={nextChapter}
+        onReloadPages={currentProvider === 'mangadex' ? reloadPagesFromServer : undefined}
+        reloading={reloadingPages}
       />
 
       {mode === 'vertical' ? (
@@ -223,6 +257,8 @@ function ReaderChrome({
   ckHid,
   prev,
   next,
+  onReloadPages,
+  reloading,
 }: {
   current: number;
   total: number;
@@ -235,6 +271,8 @@ function ReaderChrome({
   ckHid?: string | null;
   prev: ChapterLite | null;
   next: ChapterLite | null;
+  onReloadPages?: () => void;
+  reloading?: boolean;
 }) {
   const pct = total > 0 ? Math.round(((pageIndex + 1) / total) * 100) : 0;
   const currentChap = current >= 0 ? chapters[current] : null;
@@ -280,6 +318,26 @@ function ReaderChrome({
             </option>
           ))}
         </select>
+        {onReloadPages && (
+          <button
+            onClick={onReloadPages}
+            disabled={reloading}
+            className="btn-ghost text-white ring-white/10 hover:ring-white/20 px-2 sm:px-3 disabled:opacity-50"
+            title="Recargar páginas (nuevo servidor)"
+            aria-label="Recargar páginas"
+          >
+            {reloading ? (
+              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" d="M21 12a9 9 0 1 1-6.22-8.56" />
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12a9 9 0 1 0 3-6.7L3 8"/>
+                <path d="M3 3v5h5"/>
+              </svg>
+            )}
+          </button>
+        )}
         <button
           onClick={() => setMode(mode === 'vertical' ? 'paged' : 'vertical')}
           className="btn-ghost text-white ring-white/10 hover:ring-white/20 px-2 sm:px-3"

@@ -408,9 +408,8 @@ export class MangaDexProvider implements MangaProvider {
     });
   }
 
-  async getChapterPages(chapterId: string): Promise<ChapterPages> {
-    // Cache corto (5 min): los tokens at-home caducan en ~15 min.
-    return cached(`md:pages:${chapterId}`, 5 * 60_000, async () => {
+  async getChapterPages(chapterId: string, forceFresh = false): Promise<ChapterPages> {
+    const fetchFresh = async () => {
       const data = await mdFetch<{
         baseUrl: string;
         chapter: { hash: string; data: string[]; dataSaver: string[] };
@@ -419,6 +418,8 @@ export class MangaDexProvider implements MangaProvider {
         (file) => proxy(`${data.baseUrl}/data/${data.chapter.hash}/${file}`),
       );
       return { chapterId, providerId: 'mangadex', pages };
-    });
+    };
+    if (forceFresh) return fetchFresh();
+    return cached(`md:pages:${chapterId}`, 5 * 60_000, fetchFresh);
   }
 }
