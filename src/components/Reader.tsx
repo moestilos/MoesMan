@@ -63,6 +63,30 @@ export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, 
     }
   }
 
+  /** Sólo cambia la URL de UNA página (retry individual). No afecta a las demás. */
+  async function refreshSinglePageUrl(index: number) {
+    try {
+      const res = await fetch(`/api/chapter-pages/${encodeURIComponent(chapterId)}?p=${currentProvider}`);
+      if (!res.ok) return;
+      const body = await res.json();
+      const fresh = Array.isArray(body.pages) ? body.pages[index] : null;
+      if (!fresh) return;
+      setPages((prev) => {
+        const next = [...prev];
+        next[index] = fresh;
+        return next;
+      });
+      // También quitar del set loaded para que intente cargar
+      setLoaded((prev) => {
+        const next = new Set(prev);
+        next.delete(index);
+        return next;
+      });
+    } catch {
+      // silencioso
+    }
+  }
+
   const currentIdx = useMemo(
     () => chapters.findIndex((c) => c.id === chapterId),
     [chapters, chapterId],
@@ -230,6 +254,7 @@ export default function Reader({ mangaId, mangaTitle, mangaCoverUrl, chapterId, 
               onLoaded={() => markLoaded(i)}
               pageRef={(el) => (pageRefs.current[i] = el)}
               priority={i < 5}
+              onRequestFreshServer={currentProvider === 'mangadex' ? () => refreshSinglePageUrl(i) : undefined}
             />
           ))}
           <ChapterEnd prev={prevChapter} next={nextChapter} mangaId={mangaId} ckHid={ckHid} />
@@ -395,6 +420,7 @@ function PageImg({
   onLoaded,
   pageRef,
   priority,
+  onRequestFreshServer,
 }: {
   src: string;
   index: number;
@@ -402,6 +428,7 @@ function PageImg({
   onLoaded: () => void;
   pageRef: (el: HTMLDivElement | null) => void;
   priority: boolean;
+  onRequestFreshServer?: () => void;
 }) {
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
@@ -424,7 +451,13 @@ function PageImg({
 
   function retry() {
     setFailed(false);
-    setAttempt((a) => a + 1);
+    // Si ya falló 2+ veces en misma URL, pedir servidor fresco (nuevo baseUrl)
+    if (attempt >= 1 && onRequestFreshServer) {
+      onRequestFreshServer();
+      setAttempt(0);
+    } else {
+      setAttempt((a) => a + 1);
+    }
   }
 
   const finalSrc = attempt === 0 ? src : `${src}${src.includes('?') ? '&' : '?'}r=${attempt}`;
