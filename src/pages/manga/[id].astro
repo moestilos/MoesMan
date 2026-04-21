@@ -12,6 +12,12 @@ if (!id) return Astro.redirect('/');
 
 const provider = getProvider('mangadex');
 
+const langParam = (Astro.url.searchParams.get('lang') ?? 'all').toLowerCase();
+const langFilter: string[] | undefined =
+  langParam === 'es' ? ['es', 'es-la']
+  : langParam === 'en' ? ['en']
+  : undefined; // all → preferredLanguages del provider
+
 let manga: Awaited<ReturnType<typeof provider.getManga>> | null = null;
 let chapters: Awaited<ReturnType<typeof provider.listChapters>> = [];
 let error: string | null = null;
@@ -19,11 +25,15 @@ let error: string | null = null;
 try {
   [manga, chapters] = await Promise.all([
     provider.getManga(id),
-    provider.listChapters({ mangaId: id, limit: 300, order: 'asc' }),
+    provider.listChapters({ mangaId: id, limit: 300, order: 'asc', language: langFilter }),
   ]);
 } catch (e) {
   error = e instanceof Error ? e.message : 'Error';
 }
+
+const avail = manga?.availableLanguages ?? [];
+const hasEs = avail.includes('es') || avail.includes('es-la');
+const hasEn = avail.includes('en');
 
 const cover = manga?.coverUrl ?? '/placeholder-cover.svg';
 const statusLabel: Record<string, { label: string; tone: string; dot: string }> = {
@@ -210,7 +220,33 @@ const lastChapter = chapters[chapters.length - 1];
             <span class="section-kicker">Contenido</span>
             <h2 class="section-title mt-2">Capítulos <span class="text-fg-muted font-normal">· {chapters.length}</span></h2>
           </div>
-          <span class="text-xs font-semibold uppercase tracking-wider text-fg-subtle">ES / EN</span>
+          <div class="flex items-center gap-1.5 rounded-full bg-bg-card ring-1 ring-border p-1">
+            <a
+              href={`/manga/${manga.id}`}
+              class:list={[
+                'px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider transition-colors',
+                langParam === 'all' ? 'bg-brand-500/20 text-brand-300 ring-1 ring-brand-500/30' : 'text-fg-muted hover:text-fg',
+              ]}
+            >Todos</a>
+            <a
+              href={`/manga/${manga.id}?lang=es`}
+              aria-disabled={!hasEs}
+              class:list={[
+                'px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider transition-colors',
+                langParam === 'es' ? 'bg-brand-500/20 text-brand-300 ring-1 ring-brand-500/30' : 'text-fg-muted hover:text-fg',
+                !hasEs && 'opacity-40 pointer-events-none',
+              ]}
+            >ES</a>
+            <a
+              href={`/manga/${manga.id}?lang=en`}
+              aria-disabled={!hasEn}
+              class:list={[
+                'px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider transition-colors',
+                langParam === 'en' ? 'bg-brand-500/20 text-brand-300 ring-1 ring-brand-500/30' : 'text-fg-muted hover:text-fg',
+                !hasEn && 'opacity-40 pointer-events-none',
+              ]}
+            >EN</a>
+          </div>
         </div>
 
         {chapters.length === 0 ? (
@@ -221,7 +257,11 @@ const lastChapter = chapters[chapters.length - 1];
                 <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
               </svg>
             </span>
-            <p class="text-sm text-fg-muted">No hay capítulos disponibles en español o inglés.</p>
+            <p class="text-sm text-fg-muted">
+              {langParam === 'es' ? 'No hay capítulos en español. Prueba con EN o Todos.'
+              : langParam === 'en' ? 'No hay capítulos en inglés. Prueba con ES o Todos.'
+              : 'No hay capítulos disponibles en español o inglés.'}
+            </p>
           </div>
         ) : (
           <ul class="divide-y divide-border/50 overflow-hidden rounded-2xl bg-bg-card/40 ring-1 ring-border">

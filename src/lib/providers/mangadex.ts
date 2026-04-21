@@ -386,7 +386,7 @@ export class MangaDexProvider implements MangaProvider {
         'order[volume]': order,
         'order[chapter]': order,
         'includes[]': ['scanlation_group'],
-        'contentRating[]': ['safe', 'suggestive', 'erotica'],
+        'contentRating[]': ['safe', 'suggestive', 'erotica', 'pornographic'],
         includeExternalUrl: '0',
       });
       const mapped = data.data
