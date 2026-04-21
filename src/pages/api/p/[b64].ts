@@ -1,8 +1,6 @@
 import type { APIRoute } from 'astro';
 
 export const prerender = false;
-// Vercel Edge: cold start ~ms, streaming nativo, mejor para imágenes
-export const config = { runtime: 'edge' };
 
 const ALLOWED = [
   /^https:\/\/uploads\.mangadex\.org\//,

@@ -5,8 +5,12 @@
  *
  * Compatible server y browser (usa btoa si está, sino Buffer).
  */
+/**
+ * Por estabilidad (Vercel a veces tarda en publicar rutas nuevas
+ * con parámetros dinámicos) usamos el endpoint legacy /api/img que
+ * está probado. La obfuscación adblock se consigue vía ref= genérico.
+ */
 export function proxyUrl(target: string, ref?: 'w'): string {
-  const b64 = btoa(unescape(encodeURIComponent(target)));
-  const safe = b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  return ref ? `/api/p/${safe}?r=${ref}` : `/api/p/${safe}`;
+  const base = `/api/img?u=${encodeURIComponent(target)}`;
+  return ref ? `${base}&ref=${ref === 'w' ? 'webtoons' : ref}` : base;
 }
