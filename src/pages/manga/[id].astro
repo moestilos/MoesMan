@@ -318,7 +318,8 @@ const lastChapter = chapters[chapters.length - 1];
                 <a
                   href={c.externalUrl ?? readHref(c.id, c.providerId)}
                   target={c.externalUrl ? '_blank' : undefined}
-                  rel={c.externalUrl ? 'noreferrer noopener' : undefined}
+                  rel={c.externalUrl ? 'noopener' : undefined}
+                  title={c.externalUrl ? `Abre en: ${new URL(c.externalUrl).host}` : undefined}
                   class="flex min-w-0 flex-1 items-center gap-2.5 px-2.5 py-3 sm:gap-4 sm:px-4 sm:py-3.5"
                 >
                   <span class="flex-none flex items-baseline gap-1 w-10 sm:w-14">

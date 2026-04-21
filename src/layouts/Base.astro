@@ -58,12 +58,12 @@ const {
     <title>{title}</title>
     <slot name="head" />
   </head>
-  <body class:list={[hideChrome && 'reader-mode']}>
+  <body class:list={[hideChrome && 'reader-mode', !hideChrome && 'min-h-screen flex flex-col']}>
     <DialogRoot client:idle />
     {!hideChrome && <BgStarfield />}
     {!hideChrome && <Header />}
     {!hideChrome && <BackButton client:idle />}
-    <main class:list={[!fullBleed && 'container-app pt-3 pb-16 sm:pt-6 sm:pb-24 lg:pt-8', 'relative z-10']}>
+    <main class:list={[!fullBleed && 'container-app pt-3 pb-16 sm:pt-6 sm:pb-24 lg:pt-8', 'relative z-10', !hideChrome && 'flex-1']}>
       <slot />
     </main>
     {!hideChrome && (
