@@ -6,10 +6,18 @@ const ALLOWED = [
   /^https:\/\/uploads\.mangadex\.org\//,
   /^https:\/\/[a-z0-9-]+\.mangadex\.network\//,
   /^https:\/\/mangadex\.org\//,
+  /^https:\/\/meo\d*\.comick\.pictures\//,
+  /^https:\/\/[a-z0-9-]+\.pstatic\.net\//,
+  /^https:\/\/shared-comic\.pstatic\.net\//,
 ];
+
+const REFERERS: Record<string, string> = {
+  webtoons: 'https://www.webtoons.com/',
+};
 
 export const GET: APIRoute = async ({ url }) => {
   const target = url.searchParams.get('u');
+  const ref = url.searchParams.get('ref');
   if (!target) return new Response('Missing u', { status: 400 });
 
   if (!ALLOWED.some((r) => r.test(target))) {
@@ -17,12 +25,12 @@ export const GET: APIRoute = async ({ url }) => {
   }
 
   try {
-    const upstream = await fetch(target, {
-      headers: {
-        'User-Agent': 'MoesMan/0.1 (personal manga library)',
-        Accept: 'image/*',
-      },
-    });
+    const headers: Record<string, string> = {
+      'User-Agent': 'MoesMan/0.1 (personal manga library)',
+      Accept: 'image/*',
+    };
+    if (ref && REFERERS[ref]) headers.Referer = REFERERS[ref];
+    const upstream = await fetch(target, { headers });
     if (!upstream.ok || !upstream.body) {
       return new Response('Upstream error', { status: upstream.status || 502 });
     }

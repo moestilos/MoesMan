@@ -5,6 +5,7 @@ import type {
 } from './types';
 import { MangaDexProvider } from './mangadex';
 import { ComickProvider } from './comick';
+import { WebtoonsProvider } from './webtoons';
 
 const providers = new Map<string, MangaProvider>();
 
@@ -14,6 +15,7 @@ function register(p: MangaProvider) {
 
 register(new MangaDexProvider());
 register(new ComickProvider());
+register(new WebtoonsProvider());
 
 export function getProvider(id = 'mangadex'): MangaProvider {
   const p = providers.get(id);

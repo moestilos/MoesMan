@@ -1,0 +1,58 @@
+---
+import Base from '@/layouts/Base.astro';
+import MangaCard from '@/components/MangaCard.astro';
+import { getProvider } from '@/lib/providers';
+
+const provider = getProvider('webtoons');
+const q = (Astro.url.searchParams.get('q') ?? '').trim();
+
+let items: Awaited<ReturnType<typeof provider.popular>> = [];
+let error: string | null = null;
+
+try {
+  items = q
+    ? await provider.search({ query: q, limit: 48 })
+    : await provider.popular({ limit: 48 });
+} catch (e) {
+  error = e instanceof Error ? e.message : 'Error';
+}
+---
+
+<Base title={q ? `Webtoons · ${q} — Ako` : 'Webtoons — Ako'}>
+  <section class="mb-6 sm:mb-8">
+    <span class="section-kicker">Proveedor oficial</span>
+    <h1 class="mt-3 font-display text-2xl xs:text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.05] tracking-tighter break-words">
+      <span class="text-gradient-brand">Webtoons</span>
+    </h1>
+    <p class="mt-2 text-sm sm:text-[15px] text-fg-muted max-w-xl">
+      Manhwa oficial de Naver/LINE. Sólo inglés, SFW.
+    </p>
+  </section>
+
+  <form method="GET" action="/webtoons" class="mb-6">
+    <input
+      class="input w-full max-w-lg"
+      type="search"
+      name="q"
+      value={q}
+      placeholder="Buscar en Webtoons (ej: Tower of God)"
+      autocomplete="off"
+    />
+  </form>
+
+  {error && (
+    <div class="mb-6 rounded-xl border border-brand-500/40 bg-brand-500/10 p-4 text-sm text-brand-200">
+      {error}
+    </div>
+  )}
+
+  {items.length === 0 && !error ? (
+    <p class="py-16 text-center text-fg-muted">Sin resultados.</p>
+  ) : (
+    <div class="grid gap-3 sm:gap-4 lg:gap-5 grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
+      {items.map((m, i) => (
+        <MangaCard manga={m} priority={i < 6} />
+      ))}
+    </div>
+  )}
+</Base>

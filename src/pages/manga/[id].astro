@@ -7,16 +7,19 @@ import DownloadMangaZip from '@/components/DownloadMangaZip';
 import TranslatableDesc from '@/components/TranslatableDesc';
 import { getProvider, fetchMergedChapters } from '@/lib/providers';
 
-const { id } = Astro.params;
-if (!id) return Astro.redirect('/');
+const { id: rawId } = Astro.params;
+if (!rawId) return Astro.redirect('/');
+const id = decodeURIComponent(rawId);
 
-const provider = getProvider('mangadex');
+const providerParam = (Astro.url.searchParams.get('p') ?? 'mangadex').toLowerCase();
+const providerId = providerParam === 'webtoons' ? 'webtoons' : 'mangadex';
+const provider = getProvider(providerId);
 
 const langParam = (Astro.url.searchParams.get('lang') ?? 'all').toLowerCase();
 const langFilter: string[] | undefined =
   langParam === 'es' ? ['es', 'es-la']
   : langParam === 'en' ? ['en']
-  : undefined; // all → preferredLanguages del provider
+  : undefined;
 
 let manga: Awaited<ReturnType<typeof provider.getManga>> | null = null;
 let chapters: Awaited<ReturnType<typeof provider.listChapters>> = [];
@@ -25,14 +28,18 @@ let error: string | null = null;
 
 try {
   manga = await provider.getManga(id);
-  const merged = await fetchMergedChapters({
-    mdMangaId: id,
-    title: manga.title,
-    altTitles: manga.altTitles,
-    language: langFilter,
-  });
-  chapters = merged.chapters;
-  ckHid = merged.ckHid;
+  if (providerId === 'mangadex') {
+    const merged = await fetchMergedChapters({
+      mdMangaId: id,
+      title: manga.title,
+      altTitles: manga.altTitles,
+      language: langFilter,
+    });
+    chapters = merged.chapters;
+    ckHid = merged.ckHid;
+  } else {
+    chapters = await provider.listChapters({ mangaId: id, limit: 500, order: 'asc' });
+  }
 } catch (e) {
   error = e instanceof Error ? e.message : 'Error';
 }
@@ -40,6 +47,21 @@ try {
 const avail = manga?.availableLanguages ?? [];
 const hasEs = avail.includes('es') || avail.includes('es-la');
 const hasEn = avail.includes('en') || !!ckHid;
+const showLangPicker = providerId === 'mangadex';
+const selfHref = providerId === 'mangadex' ? `/manga/${id}` : `/manga/${encodeURIComponent(id)}?p=${providerId}`;
+const selfHrefWithLang = (l: 'all' | 'es' | 'en') => {
+  const base = providerId === 'mangadex' ? `/manga/${id}` : `/manga/${encodeURIComponent(id)}`;
+  const params = new URLSearchParams();
+  if (providerId !== 'mangadex') params.set('p', providerId);
+  if (l !== 'all') params.set('lang', l);
+  const qs = params.toString();
+  return qs ? `${base}?${qs}` : base;
+};
+const readHref = (chapterId: string, chapterProvider: string) => {
+  const params = new URLSearchParams({ manga: id, p: chapterProvider });
+  if (ckHid) params.set('ck', ckHid);
+  return `/read/${encodeURIComponent(chapterId)}?${params.toString()}`;
+};
 
 const cover = manga?.coverUrl ?? '/placeholder-cover.svg';
 const statusLabel: Record<string, { label: string; tone: string; dot: string }> = {
@@ -187,13 +209,13 @@ const lastChapter = chapters[chapters.length - 1];
               <!-- CTAs mobile-first: stack full-width en movil, inline en sm+ -->
               <div class="mt-2 grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
                 {firstChapter && (
-                  <a href={`/read/${firstChapter.id}?manga=${manga.id}&p=${firstChapter.providerId}${ckHid ? `&ck=${ckHid}` : ''}`} class="btn-primary w-full sm:w-auto">
+                  <a href={readHref(firstChapter.id, firstChapter.providerId)} class="btn-primary w-full sm:w-auto">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                     Empezar desde Cap. {firstChapter.number ?? '1'}
                   </a>
                 )}
                 {lastChapter && lastChapter.id !== firstChapter?.id && (
-                  <a href={`/read/${lastChapter.id}?manga=${manga.id}&p=${lastChapter.providerId}${ckHid ? `&ck=${ckHid}` : ''}`} class="btn-secondary w-full sm:w-auto">
+                  <a href={readHref(lastChapter.id, lastChapter.providerId)} class="btn-secondary w-full sm:w-auto">
                     Último · Cap. {lastChapter.number ?? '?'}
                   </a>
                 )}
@@ -207,7 +229,7 @@ const lastChapter = chapters[chapters.length - 1];
                   )}
                   <MangaActions
                     client:only="react"
-                    providerId="mangadex"
+                    providerId={providerId}
                     mangaId={manga.id}
                     title={manga.title}
                     coverUrl={manga.coverUrl}
@@ -226,33 +248,38 @@ const lastChapter = chapters[chapters.length - 1];
             <span class="section-kicker">Contenido</span>
             <h2 class="section-title mt-2">Capítulos <span class="text-fg-muted font-normal">· {chapters.length}</span></h2>
           </div>
-          <div class="flex items-center gap-1.5 rounded-full bg-bg-card ring-1 ring-border p-1">
-            <a
-              href={`/manga/${manga.id}`}
-              class:list={[
-                'px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider transition-colors',
-                langParam === 'all' ? 'bg-brand-500/20 text-brand-300 ring-1 ring-brand-500/30' : 'text-fg-muted hover:text-fg',
-              ]}
-            >Todos</a>
-            <a
-              href={`/manga/${manga.id}?lang=es`}
-              aria-disabled={!hasEs}
-              class:list={[
-                'px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider transition-colors',
-                langParam === 'es' ? 'bg-brand-500/20 text-brand-300 ring-1 ring-brand-500/30' : 'text-fg-muted hover:text-fg',
-                !hasEs && 'opacity-40 pointer-events-none',
-              ]}
-            >ES</a>
-            <a
-              href={`/manga/${manga.id}?lang=en`}
-              aria-disabled={!hasEn}
-              class:list={[
-                'px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider transition-colors',
-                langParam === 'en' ? 'bg-brand-500/20 text-brand-300 ring-1 ring-brand-500/30' : 'text-fg-muted hover:text-fg',
-                !hasEn && 'opacity-40 pointer-events-none',
-              ]}
-            >EN</a>
-          </div>
+          {showLangPicker && (
+            <div class="flex items-center gap-1.5 rounded-full bg-bg-card ring-1 ring-border p-1">
+              <a
+                href={selfHrefWithLang('all')}
+                class:list={[
+                  'px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider transition-colors',
+                  langParam === 'all' ? 'bg-brand-500/20 text-brand-300 ring-1 ring-brand-500/30' : 'text-fg-muted hover:text-fg',
+                ]}
+              >Todos</a>
+              <a
+                href={selfHrefWithLang('es')}
+                aria-disabled={!hasEs}
+                class:list={[
+                  'px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider transition-colors',
+                  langParam === 'es' ? 'bg-brand-500/20 text-brand-300 ring-1 ring-brand-500/30' : 'text-fg-muted hover:text-fg',
+                  !hasEs && 'opacity-40 pointer-events-none',
+                ]}
+              >ES</a>
+              <a
+                href={selfHrefWithLang('en')}
+                aria-disabled={!hasEn}
+                class:list={[
+                  'px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider transition-colors',
+                  langParam === 'en' ? 'bg-brand-500/20 text-brand-300 ring-1 ring-brand-500/30' : 'text-fg-muted hover:text-fg',
+                  !hasEn && 'opacity-40 pointer-events-none',
+                ]}
+              >EN</a>
+            </div>
+          )}
+          {!showLangPicker && (
+            <span class="text-xs font-semibold uppercase tracking-wider text-fg-subtle">{provider.name}</span>
+          )}
         </div>
 
         {chapters.length === 0 ? (
@@ -274,7 +301,7 @@ const lastChapter = chapters[chapters.length - 1];
             {chapters.map((c, i) => (
               <li class="group flex items-center gap-1 pr-1.5 sm:pr-3 transition-colors hover:bg-bg-hover/50">
                 <a
-                  href={`/read/${c.id}?manga=${manga.id}&p=${c.providerId}${ckHid ? `&ck=${ckHid}` : ''}`}
+                  href={readHref(c.id, c.providerId)}
                   class="flex min-w-0 flex-1 items-center gap-2.5 px-2.5 py-3 sm:gap-4 sm:px-4 sm:py-3.5"
                 >
                   <span class="flex-none flex items-baseline gap-1 w-10 sm:w-14">

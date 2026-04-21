@@ -3,14 +3,22 @@ import Base from '@/layouts/Base.astro';
 import Reader from '@/components/Reader';
 import { getProvider, fetchMergedChapters } from '@/lib/providers';
 
-const { chapterId } = Astro.params;
-if (!chapterId) return Astro.redirect('/');
+const { chapterId: rawChapterId } = Astro.params;
+if (!rawChapterId) return Astro.redirect('/');
+const chapterId = decodeURIComponent(rawChapterId);
 
 const mangaIdParam = Astro.url.searchParams.get('manga');
 const providerParam = (Astro.url.searchParams.get('p') ?? 'mangadex').toLowerCase();
 const ckHidParam = Astro.url.searchParams.get('ck');
-const chapterProvider = getProvider(providerParam === 'comick' ? 'comick' : 'mangadex');
-const mdProvider = getProvider('mangadex');
+const providerId: 'mangadex' | 'comick' | 'webtoons' =
+  providerParam === 'comick' ? 'comick'
+  : providerParam === 'webtoons' ? 'webtoons'
+  : 'mangadex';
+const chapterProvider = getProvider(providerId);
+// Para metadatos del manga (titulo/cover) y lista de caps, usar el provider del manga
+// (en webtoons el mangaId es del propio provider; en comick/mangadex el manga es de mangadex)
+const mangaProviderId = providerId === 'webtoons' ? 'webtoons' : 'mangadex';
+const mangaProvider = getProvider(mangaProviderId);
 
 let pages: string[] = [];
 let chapters: Array<{ id: string; number: string | null; title: string | null; language: string; providerId: string }> = [];
@@ -21,20 +29,22 @@ let mangaCoverUrl: string | null = null;
 
 try {
   const pageDataP = chapterProvider.getChapterPages(chapterId);
-  const mangaDetailP = mangaId ? mdProvider.getManga(mangaId).catch(() => null) : Promise.resolve(null);
-  const mangaDetail = await mangaDetailP;
+  const mangaDetail = mangaId ? await mangaProvider.getManga(mangaId).catch(() => null) : null;
   if (mangaDetail) {
     mangaTitle = mangaDetail.title;
     mangaCoverUrl = mangaDetail.coverUrl;
   }
-  const chapListP = mangaId
-    ? fetchMergedChapters({
-        mdMangaId: mangaId,
-        ckHid: ckHidParam,
-        title: mangaDetail?.title,
-        altTitles: mangaDetail?.altTitles,
-      }).then((r) => r.chapters)
-    : Promise.resolve([]);
+  const chapListP: Promise<Array<{ id: string; providerId: string; number: string | null; title: string | null; language: string }>> =
+    mangaId
+      ? mangaProviderId === 'mangadex'
+        ? fetchMergedChapters({
+            mdMangaId: mangaId,
+            ckHid: ckHidParam,
+            title: mangaDetail?.title,
+            altTitles: mangaDetail?.altTitles,
+          }).then((r) => r.chapters)
+        : mangaProvider.listChapters({ mangaId, limit: 500, order: 'asc' })
+      : Promise.resolve([]);
   const [pageData, chapList] = await Promise.all([pageDataP, chapListP]);
   pages = pageData.pages;
   chapters = chapList.map((c) => ({

@@ -8,7 +8,9 @@ interface Props {
   rank?: number;
 }
 const { manga, priority = false, size = 'md', rank } = Astro.props;
-const href = `/manga/${manga.id}`;
+const href = manga.providerId === 'mangadex'
+  ? `/manga/${manga.id}`
+  : `/manga/${encodeURIComponent(manga.id)}?p=${manga.providerId}`;
 const cover = manga.coverUrl ?? '/placeholder-cover.svg';
 const statusLabel: Record<string, { label: string; dot: string }> = {
   ongoing: { label: 'En curso', dot: 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.7)]' },
