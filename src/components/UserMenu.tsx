@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { clearAuth, getToken, getUser, updateUser, type AuthUser } from '@/lib/auth-client';
 import { api } from '@/lib/api';
 import NsfwToggle from './NsfwToggle';
@@ -102,30 +103,17 @@ export default function UserMenu() {
   }
 
   const initial = (user.username?.[0] ?? user.email[0]).toUpperCase();
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-full bg-bg-card p-0.5 sm:pl-1 sm:pr-3 sm:py-1 ring-1 ring-border hover:ring-brand-500/40 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60"
-        aria-haspopup="menu"
-        aria-expanded={open}
+  const menuBody = open && (
+    <>
+      <div
+        className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm"
+        onClick={() => setOpen(false)}
+      />
+      <div
+        role="menu"
+        className="fixed inset-x-0 bottom-0 z-[101] animate-slide-up rounded-t-3xl bg-bg-card p-2 ring-1 ring-border shadow-card-lg pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:inset-x-auto sm:bottom-auto sm:top-[calc(env(safe-area-inset-top,0px)+5rem)] sm:right-4 sm:w-[20rem] sm:rounded-2xl sm:pb-2 max-h-[85vh] overflow-y-auto overscroll-contain"
       >
-        <Avatar user={user} size={30} className="text-xs" />
-        <span className="hidden sm:block text-sm font-medium max-w-[120px] truncate">{user.username}</span>
-      </button>
-
-      {open && (
-        <>
-          <div
-            className="fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-0 sm:z-30"
-            onClick={() => setOpen(false)}
-          />
-          <div
-            role="menu"
-            className="fixed inset-x-0 bottom-0 z-[80] animate-slide-up rounded-t-3xl bg-bg-card p-2 ring-1 ring-border shadow-card-lg pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:mt-2 sm:w-[20rem] sm:rounded-2xl sm:pb-2 sm:animate-fade-in sm:z-40 max-h-[85vh] overflow-y-auto overscroll-contain"
-          >
-            <div className="mx-auto mb-1 h-1 w-10 rounded-full bg-border sm:hidden" />
+        <div className="mx-auto mb-1 h-1 w-10 rounded-full bg-border sm:hidden" />
             <div className="flex items-center gap-3 border-b border-border px-3 py-3">
               <div className="relative">
                 <Avatar user={user} size={48} className="text-lg" />
@@ -226,10 +214,23 @@ export default function UserMenu() {
               </svg>
               Cerrar sesión
             </button>
-          </div>
-        </>
-      )}
-    </div>
+      </div>
+    </>
+  );
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-2 rounded-full bg-bg-card p-0.5 sm:pl-1 sm:pr-3 sm:py-1 ring-1 ring-border hover:ring-brand-500/40 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60"
+        aria-haspopup="menu"
+        aria-expanded={open}
+      >
+        <Avatar user={user} size={30} className="text-xs" />
+        <span className="hidden sm:block text-sm font-medium max-w-[120px] truncate">{user.username}</span>
+      </button>
+      {menuBody && typeof document !== 'undefined' && createPortal(menuBody, document.body)}
+    </>
   );
 }
 
