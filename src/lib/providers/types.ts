@@ -33,6 +33,8 @@ export interface Chapter {
   publishedAt: string | null;
   pages: number | null;
   groupName?: string | null;
+  /** URL externa oficial (webtoons, tappytoon, etc). Si existe, cap no se lee en-app. */
+  externalUrl?: string | null;
 }
 
 export interface ChapterPages {

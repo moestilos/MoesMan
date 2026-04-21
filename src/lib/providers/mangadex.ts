@@ -212,6 +212,7 @@ function mapChapter(c: MDChapter): Chapter {
     publishedAt: c.attributes.publishAt,
     pages: c.attributes.pages,
     groupName: (group?.attributes as { name?: string } | undefined)?.name ?? null,
+    externalUrl: c.attributes.externalUrl ?? null,
   };
 }
 
@@ -387,11 +388,12 @@ export class MangaDexProvider implements MangaProvider {
         'order[chapter]': order,
         'includes[]': ['scanlation_group'],
         'contentRating[]': ['safe', 'suggestive', 'erotica', 'pornographic'],
-        includeExternalUrl: '0',
+        // Incluir externalUrl: muchas series licenciadas redirigen a plataforma oficial
       });
       const mapped = data.data
         .map(mapChapter)
-        .filter((c) => c.pages && c.pages > 0);
+        // Aceptar capítulos con páginas in-app O con enlace externo oficial
+        .filter((c) => (c.pages && c.pages > 0) || !!c.externalUrl);
       const deduped = dedupeChapters(mapped, langs);
       // Reordenar numéricamente (dedupe rompe orden de API)
       deduped.sort((a, b) => {
