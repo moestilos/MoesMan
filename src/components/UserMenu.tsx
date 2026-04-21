@@ -118,12 +118,12 @@ export default function UserMenu() {
       {open && (
         <>
           <div
-            className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-0"
+            className="fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-0 sm:z-30"
             onClick={() => setOpen(false)}
           />
           <div
             role="menu"
-            className="fixed inset-x-0 bottom-0 z-40 animate-slide-up rounded-t-3xl bg-bg-card p-2 ring-1 ring-border shadow-card-lg pb-[max(env(safe-area-inset-bottom),0.5rem)] sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:mt-2 sm:w-[20rem] sm:rounded-2xl sm:pb-2 sm:animate-fade-in max-h-[85vh] overflow-y-auto"
+            className="fixed inset-x-0 bottom-0 z-[80] animate-slide-up rounded-t-3xl bg-bg-card p-2 ring-1 ring-border shadow-card-lg pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:mt-2 sm:w-[20rem] sm:rounded-2xl sm:pb-2 sm:animate-fade-in sm:z-40 max-h-[85vh] overflow-y-auto overscroll-contain"
           >
             <div className="mx-auto mb-1 h-1 w-10 rounded-full bg-border sm:hidden" />
             <div className="flex items-center gap-3 border-b border-border px-3 py-3">
