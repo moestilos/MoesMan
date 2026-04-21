@@ -236,14 +236,13 @@ export class MangaDexProvider implements MangaProvider {
       });
       return data.data
         .filter((m) => {
-          // Debe tener al menos un capítulo (lastChapter no null/0/empty)
+          // lastChapter null/undefined/'' = en publicación → aceptar si hay idioma match
           const lc = m.attributes.lastChapter;
-          if (lc === null || lc === undefined) {
-            // Algunos tienen lastChapter null pero availableTranslatedLanguages no vacío = OK
+          if (lc === null || lc === undefined || lc === '') {
             const avail = m.attributes.availableTranslatedLanguages ?? [];
             return avail.some((l) => langs.includes(l));
           }
-          if (lc === '' || lc === '0') return false;
+          if (lc === '0') return false;
           return true;
         })
         .map((m) => mapSummary(m, langs))
@@ -267,14 +266,13 @@ export class MangaDexProvider implements MangaProvider {
       });
       return data.data
         .filter((m) => {
-          // Debe tener al menos un capítulo (lastChapter no null/0/empty)
+          // lastChapter null/undefined/'' = en publicación → aceptar si hay idioma match
           const lc = m.attributes.lastChapter;
-          if (lc === null || lc === undefined) {
-            // Algunos tienen lastChapter null pero availableTranslatedLanguages no vacío = OK
+          if (lc === null || lc === undefined || lc === '') {
             const avail = m.attributes.availableTranslatedLanguages ?? [];
             return avail.some((l) => langs.includes(l));
           }
-          if (lc === '' || lc === '0') return false;
+          if (lc === '0') return false;
           return true;
         })
         .map((m) => mapSummary(m, langs))
@@ -298,14 +296,13 @@ export class MangaDexProvider implements MangaProvider {
       });
       return data.data
         .filter((m) => {
-          // Debe tener al menos un capítulo (lastChapter no null/0/empty)
+          // lastChapter null/undefined/'' = en publicación → aceptar si hay idioma match
           const lc = m.attributes.lastChapter;
-          if (lc === null || lc === undefined) {
-            // Algunos tienen lastChapter null pero availableTranslatedLanguages no vacío = OK
+          if (lc === null || lc === undefined || lc === '') {
             const avail = m.attributes.availableTranslatedLanguages ?? [];
             return avail.some((l) => langs.includes(l));
           }
-          if (lc === '' || lc === '0') return false;
+          if (lc === '0') return false;
           return true;
         })
         .map((m) => mapSummary(m, langs))
@@ -348,14 +345,13 @@ export class MangaDexProvider implements MangaProvider {
       const data = await mdFetch<{ data: MDManga[] }>('/manga', params);
       return data.data
         .filter((m) => {
-          // Debe tener al menos un capítulo (lastChapter no null/0/empty)
+          // lastChapter null/undefined/'' = en publicación → aceptar si hay idioma match
           const lc = m.attributes.lastChapter;
-          if (lc === null || lc === undefined) {
-            // Algunos tienen lastChapter null pero availableTranslatedLanguages no vacío = OK
+          if (lc === null || lc === undefined || lc === '') {
             const avail = m.attributes.availableTranslatedLanguages ?? [];
             return avail.some((l) => langs.includes(l));
           }
-          if (lc === '' || lc === '0') return false;
+          if (lc === '0') return false;
           return true;
         })
         .map((m) => mapSummary(m, langs))
