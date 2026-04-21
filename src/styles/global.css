@@ -586,145 +586,21 @@ li.chapter-partial::before {
 }
 
 /* =============================================================
-   DESIGN POLISH — refinamiento senior
+   DESIGN POLISH — refinamiento sobrio
+   Principio: movimiento sólo cuando aporta. Nunca competir con
+   elementos ya animados (pill indicator, hover nativo).
    ============================================================= */
 
-/* ---------- Cards cinematográficas ---------- */
-.card, .surface {
-  transition:
-    transform var(--dur-base) var(--ease-out),
-    box-shadow var(--dur-base) var(--ease-out),
-    border-color var(--dur-base) var(--ease-out);
-}
-@media (hover: hover) {
-  .card:hover, .surface:hover {
-    box-shadow:
-      0 1px 0 0 rgba(255,255,255,0.04) inset,
-      0 24px 48px -24px rgba(0,0,0,0.6),
-      0 0 0 1px rgba(var(--brand-500), 0.25);
-  }
-}
-
-/* ---------- Button glow en hover (refuerza jerarquía) ---------- */
-.btn-primary {
-  position: relative;
-  overflow: hidden;
-}
-.btn-primary::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    120% 80% at 50% 0%,
-    rgba(255,255,255,0.18) 0%,
-    transparent 60%
-  );
-  opacity: 0;
-  transition: opacity var(--dur-base) var(--ease-out);
-  pointer-events: none;
-}
-.btn-primary:hover::after { opacity: 1; }
-
-/* ---------- Focus visible mejorado en inputs/buttons ---------- */
+/* Focus-visible consistente y visible */
 .btn:focus-visible,
-.btn-icon:focus-visible {
+.btn-icon:focus-visible,
+.press-scale:focus-visible {
   box-shadow:
-    0 0 0 3px rgb(var(--brand-500) / 0.55),
-    0 0 0 6px rgba(0,0,0,0.5),
-    0 0 40px -6px rgb(var(--brand-500) / 0.55);
+    0 0 0 2px rgb(var(--brand-500) / 0.6),
+    0 0 0 4px rgba(0, 0, 0, 0.5);
 }
 
-/* ---------- Section title: underline decorativa sutil ---------- */
-.section-title {
-  position: relative;
-  display: inline-block;
-}
-
-/* ---------- Gradient text con leve shimmer ---------- */
-.text-gradient-brand {
-  background-size: 200% 100%;
-  background-position: 0% 50%;
-  animation: gradient-drift 8s ease-in-out infinite;
-}
-@keyframes gradient-drift {
-  0%, 100% { background-position: 0% 50%; }
-  50%      { background-position: 100% 50%; }
-}
-
-/* ---------- Stagger entrance (uso: animate-fade-in-up + --i) ---------- */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in-up {
-  animation: fadeInUp var(--dur-slow) var(--ease-out) both;
-  animation-delay: var(--stagger, 0ms);
-}
-
-/* ---------- Reveal en scroll (IntersectionObserver lo marca) ---------- */
-.reveal-on-scroll {
-  opacity: 0;
-  transform: translateY(12px);
-  transition:
-    opacity 600ms var(--ease-out),
-    transform 600ms var(--ease-out);
-}
-.reveal-on-scroll.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ---------- Skeleton shimmer más visible ---------- */
-.skeleton::after {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.055) 48%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.055) 52%,
-    transparent 100%
-  );
-  animation-duration: 1.8s;
-}
-
-/* ---------- Link nav underline deslizante ---------- */
-.link-nav {
-  position: relative;
-}
-.link-nav::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: 4px;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(90deg, rgb(var(--brand-400)), rgb(var(--brand-600)));
-  transform: translateX(-50%);
-  transition: width var(--dur-base) var(--ease-out);
-  border-radius: 999px;
-  pointer-events: none;
-}
-@media (hover: hover) {
-  .link-nav:hover::after { width: 60%; }
-}
-
-/* ---------- Chip / badge hover sutil ---------- */
-.genre-pill {
-  transition:
-    background-color var(--dur-base) var(--ease-out),
-    color var(--dur-base) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-base) var(--ease-out);
-}
-.genre-pill:hover {
-  transform: translateY(-1px);
-}
-.genre-pill:active {
-  transform: scale(0.96);
-  transition-duration: 90ms;
-}
-
-/* ---------- Press-scale utility para elementos que no usan .btn ---------- */
+/* Press feedback universal para elementos ad-hoc (sin .btn) */
 .press-scale {
   transition: transform var(--dur-fast) var(--ease-out);
 }
@@ -732,7 +608,22 @@ li.chapter-partial::before {
   transform: scale(0.96);
 }
 
-/* ---------- Container breathing room mejorado en desktop ---------- */
+/* Selection theme-aware (tinte brand) */
+*::selection {
+  background: rgb(var(--brand-500) / 0.35);
+}
+
+/* Skeleton shimmer ligeramente más perceptible — sin exageración */
+.skeleton::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  );
+}
+
+/* Container padding en 2xl — aire para pantallas grandes */
 @media (min-width: 1536px) {
   .container-app {
     padding-left: max(4rem, var(--safe-left));
@@ -740,7 +631,7 @@ li.chapter-partial::before {
   }
 }
 
-/* ---------- Scroll progress overlay para /read ---------- */
+/* Reader: barra fina de progreso (solo modo lector, no chrome global) */
 body.reader-mode::before {
   content: "";
   position: fixed;
@@ -748,33 +639,9 @@ body.reader-mode::before {
   left: 0;
   height: 2px;
   width: var(--reader-progress, 0%);
-  background: linear-gradient(90deg, rgb(var(--brand-400)), rgb(var(--brand-600)));
+  background: rgb(var(--brand-500));
   z-index: 100;
   transition: width 120ms linear;
   pointer-events: none;
-  box-shadow: 0 0 10px rgb(var(--brand-500) / 0.6);
-}
-
-/* ---------- Tactile hover for MangaCard container ---------- */
-@media (hover: hover) {
-  a.group:hover .rounded-xl {
-    box-shadow:
-      0 1px 0 0 rgba(255,255,255,0.06) inset,
-      0 20px 40px -20px rgba(0,0,0,0.7);
-  }
-}
-
-/* ---------- Selection theme-aware ---------- */
-*::selection {
-  background: rgb(var(--brand-500) / 0.35);
-  text-shadow: 0 0 20px rgb(var(--brand-500) / 0.25);
-}
-
-/* ---------- Empty state icon float ---------- */
-@keyframes float-subtle {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-3px); }
-}
-.empty-icon {
-  animation: float-subtle 3.5s ease-in-out infinite;
+  opacity: 0.85;
 }
